@@ -1,0 +1,25 @@
+{
+  "name": "messagepack-schema-runtime",
+  "version": "1.0.0",
+  "description": "MessagePack-Schema runtime library",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/messagepack-schema/typescript.git"
+  },
+  "keywords": [
+    "messagepack",
+    "schema",
+    "mpack",
+    "msgpack"
+  ],
+  "author": "Tomas Weigenast",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/messagepack-schema/typescript/issues"
+  },
+  "homepage": "https://github.com/messagepack-schema/typescript#readme"
+}
