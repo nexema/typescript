@@ -29,5 +29,8 @@
   "devDependencies": {
     "@types/node": "^18.11.7",
     "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "msgpackr": "^1.7.2"
   }
 }
