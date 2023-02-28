@@ -1,21 +1,32 @@
 {
-  "name": "messagepack-schema-runtime",
+  "name": "nexema",
   "version": "1.0.0",
-  "description": "MessagePack-Schema runtime library",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Nexema runtime library",
+  "main": "dist/cjs/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf dist",
+    "build:esm": "tsc --declaration --module es2020 --declarationDir ./dist/types --outDir dist/esm",
+    "build:cjs": "tsc --declaration false --module commonjs --outDir dist/cjs",
+    "build": "npm run build:esm && npm run build:cjs"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/messagepack-schema/typescript.git"
+    "url": "https://github.com/nexema/typescript.git",
+    "directory": "runtime"
+  },
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts"
   },
   "keywords": [
-    "messagepack",
-    "schema",
-    "mpack",
-    "msgpack"
+    "nexema",
+    "binary",
+    "serialization",
+    "serialize",
+    "deserialization",
+    "encoding",
+    "decoding"
   ],
   "files": [
     "./dist"
@@ -23,14 +34,15 @@
   "author": "Tomas Weigenast",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/messagepack-schema/typescript/issues"
+    "url": "https://github.com/nexema/typescript/issues"
   },
-  "homepage": "https://github.com/messagepack-schema/typescript#readme",
+  "homepage": "https://github.com/nexema/typescript#readme",
   "devDependencies": {
     "@types/node": "^18.11.7",
+    "@types/varint": "^6.0.1",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "msgpackr": "^1.7.2"
+    "varint": "^6.0.0"
   }
 }

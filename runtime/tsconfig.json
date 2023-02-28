@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "esModuleInterop": true,
+    "target": "ES2020",
+    "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "declaration": true,
-    "skipLibCheck": true,
-    "outDir": "./dist"
+    "moduleResolution": "node",
+    "skipLibCheck": false,
+    "outDir": "./dist",
+    "declarationMap": false
+    // "lib": ["ES2020.BigInt"]
   },
   "include": [
     "src/**/*"
