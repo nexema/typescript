@@ -7,7 +7,7 @@
     "clean": "rm -rf dist",
     "build:esm": "tsc --declaration --module es2020 --declarationDir ./dist/types --outDir dist/esm",
     "build:cjs": "tsc --declaration false --module commonjs --outDir dist/cjs",
-    "build": "npm run build:esm && npm run build:cjs"
+    "build": "npm run clean && npm run build:esm && npm run build:cjs"
   },
   "repository": {
     "type": "git",
