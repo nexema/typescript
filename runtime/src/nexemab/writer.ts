@@ -26,107 +26,124 @@ export class NexemabWriter {
         this._size += chunk.length;
     }
 
-    public encodeNull(): void {
+    public encodeNull(): NexemabWriter {
         this._buffer.push(NexemabSpec.NULL);
+        return this;
     }
 
-    public encodeBool(value: boolean): void {
+    public encodeBool(value: boolean): NexemabWriter {
         this._buffer.push(value ? NexemabSpec.BoolTrue : NexemabSpec.BoolFalse);
+        return this;
     }
 
-    public encodeUint8(value: number): void {
+    public encodeUint8(value: number): NexemabWriter {
         this._buffer.push(value);
+        return this;
     }
 
-    public encodeUint16(value: number): void {
+    public encodeUint16(value: number): NexemabWriter {
         const chunk = new Uint8Array(2);
         new DataView(chunk.buffer).setUint16(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeUint32(value: number): void {
+    public encodeUint32(value: number): NexemabWriter {
         const chunk = new Uint8Array(4);
         new DataView(chunk.buffer).setUint32(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeUint64(value: bigint): void {
-        const chunk = new Uint8Array(4);
+    public encodeUint64(value: bigint): NexemabWriter {
+        const chunk = new Uint8Array(8);
         new DataView(chunk.buffer).setBigUint64(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeInt8(value: number): void {
+    public encodeInt8(value: number): NexemabWriter {
         this._buffer.push(value);
+        return this;
     }
 
-    public encodeInt16(value: number): void {
+    public encodeInt16(value: number): NexemabWriter {
         const chunk = new Uint8Array(2);
         new DataView(chunk.buffer).setInt16(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeInt32(value: number): void {
+    public encodeInt32(value: number): NexemabWriter {
         const chunk = new Uint8Array(4);
         new DataView(chunk.buffer).setInt32(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeInt64(value: bigint): void {
+    public encodeInt64(value: bigint): NexemabWriter {
         const chunk = new Uint8Array(8);
         new DataView(chunk.buffer).setBigInt64(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeUvarint(value: bigint): void {
+    public encodeUvarint(value: bigint): NexemabWriter {
         while(value >= NexemabSpec.UvarintMinBigInt) {
             this._buffer.push(Number(BigInt.asUintN(8, value) | NexemabSpec.UvarintMinBigInt));
             value >>= BigInt(7);
         }
 
         this._buffer.push(Number(value));
+        return this;
     }
 
-    public encodeVarint(value: bigint): void {
+    public encodeVarint(value: bigint): NexemabWriter {
         let ux = value << BigInt(1);
         if(value < 0) {
             ux = ux^ux;
         }
 
-        this.encodeUvarint(ux);
+        return this.encodeUvarint(ux);
     }
 
-    public encodeFloat32(value: number): void {
+    public encodeFloat32(value: number): NexemabWriter {
         const chunk = new Uint8Array(4);
         new DataView(chunk.buffer).setFloat32(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeFloat64(value: number): void {
+    public encodeFloat64(value: number): NexemabWriter {
         const chunk = new Uint8Array(8);
         new DataView(chunk.buffer).setFloat64(0, value, false);
         this.push(chunk);
+        return this;
     }
 
-    public encodeString(value: string): void {
+    public encodeString(value: string): NexemabWriter {
         const chunk = NexemabSpec.TextEncoder.encode(value);
         this.encodeVarint(BigInt(chunk.byteLength));
         this.push(chunk);
+        return this;
     }
 
-    public encodeBinary(value: Uint8Array): void {
+    public encodeBinary(value: Uint8Array): NexemabWriter {
         this.encodeVarint(BigInt(value.byteLength));
         this.push(value);
+        return this;
     }
 
-    public beginArray(length: number): void {
+    public beginArray(length: number): NexemabWriter {
         this._buffer.push(NexemabSpec.ArrayBegin);
         this.encodeVarint(BigInt(length));
+        return this;
     }
 
-    public beginMap(length: number): void {
+    public beginMap(length: number): NexemabWriter {
         this._buffer.push(NexemabSpec.MapBegin);
         this.encodeVarint(BigInt(length));
+        return this;
     }
 
     public takeBytes(): Uint8Array {
