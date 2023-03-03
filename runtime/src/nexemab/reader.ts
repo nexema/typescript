@@ -8,7 +8,7 @@ export class NexemabReader {
 
     constructor(buffer: Uint8Array) {
         this._buffer = buffer;
-        this._bufferView = new DataView(this._buffer, this._buffer.byteOffset, this._buffer.byteLength);
+        this._bufferView = new DataView(this._buffer.buffer, this._buffer.byteOffset, this._buffer.byteLength);
         this._offset = 0;
     }
 
@@ -35,12 +35,12 @@ export class NexemabReader {
         while(true) {
             b = this._bufferView.getUint8(this._offset++);
             if(i === NexemabSpec.MaxVarintLen) {
-                throw "uvarint overflow";
+                throw new Error("uvarint overflow");
             }
 
             if(b < NexemabSpec.UvarintMin) {
                 if(i === NexemabSpec.MaxVarintLen-1 && b>1) {
-                    throw "uvarint overflow";
+                    throw new Error("uvarint overflow");
                 }
 
                 return x | BigInt(b) << BigInt(s);
@@ -128,7 +128,7 @@ export class NexemabReader {
     public beginDecodeArray(): number {
         const code = this._bufferView.getUint8(this._offset++);
         if(code !== NexemabSpec.ArrayBegin) {
-            throw "not an array";
+            throw new Error("not an array");
         }
 
         return Number(this.decodeVarint());
@@ -137,7 +137,7 @@ export class NexemabReader {
     public beginDecodeMap(): number {
         const code = this._bufferView.getUint8(this._offset++);
         if(code !== NexemabSpec.MapBegin) {
-            throw "not a map";
+            throw new Error("not a map");
         }
 
         return Number(this.decodeVarint());
