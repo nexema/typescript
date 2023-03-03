@@ -146,6 +146,17 @@ export class NexemabWriter {
         return this;
     }
 
+    public encodeTimestamp(value: Date): NexemabWriter {
+        const milli = value.getTime();
+        const seconds = Math.floor(milli / 1000);
+        const nanos = (milli % 1000) * 1000000; 
+        return this.encodeVarint(BigInt(seconds)).encodeVarint(BigInt(nanos));
+    }
+
+    public encodeDuration(nanoseconds: bigint): NexemabWriter {
+        return this.encodeVarint(nanoseconds);
+    }
+
     public takeBytes(): Uint8Array {
         this._chunks.push(new Uint8Array(this._buffer));
         this._size += this._buffer.length;

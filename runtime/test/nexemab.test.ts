@@ -45,6 +45,8 @@ describe("Nexemab", () => {
             "binary": [(writer) => writer.encodeBinary(new Uint8Array([25, 20, 23, 11, 23, 11, 77])), [0xe, 0x19, 0x14, 0x17, 0xb, 0x17, 0xb, 0x4d]],
             "list(varint x5)": [(writer) => writer.beginArray(5).encodeVarint(13241n).encodeVarint(1231413n).encodeVarint(5n).encodeVarint(998989n).encodeVarint(1129928n), [0xdc, 0xa, 0xf2, 0xce, 0x1, 0xea, 0xa8, 0x96, 0x1, 0xa, 0x9a, 0xf9, 0x79, 0x90, 0xf7, 0x89, 0x1]],
             "map(string,float32 x3)": [(writer => writer.beginMap(3).encodeString("abc").encodeFloat32(213141.24125123).encodeString("v").encodeFloat32(-4314.34123).encodeString("9928910sad").encodeFloat32(-3224.99980989078489378)), [0xdf, 0x6, 0x6, 0x61, 0x62, 0x63, 0x48, 0x50, 0x25, 0x4f, 0x2, 0x76, 0xc5, 0x86, 0xd2, 0xbb, 0x14, 0x39, 0x39, 0x32, 0x38, 0x39, 0x31, 0x30, 0x73, 0x61, 0x64, 0xc5, 0x49, 0x8f, 0xff]],
+            "timestamp": [(writer) => writer.encodeTimestamp(new Date("2023/3/2 15:32")), [192, 174, 135, 192, 12, 0]],
+            "duration": [(writer) => writer.encodeDuration(225252342n), [236, 207, 232, 214, 1]]
         };  
 
         for(const entry of Object.entries(testCases)) {
@@ -123,7 +125,9 @@ describe("Nexemab", () => {
               (decoder) => Array.from({length: decoder.beginDecodeArray()}, () => decoder.decodeString()), null, new Error("not an array")],
             "map fails if not a map": [
               [0xdc, 0xa, 0x8, 0x68, 0x6f, 0x6c, 0x61, 0xa, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xe, 0x74, 0x65, 0x72, 0x63, 0x65, 0x72, 0x6f, 0xa, 0x74, 0x68, 0x69, 0x72, 0x64, 0x6, 0x62, 0x79, 0x65], 
-              (decoder) => Object.fromEntries(Array.from({length: decoder.beginDecodeMap()}, () => [decoder.decodeString(), decoder.decodeVarint()])), null, new Error("not a map")]
+              (decoder) => Object.fromEntries(Array.from({length: decoder.beginDecodeMap()}, () => [decoder.decodeString(), decoder.decodeVarint()])), null, new Error("not a map")],
+            "timestamp": [[192, 174, 135, 192, 12, 0], (reader) => reader.decodeTimestamp(), new Date("2023/3/2 15:32")],
+            "duration": [[236, 207, 232, 214, 1], (reader) => reader.decodeDuration(), 225252342n]
         };
 
         for(const entry of Object.entries(testCases)) {

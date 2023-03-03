@@ -149,4 +149,14 @@ export class NexemabReader {
         this._offset += buflen;
         return buffer;
     }
+
+    public decodeTimestamp(): Date {
+        const seconds = this.decodeVarint();
+        const nanos = this.decodeVarint();
+        return new Date(Number(seconds) * 1000 + Math.ceil(Number(nanos) / 1000000));
+    }
+
+    public decodeDuration(): bigint {
+        return this.decodeVarint();
+    }
 }
