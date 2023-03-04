@@ -1,5 +1,5 @@
 import { listEquals, mapEquals, primitiveEquals } from "./equality";
-import { JsType, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
+import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
 import { NexemaStructState as NexemaStructState, NexemaUnionState } from "./state";
 
 /**
@@ -14,7 +14,7 @@ export abstract class Nexemable {
     /**
      * Converts the current instance to a JavaScript object
      */
-    public abstract toObject(): JsType;
+    public abstract toObject(): JsObj;
 
     /**
      * Returns the kind of this Nexemable instance.
@@ -27,7 +27,7 @@ export abstract class Nexemable {
  */
 export abstract class BaseNexemaType<T extends BaseNexemaType<T>> implements Nexemable {
     public abstract encode(): Uint8Array;
-    public abstract toObject(): JsType;
+    public abstract toObject(): JsObj;
     public abstract get kind(): "enum" | "struct" | "union";
 
     /**

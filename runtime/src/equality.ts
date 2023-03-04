@@ -1,5 +1,5 @@
 import { FieldKind, JsKind } from "./definition";
-import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
+import { PrimitiveMapObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
 
 export function primitiveEquals(kind: FieldKind, a: Primitive, b: Primitive): boolean {
     if(a === b) {
@@ -97,8 +97,8 @@ export function mapEquals(valueJsKind: JsKind, valueKind: FieldKind, a: Primitiv
 
         if(valueJsKind === 'primitive') {
             for(const key of keys) {
-                const av = (a as JsObj)[key];
-                const bv = (b as JsObj)[key];
+                const av = (a as PrimitiveMapObj)[key];
+                const bv = (b as PrimitiveMapObj)[key];
 
                 if(!primitiveEquals(valueKind, av as Primitive, bv as Primitive)) {
                     return false;
@@ -106,8 +106,8 @@ export function mapEquals(valueJsKind: JsKind, valueKind: FieldKind, a: Primitiv
             }
         } else if(valueJsKind === 'type') {
             for(const key of keys) {
-                const av = (a as JsObj)[key];
-                const bv = (b as JsObj)[key];
+                const av = (a as PrimitiveMapObj)[key];
+                const bv = (b as PrimitiveMapObj)[key];
 
                 if(!(av as any).equals((bv as any))) {
                     return false;
