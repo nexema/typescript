@@ -3,14 +3,9 @@ import { JsType, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
 import { NexemaStructState as NexemaStructState, NexemaUnionState } from "./state";
 
 /**
- * BaseNexemaType represents the base class for every generated nexema type
+ * The very base class for every generated Nexema type.
  */
-export abstract class BaseNexemaType<T extends BaseNexemaType<T>> {
-    /**
-     * Returns the hashcode of the current instance.
-     */
-    public abstract get hashCode(): number;
-
+export abstract class Nexemable {
     /**
      * Encodes the current instance to a Uint8Array
      */
@@ -20,6 +15,25 @@ export abstract class BaseNexemaType<T extends BaseNexemaType<T>> {
      * Converts the current instance to a JavaScript object
      */
     public abstract toObject(): JsType;
+
+    /**
+     * Returns the kind of this Nexemable instance.
+     */
+    public abstract get kind(): 'enum' | 'struct' | 'union';
+}
+
+/**
+ * BaseNexemaType represents the base class for every generated Nexema type
+ */
+export abstract class BaseNexemaType<T extends BaseNexemaType<T>> implements Nexemable {
+    public abstract encode(): Uint8Array;
+    public abstract toObject(): JsType;
+    public abstract get kind(): "enum" | "struct" | "union";
+
+    /**
+     * Returns the hashcode of the current instance.
+     */
+    public abstract get hashCode(): number;
 
     /**
      * Returns true if this and [other] are strict equals, otherwise, false.
@@ -101,6 +115,10 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>> extends BaseNexema
 
         return false;
     }
+
+    public override get kind(): "enum" | "struct" | "union" {
+        return 'struct';
+    }
 }
 
 /**
@@ -151,6 +169,10 @@ export abstract class NexemaUnion<T extends NexemaUnion<T>> extends BaseNexemaTy
 
         return false;
     }
+
+    public override get kind(): "enum" | "struct" | "union" {
+        return 'union';
+    }
 }
 
 /**
@@ -182,6 +204,10 @@ export abstract class NexemaEnum<T extends NexemaEnum<T>> extends BaseNexemaType
 
     public override equals(other: T): boolean {
         return this._index === other._index;
+    }
+
+    public override get kind(): "enum" | "struct" | "union" {
+        return 'enum';
     }
 
 }
