@@ -12,10 +12,10 @@ export default {
     '!./src/**/*.module.ts',
     '!./src/**/*.spec.ts',
     '!./src/**/*.test.ts',
-    '!./src/**/*.d.ts'
+    '!./src/**/*.d.ts',
+    "!./src/index.ts"
   ],
   coverageDirectory: "coverage",
-  // coverageProvider: "v8",
   coverageReporters: [
     "lcov",
     "text-summary",

@@ -45,6 +45,7 @@ export function listEquals(argumentJsKind: JsKind, argumentKind: FieldKind, a: P
                     return false;
                 }
             }
+            break;
 
         case 'type':
             for(let i = 0; i < a.length; i++) {
@@ -55,6 +56,7 @@ export function listEquals(argumentJsKind: JsKind, argumentKind: FieldKind, a: P
                     return false;
                 }
             }
+            break;
     }
     return true;
 }
@@ -76,7 +78,7 @@ export function mapEquals(valueJsKind: JsKind, valueKind: FieldKind, a: Primitiv
                     return false;
                 } 
             }
-        } else if(valueJsKind === 'type') {
+        } else {
             for(const key of keys) {
                 const av = a.get(key);
                 const bv = b.get(key);
@@ -104,7 +106,7 @@ export function mapEquals(valueJsKind: JsKind, valueKind: FieldKind, a: Primitiv
                     return false;
                 }
             }
-        } else if(valueJsKind === 'type') {
+        } else {
             for(const key of keys) {
                 const av = (a as PrimitiveMapObj)[key];
                 const bv = (b as PrimitiveMapObj)[key];
@@ -116,5 +118,5 @@ export function mapEquals(valueJsKind: JsKind, valueKind: FieldKind, a: Primitiv
         }
     }
     
-    return false;
+    return true;
 }

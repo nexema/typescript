@@ -1,6 +1,7 @@
 import { listEquals, mapEquals, primitiveEquals } from "./equality";
+import { NexemabWriter } from "./nexemab/writer";
 import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
-import { NexemaStructState as NexemaStructState, NexemaUnionState } from "./state";
+import { NexemaStructState, NexemaUnionState } from "./state";
 
 /**
  * The very base class for every generated Nexema type.
@@ -31,18 +32,9 @@ export abstract class BaseNexemaType<T extends BaseNexemaType<T>> implements Nex
     public abstract get kind(): "enum" | "struct" | "union";
 
     /**
-     * Returns the hashcode of the current instance.
-     */
-    public abstract get hashCode(): number;
-
-    /**
      * Returns true if this and [other] are strict equals, otherwise, false.
      */
     public abstract equals(other: T): boolean;
-
-    public valueOf(): number {
-        return this.hashCode;
-    }
 }
 
 /**
@@ -90,12 +82,14 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>> extends BaseNexema
                     if(!primitiveEquals(field.value.kind, a as Primitive, b as Primitive)) {
                         return false;
                     }
+                    break;
 
                 case 'list':
                     const argumentType = field.value.arguments![0];
                     if(!listEquals(argumentType.jsKind, argumentType.kind, a as PrimitiveList, b as PrimitiveList)) {
                         return false;
                     }
+                    break;
 
                 case 'map':
                     const valueType = field.value.arguments![1];
@@ -146,12 +140,14 @@ export abstract class NexemaUnion<T extends NexemaUnion<T>> extends BaseNexemaTy
                 if(!primitiveEquals(field.value.kind, a as Primitive, b as Primitive)) {
                     return false;
                 }
+                break;
 
             case 'list':
                 const argumentType = field.value.arguments![0];
                 if(!listEquals(argumentType.jsKind, argumentType.kind, a as PrimitiveList, b as PrimitiveList)) {
                     return false;
                 }
+                break;
 
             case 'map':
                 const valueType = field.value.arguments![1];
@@ -208,6 +204,16 @@ export abstract class NexemaEnum<T extends NexemaEnum<T>> extends BaseNexemaType
 
     public override get kind(): "enum" | "struct" | "union" {
         return 'enum';
+    }
+
+    public override encode(): Uint8Array {
+        const writer = new NexemabWriter();
+        writer.encodeUint8(this._index);
+        return writer.takeBytes();
+    }
+
+    public override toObject(): JsObj {
+        return this._index;
     }
 
 }
