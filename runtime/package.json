@@ -42,15 +42,10 @@
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.7",
-    "@types/object-hash": "^3.0.2",
-    "@types/varint": "^6.0.1",
     "jest": "^29.4.3",
     "ts-jest": "^29.0.5",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "object-hash": "^3.0.0",
-    "ts-node": "^10.9.1",
-    "varint": "^6.0.0"
   }
 }
