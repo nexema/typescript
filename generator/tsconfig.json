@@ -2,14 +2,15 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "CommonJS",
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "declaration": false,
-    "moduleResolution": "node",
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "outDir": "./dist",
-    "declarationMap": false
+    "declarationMap": false,
+    "sourceMap": true,
+    "lib": ["ES2022"]
   },
   "include": [
     "src/**/*"
