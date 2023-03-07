@@ -4,7 +4,7 @@
  */
 
 import { JsObj } from "../src/primitives";
-import { Clonable, Mergeable, NexemaEnum, NexemaStruct, NexemaUnion } from "../src/type";
+import { Clonable, NexemaEnum, NexemaMergeable, NexemaStruct, NexemaUnion } from "../src/type";
 
 export class EnumA extends NexemaEnum<EnumA> {
     private constructor(index: number, name: string){
@@ -16,10 +16,12 @@ export class EnumA extends NexemaEnum<EnumA> {
     public static readonly blue: EnumA = new EnumA(2, 'blue');
 }
 
-export class StructA extends NexemaStruct<StructA> implements Mergeable<StructA>, Clonable<StructA> {
+export class StructA extends NexemaStruct<StructA> implements NexemaMergeable<StructA>, Clonable<StructA> {
+   
     public encode(): Uint8Array {
         throw new Error("Method not implemented.");
     }
+
     public toObject(): JsObj {
         throw new Error("Method not implemented.");
     }
@@ -121,6 +123,10 @@ export class StructA extends NexemaStruct<StructA> implements Mergeable<StructA>
     }
 
     public clone(): StructA {
+        throw new Error("Method not implemented.");
+    }
+
+    public mergeFrom(buffer: Uint8Array): void {
         throw new Error("Method not implemented.");
     }
 }
