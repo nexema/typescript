@@ -24,6 +24,28 @@ export abstract class Nexemable {
 }
 
 /**
+ * Provides a method to deep copy a Nexema type.
+ */
+export abstract class Clonable<T extends BaseNexemaType<T>> {
+    /**
+     * Returns an exact deep copy of this instance.
+     */
+    public abstract clone(): T;
+}
+
+/**
+ * Provides a method to merge instances.
+ */
+export abstract class Mergeable<T extends BaseNexemaType<T>> {
+    /**
+     * Uses other instance of the same type to merge their values into this instance.
+     * 
+     * @param other The other instance to merge from.
+     */
+    public abstract mergeUsing(other: T): void;
+}
+
+/**
  * BaseNexemaType represents the base class for every generated Nexema type
  */
 export abstract class BaseNexemaType<T extends BaseNexemaType<T>> implements Nexemable {

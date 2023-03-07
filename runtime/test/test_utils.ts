@@ -4,10 +4,9 @@
  */
 
 import { JsObj } from "../src/primitives";
-import { NexemaEnum, NexemaStruct, NexemaUnion } from "../src/type";
+import { Clonable, Mergeable, NexemaEnum, NexemaStruct, NexemaUnion } from "../src/type";
 
 export class EnumA extends NexemaEnum<EnumA> {
-
     private constructor(index: number, name: string){
         super(index, name);
     }
@@ -17,7 +16,7 @@ export class EnumA extends NexemaEnum<EnumA> {
     public static readonly blue: EnumA = new EnumA(2, 'blue');
 }
 
-export class StructA extends NexemaStruct<StructA> {
+export class StructA extends NexemaStruct<StructA> implements Mergeable<StructA>, Clonable<StructA> {
     public encode(): Uint8Array {
         throw new Error("Method not implemented.");
     }
@@ -25,7 +24,7 @@ export class StructA extends NexemaStruct<StructA> {
         throw new Error("Method not implemented.");
     }
 
-    constructor() {
+    public constructor() {
         super({
             fields: [
                 {
@@ -116,6 +115,14 @@ export class StructA extends NexemaStruct<StructA> {
     public set enum(value: EnumA) {
         this._state.values[3] = value;
     }
+
+    public mergeUsing(other: StructA): void {
+        throw new Error("Method not implemented.");
+    }
+
+    public clone(): StructA {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export class UnionA extends NexemaUnion<UnionA, 'firstName' | 'tags' | 'preferences' | 'enum'> {
@@ -126,7 +133,7 @@ export class UnionA extends NexemaUnion<UnionA, 'firstName' | 'tags' | 'preferen
         throw new Error("Method not implemented.");
     }
 
-    constructor() {
+    public constructor() {
         super({
             fields: [
                 {
