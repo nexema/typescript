@@ -1,6 +1,6 @@
 import { listEquals, mapEquals, primitiveEquals } from "../src/equality";
 import { PrimitiveMapObj } from "../src/primitives";
-import { EnumA } from "./test_utils";
+import { EnumA, StructA, UnionA } from "./test_utils";
 
 describe("Test equality methods on different types", () => {
     test("Test enum equality", () => {
@@ -9,6 +9,96 @@ describe("Test equality methods on different types", () => {
 
         expect(blue.equals(red)).toBeFalsy();
         expect(blue.equals(EnumA.blue)).toBeTruthy();
+    });
+
+    test("Test struct equality", () => {
+        const a = new StructA();
+        const b = new StructA();
+
+        expect(a.equals(b)).toBeTruthy();
+        
+        b.firstName = "Tomás";
+        expect(a.equals(b)).toBeFalsy();
+
+        b.firstName = "";
+        expect(a.equals(b)).toBeTruthy();
+
+        b.tags.push("a value");
+        expect(a.equals(b)).toBeFalsy();
+
+        b.tags.pop();
+        expect(a.equals(b)).toBeTruthy();
+
+        a.preferences.set("cats", true);
+        b.preferences.set("cars", false);
+        expect(a.equals(b)).toBeFalsy();
+
+        a.preferences.set("cars", false);
+        b.preferences.set("cats", true);
+        expect(a.equals(b)).toBeTruthy();
+
+        a.enum = EnumA.red;
+        b.enum = EnumA.blue;
+        expect(a.equals(b)).toBeFalsy();
+        
+        b.enum = EnumA.red;
+        expect(a.equals(b)).toBeTruthy();
+    });
+
+    test("Test union equality", () => {
+        const a = new UnionA();
+        const b = new UnionA();
+        expect(a.equals(b)).toBeTruthy();
+        expect(a.whichField).toStrictEqual('not-set');
+        expect(b.whichField).toStrictEqual('not-set');
+
+        a.firstName = "Tomás";
+        expect(a.equals(b)).toBeFalsy();
+        expect(a.whichField).toStrictEqual('firstName');
+        expect(b.whichField).toStrictEqual('not-set');
+
+        b.firstName = "Tomás";
+        expect(a.equals(b)).toBeTruthy();
+        expect(a.whichField).toStrictEqual('firstName');
+        expect(b.whichField).toStrictEqual('firstName');
+
+        a.clear();
+        expect(a.equals(b)).toBeFalsy();
+        expect(a.whichField).toStrictEqual('not-set');
+        expect(b.whichField).toStrictEqual('firstName');
+
+        a.firstName = "Jose";
+        expect(a.equals(b)).toBeFalsy();
+        expect(a.whichField).toStrictEqual('firstName');
+        expect(b.whichField).toStrictEqual('firstName');
+
+        a.tags = ["a", "b"];
+        b.tags = ["b"];
+        expect(a.equals(b)).toBeFalsy();
+        expect(a.whichField).toStrictEqual('tags');
+        expect(b.whichField).toStrictEqual('tags');
+
+        b.tags.push("b");
+        b.tags[0] = "a";
+        expect(a.equals(b)).toBeTruthy();
+
+        a.preferences = new Map();
+        b.preferences = new Map();
+        expect(a.equals(b)).toBeTruthy();
+        expect(a.whichField).toStrictEqual('preferences');
+        expect(b.whichField).toStrictEqual('preferences');
+
+        b.preferences.set("cats", false);
+        expect(a.equals(b)).toBeFalsy();
+
+        a.enum = EnumA.blue;
+        b.enum = EnumA.blue;
+        expect(a.equals(b)).toBeTruthy();
+        expect(a.whichField).toStrictEqual('enum');
+        expect(b.whichField).toStrictEqual('enum');
+
+        b.enum = EnumA.unknown;
+        expect(a.equals(b)).toBeFalsy();
     });
 
     test("Test primitive equals", () => {

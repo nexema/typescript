@@ -62,7 +62,7 @@ export abstract class NexemaMergeable<T extends BaseNexemaType<T>> {
 export abstract class NexemaStruct<T extends NexemaStruct<T>> extends BaseNexemaType<T> {
     protected _state: NexemaStructState;
     
-    public constructor(state: NexemaStructState) {
+    protected constructor(state: NexemaStructState) {
         super();
         this._state = state;
     }
@@ -107,7 +107,7 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>> extends BaseNexema
 
         }
 
-        return false;
+        return true;
     }
 
     public override get kind(): "enum" | "struct" | "union" {
@@ -118,10 +118,10 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>> extends BaseNexema
 /**
  * NexemaUnion is the base class for every Nexema union type.
  */
-export abstract class NexemaUnion<T extends NexemaUnion<T>> extends BaseNexemaType<T> {
+export abstract class NexemaUnion<T extends NexemaUnion<T, TFields>, TFields extends string> extends BaseNexemaType<T> {
     protected _state: NexemaUnionState;
 
-    public constructor(state: NexemaUnionState) {
+    protected constructor(state: NexemaUnionState) {
         super();
         this._state = state;
     }
@@ -131,8 +131,13 @@ export abstract class NexemaUnion<T extends NexemaUnion<T>> extends BaseNexemaTy
             return false;
         }
 
+        if(this._state.fieldIndex === -1 && other._state.fieldIndex === -1) {
+            return true;
+        }
+
         const a = this._state.currentValue;
         const b = other._state.currentValue;
+        
         const field = this._state.fields[this._state.fieldIndex];
 
         switch(field.value.jsKind) {
@@ -163,11 +168,26 @@ export abstract class NexemaUnion<T extends NexemaUnion<T>> extends BaseNexemaTy
                 break;
         }
 
-        return false;
+        return true;
     }
 
     public override get kind(): "enum" | "struct" | "union" {
         return 'union';
+    }
+
+    public get whichField(): TFields | 'not-set' {
+        if(this._state.fieldIndex === -1) {
+            return 'not-set';
+        }
+
+        const currentField = this._state.fields[this._state.fieldIndex];
+        const fieldName = currentField.jsName;
+        return fieldName as TFields;
+    }
+
+    public clear(): void {
+        this._state.fieldIndex = -1;
+        this._state.currentValue = undefined;
     }
 }
 
