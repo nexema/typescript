@@ -1,39 +1,36 @@
-import {EnumGenerator} from '../src/enum_generator';
-import { formatSource } from './test_utils';
+import { EnumGenerator } from '../src/enum_generator'
+import { formatSource } from './test_utils'
 
-it("should generate enum classes", () => {
+it('should generate enum classes', () => {
     const generator = new EnumGenerator({
-        id: "1",
-        name: "MyEnum",
+        id: '1',
+        name: 'MyEnum',
         fields: [
             {
                 index: 0,
-                name: "unknown",
+                name: 'unknown',
                 annotations: {},
-                documentation: []
+                documentation: [],
             },
             {
                 index: 1,
-                name: "red",
+                name: 'red',
                 annotations: {},
-                documentation: []
+                documentation: [],
             },
             {
                 index: 2,
-                name: "blue",
+                name: 'blue',
                 annotations: {},
-                documentation: []
+                documentation: [],
             },
         ],
         modifier: 'enum',
         baseType: null,
         annotations: {},
         defaults: {},
-        documentation: [
-            "This is the documentation for",
-            "MyEnum"
-        ]
-    });
+        documentation: ['This is the documentation for', 'MyEnum'],
+    })
 
     const want = `
     /**
@@ -48,7 +45,7 @@ it("should generate enum classes", () => {
         public static readonly unknown: MyEnum = new EnumA(0, "unknown");
         public static readonly red: MyEnum = new EnumA(1, "red");
         public static readonly blue: MyEnum = new EnumA(2, "blue");
-    }`;
+    }`
 
-    expect(formatSource(generator.generate())).toStrictEqual(formatSource(want));
-});
+    expect(formatSource(generator.generate())).toStrictEqual(formatSource(want))
+})

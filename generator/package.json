@@ -8,8 +8,9 @@
   },
   "preferGlobal": true,
   "scripts": {
+    "lint": "eslint .",
     "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "build": "tsc -p .",
+    "build": "npm run lint && tsc -p .",
     "local": "sudo npm i -g && nexemajsgen",
     "test": "jest --coverage=false",
     "test:coverage": "jest --coverage --colors"
@@ -34,6 +35,9 @@
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/node": "^18.14.6",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "@typescript-eslint/parser": "^5.54.1",
+    "eslint": "^8.35.0",
     "jest": "^29.4.3",
     "nodemon": "^2.0.21",
     "ts-jest": "^29.0.5",

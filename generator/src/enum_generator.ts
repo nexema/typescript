@@ -1,31 +1,33 @@
-import { ImportAlias } from "./constants";
-import { NexemaTypeDefinition, NexemaTypeFieldDefinition } from "./models";
-import { toCamelCase } from "./utils";
+import { ImportAlias } from './constants'
+import { NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
+import { toCamelCase } from './utils'
 
 export class EnumGenerator {
-    private _type: NexemaTypeDefinition;
+    private _type: NexemaTypeDefinition
 
     public constructor(type: NexemaTypeDefinition) {
-        this._type = type;
+        this._type = type
     }
 
     public generate(): string {
         return `${this._writeDocs()}
-        export class ${this._type.name} extends ${ImportAlias.Nexema}.NexemaEnum<${this._type.name}> {
+        export class ${this._type.name} extends ${
+            ImportAlias.Nexema
+        }.NexemaEnum<${this._type.name}> {
             ${this._writeConstructor()}
 
-            ${this._type.fields?.map(x => this._writeField(x)).join("\n")}
-        }`;
+            ${this._type.fields?.map((x) => this._writeField(x)).join('\n')}
+        }`
     }
 
     private _writeDocs(): string {
-        if(!this._type.documentation) {
-            return "";
+        if (!this._type.documentation) {
+            return ''
         }
 
         return `/**
-        ${this._type.documentation.map(x => `* ${x}`).join("\n")}
-        */`;
+        ${this._type.documentation.map((x) => `* ${x}`).join('\n')}
+        */`
     }
 
     private _writeConstructor(): string {
@@ -35,7 +37,9 @@ export class EnumGenerator {
     }
 
     private _writeField(field: NexemaTypeFieldDefinition): string {
-        return `public static readonly ${toCamelCase(field.name)}: ${this._type.name} = new EnumA(${field.index}, '${toCamelCase(field.name)}')`
+        return `public static readonly ${toCamelCase(field.name)}: ${
+            this._type.name
+        } = new EnumA(${field.index}, '${toCamelCase(field.name)}')`
     }
 
     /**
