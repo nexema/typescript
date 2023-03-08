@@ -112,7 +112,7 @@ const reviver = (key: string, value: any) => {
                 })),
             }));
         case '':
-            return value; // top-level object
+            return value;
         default:
             return value;
     }

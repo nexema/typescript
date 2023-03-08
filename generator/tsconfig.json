@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "declarationMap": false,
-    "sourceMap": true,
+    "sourceMap": false,
     "lib": ["ES2022"]
   },
   "include": [
