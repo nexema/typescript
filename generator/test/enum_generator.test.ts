@@ -16,13 +16,13 @@ it('should generate enum classes', () => {
                 index: 1,
                 name: 'red',
                 annotations: {},
-                documentation: [],
+                documentation: ['A red color'],
             },
             {
                 index: 2,
                 name: 'blue',
                 annotations: {},
-                documentation: [],
+                documentation: ['A blue color'],
             },
         ],
         modifier: 'enum',
@@ -43,7 +43,15 @@ it('should generate enum classes', () => {
         }
 
         public static readonly unknown: MyEnum = new EnumA(0, "unknown");
+        
+        /**
+         * A red color 
+         */
         public static readonly red: MyEnum = new EnumA(1, "red");
+
+        /**
+         * A blue color 
+         */
         public static readonly blue: MyEnum = new EnumA(2, "blue");
     }`
 

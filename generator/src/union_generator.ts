@@ -1,8 +1,8 @@
 import { ImportAlias } from './constants'
 import { NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
-import { toCamelCase, writeDocumentation } from './utils'
+import { toCamelCase } from './utils'
 
-export class EnumGenerator {
+export class UnionGenerator {
     private _type: NexemaTypeDefinition
 
     public constructor(type: NexemaTypeDefinition) {
@@ -25,7 +25,9 @@ export class EnumGenerator {
             return ''
         }
 
-        return writeDocumentation(this._type.documentation)
+        return `/**
+        ${this._type.documentation.map((x) => `* ${x}`).join('\n')}
+        */`
     }
 
     private _writeConstructor(): string {
@@ -35,9 +37,7 @@ export class EnumGenerator {
     }
 
     private _writeField(field: NexemaTypeFieldDefinition): string {
-        return `
-        ${field.documentation ? writeDocumentation(field.documentation) : ''}
-        public static readonly ${toCamelCase(field.name)}: ${
+        return `public static readonly ${toCamelCase(field.name)}: ${
             this._type.name
         } = new EnumA(${field.index}, '${toCamelCase(field.name)}')`
     }
