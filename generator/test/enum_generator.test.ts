@@ -53,6 +53,38 @@ it('should generate enum classes', () => {
          * A blue color 
          */
         public static readonly blue: MyEnum = new EnumA(2, "blue");
+
+        public static readonly values: ReadonlyArray<MyEnum> = [
+            MyEnum.unknown,
+            MyEnum.red,
+            MyEnum.blue,
+        ];
+
+           public static byIndex(index: number): MyEnum | undefined {
+             switch (index) {
+               case 0:
+                return MyEnum.unknown;
+               case 1:
+                return MyEnum.red;
+               case 2:
+                return MyEnum.blue;
+               default:
+                return undefined;
+             }
+           }
+           public static byName(name: string): MyEnum | undefined {
+             switch (name) {
+               case "unknown":
+                return MyEnum.unknown;
+               case "red":
+                return MyEnum.red;
+               case "blue":
+                return MyEnum.blue;
+           
+               default:
+                return undefined;
+             }
+           } 
     }`
 
     expect(formatSource(generator.generate())).toStrictEqual(formatSource(want))
