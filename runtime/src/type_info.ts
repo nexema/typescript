@@ -2,5 +2,5 @@ import { NexemaField } from "./definition";
 
 export interface NexemaTypeInfo {
   fieldsByJsName: { [key: string]: number };
-  fieldsByIndex: NexemaField[];
+  fieldsByIndex: { [key: number]: NexemaField };
 }

@@ -55,8 +55,8 @@ export class StructA
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
-    fieldsByIndex: [
-      {
+    fieldsByIndex: {
+      0: {
         index: 0,
         jsName: "firstName",
         name: "first_name",
@@ -65,7 +65,7 @@ export class StructA
           kind: "string",
         },
       },
-      {
+      1: {
         index: 1,
         jsName: "tags",
         name: "tags",
@@ -80,7 +80,7 @@ export class StructA
           ],
         },
       },
-      {
+      2: {
         index: 2,
         jsName: "preferences",
         name: "preferences",
@@ -99,7 +99,7 @@ export class StructA
           ],
         },
       },
-      {
+      3: {
         index: 3,
         jsName: "enum",
         name: "enum",
@@ -108,7 +108,7 @@ export class StructA
           kind: "enum",
         },
       },
-    ],
+    },
     fieldsByJsName: {
       firstName: 0,
       tags: 1,
@@ -186,8 +186,8 @@ export class UnionA extends NexemaUnion<
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
-    fieldsByIndex: [
-      {
+    fieldsByIndex: {
+      0: {
         index: 0,
         jsName: "firstName",
         name: "first_name",
@@ -196,7 +196,7 @@ export class UnionA extends NexemaUnion<
           kind: "string",
         },
       },
-      {
+      1: {
         index: 1,
         jsName: "tags",
         name: "tags",
@@ -211,7 +211,7 @@ export class UnionA extends NexemaUnion<
           ],
         },
       },
-      {
+      2: {
         index: 2,
         jsName: "preferences",
         name: "preferences",
@@ -230,7 +230,7 @@ export class UnionA extends NexemaUnion<
           ],
         },
       },
-      {
+      3: {
         index: 3,
         jsName: "enum",
         name: "enum",
@@ -239,7 +239,7 @@ export class UnionA extends NexemaUnion<
           kind: "enum",
         },
       },
-    ],
+    },
     fieldsByJsName: {
       firstName: 0,
       tags: 1,
