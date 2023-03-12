@@ -1,15 +1,15 @@
-import { NexemaField } from "./definition";
-import { JsObj, NexemaObj } from "./primitives";
+import { NexemaObj } from "./primitives";
+import { NexemaTypeInfo } from "./type_info";
 
 export interface BaseNexemaTypeState {
-    fields: NexemaField[]
+  typeInfo: NexemaTypeInfo;
 }
 
 export interface NexemaStructState extends BaseNexemaTypeState {
-    values: NexemaObj[],
+  values: NexemaObj[];
 }
 
 export interface NexemaUnionState extends BaseNexemaTypeState {
-    currentValue: NexemaObj | undefined,
-    fieldIndex: number
+  currentValue: NexemaObj | undefined;
+  fieldIndex: number;
 }
