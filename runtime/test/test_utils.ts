@@ -3,6 +3,7 @@
  * are simplified versions useful for testing only and may not represent the latest generated code.
  */
 
+import { NexemabWriter } from "../src/nexemab/writer";
 import { JsObj } from "../src/primitives";
 import {
   Clonable,
@@ -178,10 +179,11 @@ export class UnionA extends NexemaUnion<
   UnionA,
   "firstName" | "tags" | "preferences" | "enum"
 > {
-  public encode(): Uint8Array {
-    throw new Error("Method not implemented.");
+  public override encode(): Uint8Array {
+    const writer = new NexemabWriter();
+    return writer.takeBytes();
   }
-  public toObject(): JsObj {
+  public override toObject(): JsObj {
     throw new Error("Method not implemented.");
   }
 
