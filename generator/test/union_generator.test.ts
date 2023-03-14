@@ -240,6 +240,10 @@ it('should generate union classes', () => {
             }
             return instance;
         }
+
+        public toString(): string {
+            return \`MyUnion(\${whichField}: \${this._state.currentValue})\`
+        }
     }
     
     type MyUnion_stringField = {

@@ -36,6 +36,8 @@ export class UnionGenerator extends BaseGenerator {
             ${this._writeToObjectMethod()}
 
             ${this._writeCloneMethod()}
+
+            ${this._writeToStringMethod()}
         }
         
         ${this._writeFieldTypes()}`
@@ -238,6 +240,12 @@ export class UnionGenerator extends BaseGenerator {
                 }
             }
             return instance;
+        }`
+    }
+
+    private _writeToStringMethod(): string {
+        return `public toString(): string {
+            return \`${this._type.name}(\${whichField}: \${this._state.currentValue})\`
         }`
     }
 }
