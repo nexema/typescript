@@ -1,5 +1,6 @@
 export interface GeneratorSettings {
     useOnlyMaps: boolean
+    outputPath: string
 }
 
 export interface PluginResult {

@@ -1,44 +1,243 @@
-import { ImportAlias } from './constants'
-import { NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
-import { toCamelCase } from './utils'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { BaseGenerator } from './base_generator'
+import { CommonTypes, ImportAlias } from './constants'
+import {
+    NexemaFile,
+    NexemaPrimitiveValueType,
+    NexemaTypeDefinition,
+} from './models'
+import { writeDocumentation } from './utils'
 
-export class UnionGenerator {
-    private _type: NexemaTypeDefinition
-
-    public constructor(type: NexemaTypeDefinition) {
-        this._type = type
+export class UnionGenerator extends BaseGenerator {
+    public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
+        super(type, file)
     }
 
     public generate(): string {
         return `${this._writeDocs()}
         export class ${this._type.name} extends ${
             ImportAlias.Nexema
-        }.NexemaEnum<${this._type.name}> {
+        }.NexemaUnion<${this._type.name}, ${this._type
+            .fields!.map((x) => `'${this._fieldNames[x.name]}'`)
+            .join('|')}> implements ${CommonTypes.NexemaMergeable}<${
+            this._type.name
+        }>, ${CommonTypes.NexemaClonable}<${this._type.name}> {
+
+            ${this._writeTypeInfo()}
+
             ${this._writeConstructor()}
 
-            ${this._type.fields?.map((x) => this._writeField(x)).join('\n')}
-        }`
+            ${this._writeGettersAndSetters()}
+
+            ${this._writeEncodeMethod()}
+
+            ${this._writeMergeFromMethod()}
+            
+            ${this._writeToObjectMethod()}
+
+            ${this._writeCloneMethod()}
+        }
+        
+        ${this._writeFieldTypes()}`
     }
 
     private _writeDocs(): string {
-        if (!this._type.documentation) {
-            return ''
-        }
-
-        return `/**
-        ${this._type.documentation.map((x) => `* ${x}`).join('\n')}
-        */`
+        return writeDocumentation(this._type.documentation ?? [])
     }
 
     private _writeConstructor(): string {
-        return `private constructor(index: number, name: string) {
-            super(index, name);
+        return `public constructor(data: ${this._type.name}Builder?) {
+            let currentValue = undefined;
+            let fieldIndex = -1;
+            if(data) {
+                ${this._writeConstructorDataSet()}
+            }
+
+            super({
+                typeInfo: ${this._type.name}._typeInfo,
+                currentValue,
+                fieldIndex
+            });
         }`
     }
 
-    private _writeField(field: NexemaTypeFieldDefinition): string {
-        return `public static readonly ${toCamelCase(field.name)}: ${
-            this._type.name
-        } = new EnumA(${field.index}, '${toCamelCase(field.name)}')`
+    private _writeFieldTypes(): string {
+        let types = ``
+
+        for (const field of this._type.fields!) {
+            types += `type ${this._type.name}_${
+                this._fieldNames[field.name]
+            } = {
+                ${this._fieldNames[field.name]}: ${this.getJavascriptType(
+                field.type!
+            )},
+            ${this._type
+                .fields!.filter((x) => x.index !== field.index)
+                .map((x) => `${this._fieldNames[x.name]}?: never`)}
+            }
+            `
+        }
+
+        types += `type ${this._type.name}Builder = ${this._type
+            .fields!.map(
+                (x) => `${this._type.name}_${this._fieldNames[x.name]}`
+            )
+            .join('|')}`
+
+        return types
+    }
+
+    private _writeConstructorDataSet(): string {
+        let output = ''
+
+        let first = true
+        for (const field of this._type.fields!) {
+            output += `${first ? '' : 'else '} if(data.${
+                this._fieldNames[field.name]
+            }) {
+                currentValue = data.${this._fieldNames[field.name]}
+                fieldIndex = ${field.index}
+            }`
+
+            first = false
+        }
+
+        return output
+    }
+
+    private _writeGettersAndSetters(): string {
+        let output = ''
+
+        for (const field of this._type.fields!) {
+            const jsType = this.getJavascriptType(field.type!)
+            output += `
+            public get ${this._fieldNames[field.name]}(): ${jsType} {
+                return this._state.currentValue as ${jsType}
+            }
+
+            public set ${this._fieldNames[field.name]}(value: ${jsType}) {
+                this._state.currentValue = value;
+                this._state.fieldIndex = ${field.index};
+            }
+            `
+        }
+
+        return output
+    }
+
+    private _writeEncodeMethod(): string {
+        return `public override encode(): Uint8Array {
+            const writer = new ${CommonTypes.NexemabWriter}();
+            switch(this._state.fieldIndex) {
+                case -1: {
+                        writer.encodeNull();
+                        break;
+                    }
+                ${this._type
+                    .fields!.map(
+                        (x) => `case ${x.index}: {
+                        ${this._writeFieldEncoder(
+                            `this._state.currentValue as ${this.getJavascriptType(
+                                x.type!
+                            )}`,
+                            x.type!
+                        )};
+                        break;
+                    }`
+                    )
+                    .join('\n')}
+            }
+            return writer.takeBytes();
+        }`
+    }
+
+    private _writeMergeFromMethod(): string {
+        return `public override mergeFrom(buffer: Uint8Array): void {
+            const reader = new ${CommonTypes.NexemabReader}(buffer);
+            if(reader.isNextNull()) {
+                this.clear();
+            } else {
+                const field = reader.decodeVarint();
+                switch(field) {
+                    ${this._type
+                        .fields!.map(
+                            (x) => `case ${x.index}: {
+                        this._state.currentValue = ${this._writeFieldDecoder(
+                            x.type!
+                        )}
+                        this._state.fieldIndex = ${x.index};
+                        break;
+                    }`
+                        )
+                        .join('\n')}
+                }
+            }
+        }`
+    }
+
+    private _writeToObjectMethod(): string {
+        return `public override toObject(): ${CommonTypes.JsObj} {
+            switch(this._state.fieldIndex) {
+                case -1:
+                    return null;
+
+                ${this._type
+                    .fields!.map(
+                        (x) => `case ${x.index}: 
+                    return ${this._writeValueToJsObj(
+                        'this._state.currentValue',
+                        x.type!
+                    )}
+                `
+                    )
+                    .join('\n')}
+            } 
+        }`
+    }
+
+    private _writeCloneMethod(): string {
+        const primitiveFields = this._type.fields!.filter((x) => {
+            if (x.type!.kind === 'primitiveValueType') {
+                const primitive = (x.type! as NexemaPrimitiveValueType)
+                    .primitive
+                return (
+                    primitive !== 'list' &&
+                    primitive !== 'map' &&
+                    primitive !== 'binary' &&
+                    primitive !== 'timestamp'
+                )
+            }
+
+            return false
+        })
+
+        const nonPrimitiveFields = this._type.fields!.filter(
+            (x) => !primitiveFields.includes(x)
+        )
+
+        return `public override clone(): ${this._type.name} {
+            const instance = new ${this._type.name}();
+            instance._state.fieldIndex = this._state.fieldIndex;
+            if(this._state.fieldIndex !== -1) {
+                switch(this._state.fieldIndex) {
+                    ${primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
+                        instance._state.currentValue = this._state.currentValue;
+                        break;
+
+                    ${nonPrimitiveFields
+                        .map(
+                            (x) => `case ${x.index}: {
+                                instance._state.currentValue = ${this._writeDeepCloneValue(
+                                    'this._state.currentValue',
+                                    x.type!
+                                )}
+                                break;
+                    }`
+                        )
+                        .join('\n')}
+                }
+            }
+            return instance;
+        }`
     }
 }
