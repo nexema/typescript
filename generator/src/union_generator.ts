@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BaseGenerator } from './base_generator'
+import { GeneratorBase } from './generator_base'
 import { CommonTypes, ImportAlias } from './constants'
 import {
     NexemaFile,
@@ -8,7 +8,7 @@ import {
 } from './models'
 import { writeDocumentation } from './utils'
 
-export class UnionGenerator extends BaseGenerator {
+export class UnionGenerator extends GeneratorBase {
     public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
         super(type, file)
     }

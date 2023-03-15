@@ -11,7 +11,7 @@ import {
 import { TypeReference } from './type_reference'
 import { isJsPrimitive, toCamelCase } from './utils'
 
-export abstract class BaseGenerator {
+export abstract class GeneratorBase {
     protected _type: NexemaTypeDefinition
     protected _file: NexemaFile
     protected _fieldNames: { [key: string]: string }
