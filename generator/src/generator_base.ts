@@ -2,6 +2,7 @@
 import { CommonTypes, DecoderMethods, EncoderMethods } from './constants'
 import { Generator } from './generator'
 import {
+    JsObj,
     NexemaFile,
     NexemaPrimitiveValueType,
     NexemaTypeDefinition,
@@ -283,6 +284,27 @@ export abstract class GeneratorBase {
         }
     }
 
+    protected _writeJsObj(value: JsObj): string {
+        const type = typeof value
+        if (type === 'string') {
+            return `"${value}"`
+        } else if (
+            type === 'boolean' ||
+            type === 'bigint' ||
+            type === 'number'
+        ) {
+            return value.toString()
+        } else if (type === 'object') {
+            return `new Map([${Object.entries(value)
+                .map(([key, value]) => `[${key}: ${this._writeJsObj(value)}]`)
+                .join(',')}])`
+        } else {
+            return `[${(value as JsObj[])
+                .map((x) => this._writeJsObj(x))
+                .join(',')}]`
+        }
+    }
+
     private _getEncoder(
         variableName: string,
         valueType: NexemaValueType
@@ -324,7 +346,7 @@ export abstract class GeneratorBase {
             const primitiveValueType = valueType as NexemaPrimitiveValueType
             if (primitiveValueType.primitive === 'list') {
                 const elementType = primitiveValueType.arguments![0]
-                return `Array.from({length: reader.beginDecodeArray()}, (x) => ${this._getDecoder(
+                return `Array.from({length: reader.beginDecodeArray()}, (x) => ${this._writeFieldDecoder(
                     elementType
                 )})`
             } else if (primitiveValueType.primitive === 'map') {
@@ -332,7 +354,7 @@ export abstract class GeneratorBase {
                 const elementType = primitiveValueType.arguments![0]
                 return `new Map(Array.from({length: reader.beginDecodeMap()}, (x) => [${this._getDecoder(
                     keyType
-                )}, ${this._getDecoder(elementType)}]))`
+                )}, ${this._writeFieldDecoder(elementType)}]))`
             } else {
                 const decoder = DecoderMethods[primitiveValueType.primitive]
                 return `reader.${decoder}()`

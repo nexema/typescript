@@ -31,6 +31,7 @@ export interface NexemaFile {
 export type JsObj =
     | string
     | number
+    | bigint
     | boolean
     | JsObj[]
     | { [key: string]: JsObj }
