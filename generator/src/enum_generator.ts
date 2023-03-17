@@ -44,7 +44,9 @@ export class EnumGenerator {
         ${field.documentation ? writeDocumentation(field.documentation) : ''}
         public static readonly ${toCamelCase(field.name)}: ${
             this._type.name
-        } = new EnumA(${field.index}, '${toCamelCase(field.name)}')`
+        } = new ${this._type.name}(${field.index}, '${toCamelCase(
+            field.name
+        )}')`
     }
 
     private _writeValuesField(): string {

@@ -1,5 +1,6 @@
 import { EnumGenerator } from '../src/enum_generator'
 import { formatSource } from './test_utils'
+import fs from 'fs'
 
 it('should generate enum classes', () => {
     const generator = new EnumGenerator({
@@ -42,17 +43,17 @@ it('should generate enum classes', () => {
             super(index, name);
         }
 
-        public static readonly unknown: MyEnum = new EnumA(0, "unknown");
+        public static readonly unknown: MyEnum = new MyEnum(0, "unknown");
         
         /**
          * A red color 
          */
-        public static readonly red: MyEnum = new EnumA(1, "red");
+        public static readonly red: MyEnum = new MyEnum(1, "red");
 
         /**
          * A blue color 
          */
-        public static readonly blue: MyEnum = new EnumA(2, "blue");
+        public static readonly blue: MyEnum = new MyEnum(2, "blue");
 
         public static readonly values: ReadonlyArray<MyEnum> = [
             MyEnum.unknown,
@@ -87,5 +88,11 @@ it('should generate enum classes', () => {
            } 
     }`
 
-    expect(formatSource(generator.generate())).toStrictEqual(formatSource(want))
+    const got = formatSource(generator.generate())
+    expect(got).toStrictEqual(formatSource(want))
+    fs.writeFileSync(
+        'example/src/enum.ts',
+        `import * as $nex from 'nexema'; 
+    ${got}`
+    )
 })
