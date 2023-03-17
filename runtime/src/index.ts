@@ -1,6 +1,6 @@
 export {
   BaseNexemaType,
-  Clonable,
+  NexemaClonable as Clonable,
   NexemaEnum,
   NexemaMergeable,
   NexemaStruct,
@@ -16,5 +16,5 @@ export {
   PrimitiveList,
   PrimitiveMap,
 } from "./primitives";
-export { JsKind, FieldKind, NexemaField, NexemaFieldType } from "./definition";
+export { FieldKind, NexemaField, NexemaFieldType } from "./definition";
 export { NexemaTypeInfo } from "./type_info";

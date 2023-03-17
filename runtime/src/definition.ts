@@ -7,25 +7,10 @@ export interface NexemaField {
 
 export interface NexemaFieldType {
   kind: FieldKind;
-  jsKind: JsKind;
-  nexemaType: NexemaPrimitive;
   arguments?: NexemaFieldType[];
 }
 
-export type JsKind = "primitive" | "list" | "map" | "type";
 export type FieldKind =
-  | "string"
-  | "boolean"
-  | "number"
-  | "bigint"
-  | "binary"
-  | "list"
-  | "map"
-  | "enum"
-  | "struct"
-  | "union";
-
-export type NexemaPrimitive =
   | "string"
   | "boolean"
   | "uint"
@@ -43,6 +28,25 @@ export type NexemaPrimitive =
   | "binary"
   | "list"
   | "map"
-  | "type"
+  | "struct"
+  | "union"
+  | "enum"
   | "timestamp"
   | "duration";
+
+export const FieldUtils = {
+  isPrimitive(kind: FieldKind): boolean {
+    switch (kind) {
+      case "list":
+      case "map":
+      case "struct":
+      case "union":
+      case "enum":
+      case "binary":
+        return false;
+
+      default:
+        return true;
+    }
+  },
+};

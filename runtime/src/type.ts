@@ -1,4 +1,10 @@
-import { listEquals, mapEquals, primitiveEquals } from "./equality";
+import { FieldUtils } from "./definition";
+import {
+  binaryEquals,
+  listEquals,
+  mapEquals,
+  primitiveEquals,
+} from "./equality";
 import { NexemabWriter } from "./nexemab/writer";
 import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
 import { NexemaStructState, NexemaUnionState } from "./state";
@@ -26,7 +32,7 @@ export abstract class Nexemable {
 /**
  * Provides a method to deep copy a Nexema type.
  */
-export abstract class Clonable<T extends BaseNexemaType<T>> {
+export abstract class NexemaClonable<T extends BaseNexemaType<T>> {
   /**
    * Returns an exact deep copy of this instance.
    */
@@ -92,48 +98,26 @@ export abstract class NexemaStruct<
       const a = values[i];
       const b = otherValues[i];
 
-      switch (field.value.jsKind) {
-        case "primitive":
-          if (
-            !primitiveEquals(field.value.kind, a as Primitive, b as Primitive)
-          ) {
-            return false;
-          }
-          break;
-
-        case "list":
-          const argumentType = field.value.arguments![0];
-          if (
-            !listEquals(
-              argumentType.jsKind,
-              argumentType.kind,
-              a as PrimitiveList,
-              b as PrimitiveList
-            )
-          ) {
-            return false;
-          }
-          break;
-
-        case "map":
-          const valueType = field.value.arguments![1];
-          if (
-            !mapEquals(
-              valueType.jsKind,
-              valueType.kind,
-              a as PrimitiveMap,
-              b as PrimitiveMap
-            )
-          ) {
-            return false;
-          }
-          break;
-
-        case "type":
-          if (!(a as any).equals(b as any)) {
-            return false;
-          }
-          break;
+      if (FieldUtils.isPrimitive(field.value.kind)) {
+        if (!primitiveEquals(a as Primitive, b as Primitive)) {
+          return false;
+        }
+      } else if (field.value.kind === "list") {
+        const argumentType = field.value.arguments![0];
+        if (
+          !listEquals(argumentType.kind, a as PrimitiveList, b as PrimitiveList)
+        ) {
+          return false;
+        }
+      } else if (field.value.kind === "map") {
+        const valueType = field.value.arguments![1];
+        if (!mapEquals(valueType.kind, a as PrimitiveMap, b as PrimitiveMap)) {
+          return false;
+        }
+      } else {
+        if (!(a as any).equals(b as any)) {
+          return false;
+        }
       }
     }
 
@@ -149,14 +133,24 @@ export abstract class NexemaStruct<
  * NexemaUnion is the base class for every Nexema union type.
  */
 export abstract class NexemaUnion<
-  T extends NexemaUnion<T, TFields>,
-  TFields extends string
-> extends BaseNexemaType<T> {
+    T extends NexemaUnion<T, TFields>,
+    TFields extends string
+  >
+  extends BaseNexemaType<T>
+  implements NexemaMergeable<T>
+{
   protected _state: NexemaUnionState;
 
   protected constructor(state: NexemaUnionState) {
     super();
     this._state = state;
+  }
+
+  public abstract mergeFrom(buffer: Uint8Array): void;
+
+  public mergeUsing(other: T): void {
+    this._state.currentValue = other._state.currentValue;
+    this._state.fieldIndex = other._state.fieldIndex;
   }
 
   public override equals(other: T): boolean {
@@ -173,24 +167,38 @@ export abstract class NexemaUnion<
 
     const field = this._state.typeInfo.fieldsByIndex[this._state.fieldIndex];
 
-    switch (field.value.jsKind) {
-      case "primitive":
-        if (
-          !primitiveEquals(field.value.kind, a as Primitive, b as Primitive)
-        ) {
+    switch (field.value.kind) {
+      case "string":
+      case "boolean":
+      case "uint":
+      case "uint8":
+      case "uint16":
+      case "uint32":
+      case "uint64":
+      case "int":
+      case "int8":
+      case "int16":
+      case "int32":
+      case "int64":
+      case "float32":
+      case "float64":
+      case "duration":
+        if (!primitiveEquals(a as Primitive, b as Primitive)) {
           return false;
         }
+        break;
+
+      case "binary":
+        if (!binaryEquals(a as Uint8Array, b as Uint8Array)) {
+          return false;
+        }
+
         break;
 
       case "list":
         const argumentType = field.value.arguments![0];
         if (
-          !listEquals(
-            argumentType.jsKind,
-            argumentType.kind,
-            a as PrimitiveList,
-            b as PrimitiveList
-          )
+          !listEquals(argumentType.kind, a as PrimitiveList, b as PrimitiveList)
         ) {
           return false;
         }
@@ -198,19 +206,14 @@ export abstract class NexemaUnion<
 
       case "map":
         const valueType = field.value.arguments![1];
-        if (
-          !mapEquals(
-            valueType.jsKind,
-            valueType.kind,
-            a as PrimitiveMap,
-            b as PrimitiveMap
-          )
-        ) {
+        if (!mapEquals(valueType.kind, a as PrimitiveMap, b as PrimitiveMap)) {
           return false;
         }
         break;
 
-      case "type":
+      case "enum":
+      case "struct":
+      case "union":
         if (!(a as any).equals(b as any)) {
           return false;
         }

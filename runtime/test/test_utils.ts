@@ -4,9 +4,10 @@
  */
 
 import { NexemabWriter } from "../src/nexemab/writer";
+import { NexemabReader } from "../src/nexemab/reader";
 import { JsObj } from "../src/primitives";
 import {
-  Clonable,
+  NexemaClonable,
   NexemaEnum,
   NexemaMergeable,
   NexemaStruct,
@@ -45,7 +46,7 @@ export class EnumA extends NexemaEnum<EnumA> {
 
 export class StructA
   extends NexemaStruct<StructA>
-  implements NexemaMergeable<StructA>, Clonable<StructA>
+  implements NexemaMergeable<StructA>, NexemaClonable<StructA>
 {
   public encode(): Uint8Array {
     throw new Error("Method not implemented.");
@@ -62,7 +63,6 @@ export class StructA
         jsName: "firstName",
         name: "first_name",
         value: {
-          jsKind: "primitive",
           kind: "string",
         },
       },
@@ -71,11 +71,9 @@ export class StructA
         jsName: "tags",
         name: "tags",
         value: {
-          jsKind: "list",
           kind: "list",
           arguments: [
             {
-              jsKind: "primitive",
               kind: "string",
             },
           ],
@@ -86,15 +84,12 @@ export class StructA
         jsName: "preferences",
         name: "preferences",
         value: {
-          jsKind: "map",
           kind: "map",
           arguments: [
             {
-              jsKind: "primitive",
               kind: "string",
             },
             {
-              jsKind: "primitive",
               kind: "boolean",
             },
           ],
@@ -105,7 +100,6 @@ export class StructA
         jsName: "enum",
         name: "enum",
         value: {
-          jsKind: "type",
           kind: "enum",
         },
       },
@@ -118,7 +112,19 @@ export class StructA
     },
   };
 
-  public constructor() {
+  public constructor(
+    data: {
+      firstName: string;
+      tags: Array<string>;
+      preferences: Map<string, boolean>;
+      enum: EnumA;
+    } = {
+      firstName: "",
+      enum: EnumA.unknown,
+      preferences: new Map(),
+      tags: [],
+    }
+  ) {
     super({
       typeInfo: StructA._typeInfo,
       values: [
@@ -175,16 +181,23 @@ export class StructA
   }
 }
 
-export class UnionA extends NexemaUnion<
-  UnionA,
-  "firstName" | "tags" | "preferences" | "enum"
-> {
+export class UnionA
+  extends NexemaUnion<UnionA, "firstName" | "tags" | "preferences" | "enum">
+  implements NexemaMergeable<UnionA>, NexemaClonable<UnionA>
+{
   public override encode(): Uint8Array {
     const writer = new NexemabWriter();
     return writer.takeBytes();
   }
   public override toObject(): JsObj {
-    throw new Error("Method not implemented.");
+    return {
+      firstName: this.firstName,
+      tags: this.tags,
+      preferences: Object.fromEntries(
+        Array.from(this.preferences.entries(), (entry) => [entry[0], entry[1]])
+      ),
+      enum: this.enum.index,
+    };
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
@@ -194,7 +207,6 @@ export class UnionA extends NexemaUnion<
         jsName: "firstName",
         name: "first_name",
         value: {
-          jsKind: "primitive",
           kind: "string",
         },
       },
@@ -203,11 +215,9 @@ export class UnionA extends NexemaUnion<
         jsName: "tags",
         name: "tags",
         value: {
-          jsKind: "list",
           kind: "list",
           arguments: [
             {
-              jsKind: "primitive",
               kind: "string",
             },
           ],
@@ -218,15 +228,12 @@ export class UnionA extends NexemaUnion<
         jsName: "preferences",
         name: "preferences",
         value: {
-          jsKind: "map",
           kind: "map",
           arguments: [
             {
-              jsKind: "primitive",
               kind: "string",
             },
             {
-              jsKind: "primitive",
               kind: "boolean",
             },
           ],
@@ -237,7 +244,6 @@ export class UnionA extends NexemaUnion<
         jsName: "enum",
         name: "enum",
         value: {
-          jsKind: "type",
           kind: "enum",
         },
       },
@@ -256,6 +262,15 @@ export class UnionA extends NexemaUnion<
       currentValue: undefined,
       fieldIndex: -1,
     });
+  }
+
+  public clone(): UnionA {
+    throw new Error("Method not implemented.");
+  }
+
+  public mergeFrom(buffer: Uint8Array): void {
+    const reader = new NexemabReader(buffer);
+    Array.from({ length: reader.beginDecodeArray() }, (x) => 5);
   }
 
   public get firstName(): string {
