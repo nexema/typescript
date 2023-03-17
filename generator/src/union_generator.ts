@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeneratorBase } from './generator_base'
 import { CommonTypes, ImportAlias } from './constants'
+import { GeneratorBase } from './generator_base'
 import {
     NexemaFile,
     NexemaPrimitiveValueType,
@@ -9,6 +9,24 @@ import {
 import { writeDocumentation } from './utils'
 
 export class UnionGenerator extends GeneratorBase {
+    primitiveFields = this._type.fields!.filter((x) => {
+        if (x.type!.kind === 'primitiveValueType') {
+            const primitive = (x.type! as NexemaPrimitiveValueType).primitive
+            return (
+                primitive !== 'list' &&
+                primitive !== 'map' &&
+                primitive !== 'binary' &&
+                primitive !== 'timestamp'
+            )
+        }
+
+        return false
+    })
+
+    nonPrimitiveFields = this._type.fields!.filter(
+        (x) => !this.primitiveFields.includes(x)
+    )
+
     public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
         super(type, file)
     }
@@ -32,6 +50,8 @@ export class UnionGenerator extends GeneratorBase {
             ${this._writeEncodeMethod()}
 
             ${this._writeMergeFromMethod()}
+
+            ${this._writeMergeUsingMethod()}
             
             ${this._writeToObjectMethod()}
 
@@ -48,7 +68,7 @@ export class UnionGenerator extends GeneratorBase {
     }
 
     private _writeConstructor(): string {
-        return `public constructor(data: ${this._type.name}Builder?) {
+        return `public constructor(data?: ${this._type.name}Builder) {
             let currentValue = undefined;
             let fieldIndex = -1;
             if(data) {
@@ -154,7 +174,7 @@ export class UnionGenerator extends GeneratorBase {
     }
 
     private _writeMergeFromMethod(): string {
-        return `public override mergeFrom(buffer: Uint8Array): void {
+        return `public mergeFrom(buffer: Uint8Array): void {
             const reader = new ${CommonTypes.NexemabReader}(buffer);
             if(reader.isNextNull()) {
                 this.clear();
@@ -163,7 +183,7 @@ export class UnionGenerator extends GeneratorBase {
                 switch(field) {
                     ${this._type
                         .fields!.map(
-                            (x) => `case ${x.index}: {
+                            (x) => `case ${x.index}n: {
                         this._state.currentValue = ${this._writeFieldDecoder(
                             x.type!
                         )}
@@ -177,64 +197,82 @@ export class UnionGenerator extends GeneratorBase {
         }`
     }
 
+    private _writeMergeUsingMethod(): string {
+        return `public mergeUsing(other: ${this._type!.name}): void {
+            this._state.fieldIndex = other._state.fieldIndex;
+            switch(other._state.fieldIndex) {
+                case -1:
+                    this._state.currentValue = undefined;
+                    break;
+
+                    ${this.primitiveFields
+                        .map((x) => `case ${x.index}:`)
+                        .join('\n')}
+                        this._state.currentValue = other._state.currentValue;
+                        break;
+
+                    ${this.nonPrimitiveFields
+                        .map(
+                            (x) => `case ${x.index}: 
+                                this._state.currentValue = ${this._writeDeepCloneValue(
+                                    `other._state.currentValue as ${this.getJavascriptType(
+                                        x.type!
+                                    )}`,
+                                    x.type!
+                                )}
+                                break;
+                    `
+                        )
+                        .join('\n')}
+            }
+        }`
+    }
+
     private _writeToObjectMethod(): string {
         return `public override toObject(): ${CommonTypes.JsObj} {
             switch(this._state.fieldIndex) {
-                case -1:
-                    return null;
-
                 ${this._type
                     .fields!.map(
                         (x) => `case ${x.index}: 
                     return ${this._writeValueToJsObj(
-                        'this._state.currentValue',
+                        `this._state.currentValue as ${this.getJavascriptType(
+                            x.type!
+                        )}`,
                         x.type!
                     )}
                 `
                     )
                     .join('\n')}
+
+                default:
+                    return null;
             } 
         }`
     }
 
     private _writeCloneMethod(): string {
-        const primitiveFields = this._type.fields!.filter((x) => {
-            if (x.type!.kind === 'primitiveValueType') {
-                const primitive = (x.type! as NexemaPrimitiveValueType)
-                    .primitive
-                return (
-                    primitive !== 'list' &&
-                    primitive !== 'map' &&
-                    primitive !== 'binary' &&
-                    primitive !== 'timestamp'
-                )
-            }
-
-            return false
-        })
-
-        const nonPrimitiveFields = this._type.fields!.filter(
-            (x) => !primitiveFields.includes(x)
-        )
-
-        return `public override clone(): ${this._type.name} {
+        return `public clone(): ${this._type.name} {
             const instance = new ${this._type.name}();
             instance._state.fieldIndex = this._state.fieldIndex;
             if(this._state.fieldIndex !== -1) {
                 switch(this._state.fieldIndex) {
-                    ${primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
+                    ${this.primitiveFields
+                        .map((x) => `case ${x.index}:`)
+                        .join('\n')}
                         instance._state.currentValue = this._state.currentValue;
                         break;
 
-                    ${nonPrimitiveFields
+                    ${this.nonPrimitiveFields
                         .map(
-                            (x) => `case ${x.index}: {
+                            (x) => `case ${x.index}: 
                                 instance._state.currentValue = ${this._writeDeepCloneValue(
-                                    'this._state.currentValue',
+                                    `this._state.currentValue as ${this.getJavascriptType(
+                                        x.type!
+                                    )}`,
                                     x.type!
                                 )}
                                 break;
-                    }`
+                    `
                         )
                         .join('\n')}
                 }
@@ -245,7 +283,7 @@ export class UnionGenerator extends GeneratorBase {
 
     private _writeToStringMethod(): string {
         return `public toString(): string {
-            return \`${this._type.name}(\${whichField}: \${this._state.currentValue})\`
+            return \`${this._type.name}(\${this.whichField}: \${this._state.currentValue})\`
         }`
     }
 }

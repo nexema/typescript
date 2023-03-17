@@ -2,6 +2,7 @@ import { CommonTypes } from '../src/constants'
 import { NexemaPrimitiveValueType } from '../src/models'
 import { UnionGenerator } from '../src/union_generator'
 import { formatSource } from './test_utils'
+import fs from 'fs'
 
 it('should generate union classes', () => {
     const generator = new UnionGenerator(
@@ -74,7 +75,6 @@ it('should generate union classes', () => {
                     jsName: "stringField",
                     name: "string_field",
                     value: {
-                        jsKind: "primitive",
                         kind: "string"
                     }
                 },
@@ -83,7 +83,6 @@ it('should generate union classes', () => {
                     jsName: "boolField",
                     name: "bool_field",
                     value: {
-                        jsKind: "primitive",
                         kind: "boolean"
                     }
                 },
@@ -92,19 +91,18 @@ it('should generate union classes', () => {
                     jsName: "listField",
                     name: "list_field",
                     value: {
-                        jsKind: "list",
                         kind: "list"
                     }
                 }
             },
-            fieldsByName: {
+            fieldsByJsName: {
                 stringField: 0,
                 boolField: 1,
                 listField: 2
             }
         };
 
-        public constructor(data: MyUnionBuilder?) {
+        public constructor(data?: MyUnionBuilder) {
             let currentValue = undefined;
             let fieldIndex = -1;
             if(data) {
@@ -180,25 +178,25 @@ it('should generate union classes', () => {
             return writer.takeBytes();
         }
 
-        public override mergeFrom(buffer: Uint8Array): void {
+        public mergeFrom(buffer: Uint8Array): void {
             const reader = new $nex.NexemabReader(buffer);
             if(reader.isNextNull()) {
                 this.clear();
             } else {
                 const field = reader.decodeVarint();
                 switch(field) {
-                    case 0: {
+                    case 0n: {
                         this._state.currentValue = reader.decodeString();
                         this._state.fieldIndex = 0;
                         break;
                     }
-                    case 1: {
+                    case 1n: {
                         this._state.currentValue = reader.decodeBool();
                         this._state.fieldIndex = 1;
                         break;
                     }
-                    case 2: {
-                        this._state.currentValue = Array.from({length: reader.beginDecodeArray()}, (x) => reader.decodeFloat32());
+                    case 2n: {
+                        this._state.currentValue = Array.from({length: reader.beginDecodeArray()}, () => reader.decodeFloat32());
                         this._state.fieldIndex = 2;
                         break;
                     }
@@ -206,11 +204,26 @@ it('should generate union classes', () => {
             }
         }
 
+        public mergeUsing(other: MyUnion): void {
+            this._state.fieldIndex = other._state.fieldIndex;
+            switch(other._state.fieldIndex) {
+                case -1:
+                    this._state.currentValue = undefined;
+                    break;
+
+                case 0:
+                case 1:
+                    this._state.currentValue = other._state.currentValue;
+                    break;
+                    
+                case 2:
+                    this._state.currentValue = Array.from(other._state.currentValue as Array<number>);
+                    break;
+            }
+        }
+
         public override toObject(): ${CommonTypes.JsObj} {
             switch(this._state.fieldIndex) {
-                case -1:
-                    return null;
-
                 case 0:
                     return this._state.currentValue as string;
 
@@ -218,7 +231,10 @@ it('should generate union classes', () => {
                     return this._state.currentValue as boolean;
 
                 case 2:
-                    return Array.from(this._state.currentValue);
+                    return Array.from(this._state.currentValue as Array<number>);
+
+                default:
+                    return null;
             }
         }
 
@@ -232,17 +248,17 @@ it('should generate union classes', () => {
                         instance._state.currentValue = this._state.currentValue;
                         break;
 
-                    case 2: {
-                        instance._state.currentValue = Array.from(this._state.currentValue);
+                    case 2: 
+                        instance._state.currentValue = Array.from(this._state.currentValue as Array<number>);
                         break;
-                    }
+                    
                 }
             }
             return instance;
         }
 
         public toString(): string {
-            return \`MyUnion(\${whichField}: \${this._state.currentValue})\`
+            return \`MyUnion(\${this.whichField}: \${this._state.currentValue})\`
         }
     }
     
@@ -263,5 +279,11 @@ it('should generate union classes', () => {
     };
     type MyUnionBuilder = MyUnion_stringField | MyUnion_boolField | MyUnion_listField;`
 
-    expect(formatSource(generator.generate())).toStrictEqual(formatSource(want))
+    const got = formatSource(generator.generate())
+    expect(got).toStrictEqual(formatSource(want))
+    fs.writeFileSync(
+        'example/src/union.ts',
+        `import * as $nex from 'nexema'; 
+    ${got}`
+    )
 })
