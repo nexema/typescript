@@ -104,7 +104,7 @@ export abstract class GeneratorBase {
         }
 
         if (type.nullable) {
-            jsType += '?'
+            jsType += '| null'
         }
 
         return jsType
@@ -126,26 +126,16 @@ export abstract class GeneratorBase {
     }
 
     protected _writeNexemaFieldValue(type: NexemaValueType): string {
-        let jsKind: string
         let kind: string
         if (type.kind === 'primitiveValueType') {
             kind = (type as NexemaPrimitiveValueType).primitive
-            if (kind === 'list') {
-                jsKind = 'list'
-            } else if (kind === 'map') {
-                jsKind = 'map'
-            } else {
-                jsKind = 'primitive'
-            }
         } else {
-            jsKind = 'type'
             kind = Generator.instance.getObject(
                 (type as NexemaTypeValueType).objectId
             ).modifier
         }
 
         return `{
-            jsKind: "${jsKind}",
             kind: "${kind}"
         }`
     }
@@ -162,7 +152,7 @@ export abstract class GeneratorBase {
             CommonTypes.NexemaTypeInfo
         } = {
             fieldsByIndex: ${this._writeNexemaFields()},
-            fieldsByName: ${this._writeNexemaFieldsByJsName()}
+            fieldsByJsName: ${this._writeNexemaFieldsByJsName()}
         }`
     }
 
@@ -195,9 +185,7 @@ export abstract class GeneratorBase {
                 }
 
                 default: {
-                    out = `${variableName} as ${this.getJavascriptType(
-                        valueType
-                    )}`
+                    out = `${variableName}`
                     break
                 }
             }
@@ -254,7 +242,7 @@ export abstract class GeneratorBase {
                         return `Array.from(${variableName})`
                     }
 
-                    return `Array.from(${variableName}, (x) => ${this._writeDeepCloneValue(
+                    return `Array.from(${variableName}, () => ${this._writeDeepCloneValue(
                         'x',
                         elementType
                     )})`
@@ -346,13 +334,13 @@ export abstract class GeneratorBase {
             const primitiveValueType = valueType as NexemaPrimitiveValueType
             if (primitiveValueType.primitive === 'list') {
                 const elementType = primitiveValueType.arguments![0]
-                return `Array.from({length: reader.beginDecodeArray()}, (x) => ${this._writeFieldDecoder(
+                return `Array.from({length: reader.beginDecodeArray()}, () => ${this._writeFieldDecoder(
                     elementType
                 )})`
             } else if (primitiveValueType.primitive === 'map') {
                 const keyType = primitiveValueType.arguments![0]
                 const elementType = primitiveValueType.arguments![0]
-                return `new Map(Array.from({length: reader.beginDecodeMap()}, (x) => [${this._getDecoder(
+                return `new Map(Array.from({length: reader.beginDecodeMap()}, () => [${this._getDecoder(
                     keyType
                 )}, ${this._writeFieldDecoder(elementType)}]))`
             } else {

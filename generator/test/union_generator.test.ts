@@ -222,7 +222,7 @@ it('should generate union classes', () => {
             }
         }
 
-        public override clone(): MyUnion {
+        public clone(): MyUnion {
             const instance = new MyUnion();
             instance._state.fieldIndex = this._state.fieldIndex;
             if(this._state.fieldIndex !== -1) {

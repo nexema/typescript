@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, ImportAlias } from './constants'
 import { GeneratorBase } from './generator_base'
-import {
-    NexemaFile,
-    NexemaPrimitiveValueType,
-    NexemaTypeDefinition,
-    NexemaValueType,
-} from './models'
+import { NexemaFile, NexemaTypeDefinition } from './models'
 import { isJsPrimitive, writeDocumentation } from './utils'
 
 export class StructGenerator extends GeneratorBase {
@@ -33,6 +28,8 @@ export class StructGenerator extends GeneratorBase {
             ${this._writeEncodeMethod()}
 
             ${this._writeMergeFromMethod()}
+
+            ${this._writeMergeUsingMethod()}
             
             ${this._writeToObjectMethod()}
 
@@ -48,6 +45,7 @@ export class StructGenerator extends GeneratorBase {
 
     private _writeConstructor(): string {
         const fullnullable = this._type.fields!.every((x) => x.type!.nullable)
+        const defaults = this._type.defaults ?? {}
         return `public constructor(${this._writeConstructorDataParameter()}) {
 
             super({
@@ -56,9 +54,17 @@ export class StructGenerator extends GeneratorBase {
                     ${this._type
                         .fields!.map(
                             (x) =>
-                                `data${fullnullable ? '?' : ''}.${
+                                `data${fullnullable ? '?' : ''}.${`${
                                     this._fieldNames[x.name]
-                                }`
+                                } ${
+                                    x.type!.nullable
+                                        ? '?? null'
+                                        : defaults[x.name]
+                                        ? `?? ${this._writeJsObj(
+                                              defaults[x.name]
+                                          )}`
+                                        : ''
+                                }`}`
                         )
                         .join(',')}
                 ]
@@ -67,36 +73,21 @@ export class StructGenerator extends GeneratorBase {
     }
 
     private _writeConstructorDataParameter(): string {
-        let result = `data${
+        return `data${
             this._type.fields!.every((x) => x.type!.nullable) ? '?' : ''
         }: {
             ${this._type
                 .fields!.map(
                     (x) =>
                         `${this._fieldNames[x.name]}${
-                            x.type!.nullable ? '?' : ''
+                            x.type!.nullable ||
+                            (this._type.defaults ?? {})[x.name]
+                                ? '?'
+                                : ''
                         }: ${this.getJavascriptType(x.type!)}`
                 )
                 .join(',')}
         }`
-
-        const defaults = this._type.defaults
-            ? Array.from(Object.entries(this._type.defaults))
-            : null
-        if (defaults && defaults.length > 0) {
-            result += ` = {
-                ${defaults
-                    .map(
-                        ([field, value]) =>
-                            `${this._fieldNames[field]}: ${this._writeJsObj(
-                                value
-                            )}`
-                    )
-                    .join(',')}
-            }`
-        }
-
-        return result
     }
 
     private _writeGettersAndSetters(): string {
@@ -125,7 +116,7 @@ export class StructGenerator extends GeneratorBase {
                 .fields!.map(
                     (x) =>
                         `${this._writeFieldEncoder(
-                            this._fieldNames[x.name],
+                            `this.${this._fieldNames[x.name]}`,
                             x.type!
                         )}`
                 )
@@ -135,7 +126,7 @@ export class StructGenerator extends GeneratorBase {
     }
 
     private _writeMergeFromMethod(): string {
-        return `public override mergeFrom(buffer: Uint8Array): void {
+        return `public mergeFrom(buffer: Uint8Array): void {
             const reader = new ${CommonTypes.NexemabReader}(buffer);
             ${this._type
                 .fields!.map(
@@ -148,13 +139,33 @@ export class StructGenerator extends GeneratorBase {
         }`
     }
 
+    private _writeMergeUsingMethod(): string {
+        return `public mergeUsing(other: ${this._type.name}): void {
+            ${this._type
+                .fields!.map(
+                    (x) =>
+                        `this._state.values[${
+                            x.index
+                        }] = ${this._writeDeepCloneValue(
+                            `other._state.values[${
+                                x.index
+                            }] as ${this.getJavascriptType(x.type!)}`,
+                            x.type!
+                        )}`
+                )
+                .join('\n')}
+        }`
+    }
+
     private _writeToObjectMethod(): string {
         return `public override toObject(): ${CommonTypes.JsObj} {
             return {
                 ${this._type.fields!.map(
                     (x) =>
                         `${this._fieldNames[x.name]}: ${this._writeValueToJsObj(
-                            `this._state.values[${x.index}]`,
+                            `this._state.values[${
+                                x.index
+                            }] as ${this.getJavascriptType(x.type!)}`,
                             x.type!
                         )}`
                 )}
@@ -163,15 +174,19 @@ export class StructGenerator extends GeneratorBase {
     }
 
     private _writeCloneMethod(): string {
-        return `public override clone(): ${this._type.name} {
+        return `public clone(): ${this._type.name} {
             return new ${this._type.name}({
                 ${this._type.fields!.map(
                     (x) =>
                         `${this._fieldNames[x.name]}: ${
                             isJsPrimitive(x.type!)
-                                ? `this._state.values[${x.index}]`
+                                ? `this._state.values[${
+                                      x.index
+                                  }] as ${this.getJavascriptType(x.type!)}`
                                 : this._writeDeepCloneValue(
-                                      `this._state.values[${x.index}]`,
+                                      `this._state.values[${
+                                          x.index
+                                      }] as ${this.getJavascriptType(x.type!)}`,
                                       x.type!
                                   )
                         }`
@@ -191,24 +206,5 @@ export class StructGenerator extends GeneratorBase {
             )
             .join(', ')})\`
         }`
-    }
-
-    private _writeFieldToString(
-        variableName: string,
-        valueType: NexemaValueType
-    ): string {
-        if (valueType.kind === 'primitiveValueType') {
-            switch ((valueType as NexemaPrimitiveValueType).primitive) {
-                case 'list':
-                    return `(${variableName} as ${this.getJavascriptType(
-                        valueType
-                    )}).join(", ")`
-
-                default:
-                    return variableName
-            }
-        }
-
-        return variableName
     }
 }

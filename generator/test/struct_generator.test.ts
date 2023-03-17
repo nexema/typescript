@@ -2,6 +2,7 @@ import { CommonTypes } from '../src/constants'
 import { NexemaPrimitiveValueType } from '../src/models'
 import { StructGenerator } from '../src/struct_generator'
 import { formatSource } from './test_utils'
+import fs from 'fs'
 
 it('should generate struct classes', () => {
     const generator = new StructGenerator(
@@ -76,7 +77,6 @@ it('should generate struct classes', () => {
                     jsName: "stringField",
                     name: "string_field",
                     value: {
-                        jsKind: "primitive",
                         kind: "string"
                     }
                 },
@@ -85,7 +85,6 @@ it('should generate struct classes', () => {
                     jsName: "boolField",
                     name: "bool_field",
                     value: {
-                        jsKind: "primitive",
                         kind: "boolean"
                     }
                 },
@@ -94,12 +93,11 @@ it('should generate struct classes', () => {
                     jsName: "listField",
                     name: "list_field",
                     value: {
-                        jsKind: "list",
                         kind: "list"
                     }
                 }
             },
-            fieldsByName: {
+            fieldsByJsName: {
                 stringField: 0,
                 boolField: 1,
                 listField: 2
@@ -108,16 +106,14 @@ it('should generate struct classes', () => {
 
         public constructor(data: {
             stringField: string,
-            boolField: boolean,
-            listField: Array<number?>
-        } = {
-            boolField: true
+            boolField?: boolean,
+            listField: Array<number | null>
         }) {
             super({
                 typeInfo: MyStruct._typeInfo,
                 values: [
                     data.stringField,
-                    data.boolField,
+                    data.boolField ?? true,
                     data.listField
                 ]
             });
@@ -139,20 +135,20 @@ it('should generate struct classes', () => {
             this._state.values[1] = value;
         }
 
-        public get listField(): Array<number?> {
-            return this._state.values[2] as Array<number?>;
+        public get listField(): Array<number | null> {
+            return this._state.values[2] as Array<number | null>;
         }
 
-        public set listField(value: Array<number?>) {
+        public set listField(value: Array<number | null>) {
             this._state.values[2] = value;
         }
 
         public override encode(): Uint8Array {
             const writer = new $nex.NexemabWriter();
-            writer.encodeString(stringField);
-            writer.encodeBool(boolField);
-            writer.beginArray(listField.length);
-            for(const value of listField) {
+            writer.encodeString(this.stringField);
+            writer.encodeBool(this.boolField);
+            writer.beginArray(this.listField.length);
+            for(const value of this.listField) {
                 if(value) {
                     writer.encodeFloat32(value);
                 } else {
@@ -162,26 +158,32 @@ it('should generate struct classes', () => {
             return writer.takeBytes();
         }
 
-        public override mergeFrom(buffer: Uint8Array): void {
+        public mergeFrom(buffer: Uint8Array): void {
             const reader = new $nex.NexemabReader(buffer);
             this._state.values[0] = reader.decodeString();
             this._state.values[1] = reader.decodeBool();
-            this._state.values[2] = Array.from({length: reader.beginDecodeArray()}, (x) => reader.isNextNull() ? null : reader.decodeFloat32());
+            this._state.values[2] = Array.from({length: reader.beginDecodeArray()}, () => reader.isNextNull() ? null : reader.decodeFloat32());
+        }
+
+        public mergeUsing(other: MyStruct): void {
+            this._state.values[0] = other._state.values[0] as string
+            this._state.values[1] = other._state.values[1] as boolean
+            this._state.values[2] = Array.from(other._state.values[2] as Array<number | null>)
         }
 
         public override toObject(): ${CommonTypes.JsObj} {
             return {
                 stringField: this._state.values[0] as string,
                 boolField: this._state.values[1] as boolean,
-                listField: Array.from(this._state.values[2])
+                listField: Array.from(this._state.values[2] as Array<number | null>)
             }
         }
 
-        public override clone(): MyStruct {
+        public clone(): MyStruct {
             return new MyStruct({
-                stringField: this._state.values[0],
-                boolField: this._state.values[1],
-                listField: Array.from(this._state.values[2])
+                stringField: this._state.values[0] as string,
+                boolField: this._state.values[1] as boolean,
+                listField: Array.from(this._state.values[2] as Array<number | null>)
             });
         }
 
@@ -190,5 +192,11 @@ it('should generate struct classes', () => {
         }
     }`
 
-    expect(formatSource(generator.generate())).toStrictEqual(formatSource(want))
+    const got = formatSource(generator.generate())
+    expect(got).toStrictEqual(formatSource(want))
+    fs.writeFileSync(
+        'example/src/struct.ts',
+        `import * as $nex from 'nexema'; 
+    ${got}`
+    )
 })
