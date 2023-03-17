@@ -1,6 +1,6 @@
 {
   "name": "nexema",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Nexema runtime library",
   "main": "dist/cjs/index.js",
   "scripts": {
@@ -9,12 +9,14 @@
     "build:cjs": "tsc --declaration false --module commonjs --outDir dist/cjs",
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "test": "jest --coverage=false",
-    "test:coverage": "jest --coverage --colors"
+    "test:coverage": "jest --coverage --colors",
+    "deploy": "npm version patch && npm publish"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/nexema/typescript.git",
-    "directory": "runtime"
+    "directory": "runtime",
+    "homepage": "https://github.com/nexema/tool"
   },
   "exports": {
     "require": "./dist/cjs/index.js",
@@ -46,6 +48,5 @@
     "ts-jest": "^29.0.5",
     "typescript": "^4.8.4"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
