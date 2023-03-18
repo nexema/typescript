@@ -2,7 +2,6 @@
 import { ImportAlias } from './constants'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaTypeDefinition } from './models'
-import { writeDocumentation } from './utils'
 
 export class BaseTypeGenerator extends GeneratorBase {
     public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
@@ -10,18 +9,12 @@ export class BaseTypeGenerator extends GeneratorBase {
     }
 
     public generate(): string {
-        return `${this._writeDocs()}
+        return `${this._writeHeader(this._type.documentation, this._type.annotations)}
         export abstract class ${this._type.name}<T extends ${
             ImportAlias.Nexema
-        }.NexemaStruct<T>> extends ${ImportAlias.Nexema}.NexemaStruct<${
-            this._type.name
-        }<T>> {
+        }.NexemaStruct<T>> extends ${ImportAlias.Nexema}.NexemaStruct<${this._type.name}<T>> {
             ${this._writeGettersAndSetters()}
         }`
-    }
-
-    private _writeDocs(): string {
-        return writeDocumentation(this._type.documentation ?? [])
     }
 
     private _writeGettersAndSetters(): string {
@@ -29,11 +22,10 @@ export class BaseTypeGenerator extends GeneratorBase {
 
         for (const field of this._type.fields!) {
             const jsType = this.getJavascriptType(field.type!)
-            output += `
+            output += `${this._writeHeader(this._type.documentation, this._type.annotations, true)}
             public abstract get ${this._fieldNames[field.name]}(): ${jsType};
-            public abstract set ${
-                this._fieldNames[field.name]
-            }(value: ${jsType});
+            ${this._writeHeader(this._type.documentation, this._type.annotations, true)}
+            public abstract set ${this._fieldNames[field.name]}(value: ${jsType});
             `
         }
 

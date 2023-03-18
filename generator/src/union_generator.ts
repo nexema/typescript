@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, ImportAlias } from './constants'
 import { GeneratorBase } from './generator_base'
-import {
-    NexemaFile,
-    NexemaPrimitiveValueType,
-    NexemaTypeDefinition,
-} from './models'
-import { writeDocumentation } from './utils'
+import { NexemaFile, NexemaPrimitiveValueType, NexemaTypeDefinition } from './models'
 
 export class UnionGenerator extends GeneratorBase {
     primitiveFields = this._type.fields!.filter((x) => {
@@ -23,23 +18,21 @@ export class UnionGenerator extends GeneratorBase {
         return false
     })
 
-    nonPrimitiveFields = this._type.fields!.filter(
-        (x) => !this.primitiveFields.includes(x)
-    )
+    nonPrimitiveFields = this._type.fields!.filter((x) => !this.primitiveFields.includes(x))
 
     public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
         super(type, file)
     }
 
     public generate(): string {
-        return `${this._writeDocs()}
-        export class ${this._type.name} extends ${
-            ImportAlias.Nexema
-        }.NexemaUnion<${this._type.name}, ${this._type
-            .fields!.map((x) => `'${this._fieldNames[x.name]}'`)
-            .join('|')}> implements ${CommonTypes.NexemaMergeable}<${
+        return `${this._writeHeader(this._type.documentation, this._type.annotations)}
+        export class ${this._type.name} extends ${ImportAlias.Nexema}.NexemaUnion<${
             this._type.name
-        }>, ${CommonTypes.NexemaClonable}<${this._type.name}> {
+        }, ${this._type
+            .fields!.map((x) => `'${this._fieldNames[x.name]}'`)
+            .join('|')}> implements ${CommonTypes.NexemaMergeable}<${this._type.name}>, ${
+            CommonTypes.NexemaClonable
+        }<${this._type.name}> {
 
             ${this._writeTypeInfo()}
 
@@ -63,10 +56,6 @@ export class UnionGenerator extends GeneratorBase {
         ${this._writeFieldTypes()}`
     }
 
-    private _writeDocs(): string {
-        return writeDocumentation(this._type.documentation ?? [])
-    }
-
     private _writeConstructor(): string {
         return `public constructor(data?: ${this._type.name}Builder) {
             let currentValue = undefined;
@@ -87,12 +76,8 @@ export class UnionGenerator extends GeneratorBase {
         let types = ``
 
         for (const field of this._type.fields!) {
-            types += `type ${this._type.name}_${
-                this._fieldNames[field.name]
-            } = {
-                ${this._fieldNames[field.name]}: ${this.getJavascriptType(
-                field.type!
-            )},
+            types += `type ${this._type.name}_${this._fieldNames[field.name]} = {
+                ${this._fieldNames[field.name]}: ${this.getJavascriptType(field.type!)},
             ${this._type
                 .fields!.filter((x) => x.index !== field.index)
                 .map((x) => `${this._fieldNames[x.name]}?: never`)}
@@ -101,9 +86,7 @@ export class UnionGenerator extends GeneratorBase {
         }
 
         types += `type ${this._type.name}Builder = ${this._type
-            .fields!.map(
-                (x) => `${this._type.name}_${this._fieldNames[x.name]}`
-            )
+            .fields!.map((x) => `${this._type.name}_${this._fieldNames[x.name]}`)
             .join('|')}`
 
         return types
@@ -114,9 +97,7 @@ export class UnionGenerator extends GeneratorBase {
 
         let first = true
         for (const field of this._type.fields!) {
-            output += `${first ? '' : 'else '} if(data.${
-                this._fieldNames[field.name]
-            }) {
+            output += `${first ? '' : 'else '} if(data.${this._fieldNames[field.name]}) {
                 currentValue = data.${this._fieldNames[field.name]}
                 fieldIndex = ${field.index}
             }`
@@ -132,11 +113,11 @@ export class UnionGenerator extends GeneratorBase {
 
         for (const field of this._type.fields!) {
             const jsType = this.getJavascriptType(field.type!)
-            output += `
+            output += `${this._writeHeader(field.documentation, field.annotations, true)}
             public get ${this._fieldNames[field.name]}(): ${jsType} {
                 return this._state.currentValue as ${jsType}
             }
-
+            ${this._writeHeader(field.documentation, field.annotations, true)}
             public set ${this._fieldNames[field.name]}(value: ${jsType}) {
                 this._state.currentValue = value;
                 this._state.fieldIndex = ${field.index};
@@ -159,9 +140,7 @@ export class UnionGenerator extends GeneratorBase {
                     .fields!.map(
                         (x) => `case ${x.index}: {
                         ${this._writeFieldEncoder(
-                            `this._state.currentValue as ${this.getJavascriptType(
-                                x.type!
-                            )}`,
+                            `this._state.currentValue as ${this.getJavascriptType(x.type!)}`,
                             x.type!
                         )};
                         break;
@@ -184,9 +163,7 @@ export class UnionGenerator extends GeneratorBase {
                     ${this._type
                         .fields!.map(
                             (x) => `case ${x.index}n: {
-                        this._state.currentValue = ${this._writeFieldDecoder(
-                            x.type!
-                        )}
+                        this._state.currentValue = ${this._writeFieldDecoder(x.type!)}
                         this._state.fieldIndex = ${x.index};
                         break;
                     }`
@@ -205,9 +182,7 @@ export class UnionGenerator extends GeneratorBase {
                     this._state.currentValue = undefined;
                     break;
 
-                    ${this.primitiveFields
-                        .map((x) => `case ${x.index}:`)
-                        .join('\n')}
+                    ${this.primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
                         this._state.currentValue = other._state.currentValue;
                         break;
 
@@ -235,9 +210,7 @@ export class UnionGenerator extends GeneratorBase {
                     .fields!.map(
                         (x) => `case ${x.index}: 
                     return ${this._writeValueToJsObj(
-                        `this._state.currentValue as ${this.getJavascriptType(
-                            x.type!
-                        )}`,
+                        `this._state.currentValue as ${this.getJavascriptType(x.type!)}`,
                         x.type!
                     )}
                 `
@@ -256,9 +229,7 @@ export class UnionGenerator extends GeneratorBase {
             instance._state.fieldIndex = this._state.fieldIndex;
             if(this._state.fieldIndex !== -1) {
                 switch(this._state.fieldIndex) {
-                    ${this.primitiveFields
-                        .map((x) => `case ${x.index}:`)
-                        .join('\n')}
+                    ${this.primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
                         instance._state.currentValue = this._state.currentValue;
                         break;
 

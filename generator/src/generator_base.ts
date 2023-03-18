@@ -37,17 +37,19 @@ export abstract class GeneratorBase {
         return Generator.instance.resolveFor(this._file, objectId)
     }
 
-    protected getJavascriptType(type: NexemaValueType): string {
+    protected getJavascriptType(type: NexemaValueType, omitNullability = false): string {
         let jsType: string
         if (type.kind === 'primitiveValueType') {
             const primitiveType = type as NexemaPrimitiveValueType
             switch (primitiveType.primitive) {
                 case 'string':
                     jsType = 'string'
+                    omitNullability = false
                     break
 
                 case 'boolean':
                     jsType = 'boolean'
+                    omitNullability = false
                     break
 
                 case 'binary':
@@ -63,6 +65,7 @@ export abstract class GeneratorBase {
                 case 'float32':
                 case 'float64':
                     jsType = 'number'
+                    omitNullability = false
                     break
 
                 case 'int':
@@ -70,6 +73,7 @@ export abstract class GeneratorBase {
                 case 'uint64':
                 case 'int64':
                     jsType = 'bigint'
+                    omitNullability = false
                     break
 
                 case 'timestamp':
@@ -78,12 +82,11 @@ export abstract class GeneratorBase {
 
                 case 'duration':
                     jsType = 'bigint'
+                    omitNullability = false
                     break
 
                 case 'list':
-                    jsType = `Array<${this.getJavascriptType(
-                        primitiveType.arguments![0]
-                    )}>`
+                    jsType = `Array<${this.getJavascriptType(primitiveType.arguments![0])}>`
                     break
 
                 case 'map':
@@ -103,11 +106,45 @@ export abstract class GeneratorBase {
             jsType = this.getDeclarationForTypeReference(ref)
         }
 
-        if (type.nullable) {
+        if (type.nullable && !omitNullability) {
             jsType += '| null'
         }
 
         return jsType
+    }
+
+    protected _writeHeader(
+        docs: string[] | null,
+        annotations: { [key: string]: JsObj } | null,
+        isField = false
+    ): string {
+        docs ??= []
+        annotations ??= {}
+
+        let result = ``
+        const annotationsLen = Object.keys(annotations).length
+        const shouldWrite = docs.length > 0 || annotationsLen > 0
+        if (shouldWrite) {
+            result += '/**\n'
+        }
+
+        if (docs.length > 0) {
+            result += `${docs.map((x) => `* ${x}`).join('\n')}\n`
+        }
+
+        if (annotations['obsolete']) {
+            result += `* @deprecated ${
+                isField
+                    ? 'This field is deprecated and should not be used'
+                    : 'This class is deprecated and should not be used'
+            }\n`
+        }
+
+        if (shouldWrite) {
+            result += '*/'
+        }
+
+        return result
     }
 
     protected _writeNexemaFields(): string {
@@ -130,9 +167,7 @@ export abstract class GeneratorBase {
         if (type.kind === 'primitiveValueType') {
             kind = (type as NexemaPrimitiveValueType).primitive
         } else {
-            kind = Generator.instance.getObject(
-                (type as NexemaTypeValueType).objectId
-            ).modifier
+            kind = Generator.instance.getObject((type as NexemaTypeValueType).objectId).modifier
         }
 
         return `{
@@ -142,15 +177,11 @@ export abstract class GeneratorBase {
 
     protected _writeNexemaFieldsByJsName(): string {
         return `{
-            ${this._type
-                .fields!.map((x) => `${this._fieldNames[x.name]}: ${x.index}`)
-                .join(', ')}}`
+            ${this._type.fields!.map((x) => `${this._fieldNames[x.name]}: ${x.index}`).join(', ')}}`
     }
 
     protected _writeTypeInfo(): string {
-        return `private static readonly _typeInfo: ${
-            CommonTypes.NexemaTypeInfo
-        } = {
+        return `private static readonly _typeInfo: ${CommonTypes.NexemaTypeInfo} = {
             fieldsByIndex: ${this._writeNexemaFields()},
             fieldsByJsName: ${this._writeNexemaFieldsByJsName()}
         }`
@@ -158,7 +189,8 @@ export abstract class GeneratorBase {
 
     protected _writeValueToJsObj(
         variableName: string,
-        valueType: NexemaValueType
+        valueType: NexemaValueType,
+        writePrimitiveTypes = false
     ): string {
         let out = ''
         let writeNullable = false
@@ -168,9 +200,15 @@ export abstract class GeneratorBase {
                 case 'list': {
                     const elementType = primitiveValue.arguments![0]
                     if (elementType.kind === 'primitiveValueType') {
-                        out = `Array.from(${variableName})`
+                        out = `Array.from(${variableName} as ${this.getJavascriptType(
+                            valueType,
+                            true
+                        )})`
                     } else {
-                        out = `${variableName}.map(x => x.toObject())`
+                        out = `(${variableName} as ${this.getJavascriptType(
+                            valueType,
+                            true
+                        )}).map(x => x.toObject())`
                     }
                     writeNullable = true
                     break
@@ -179,35 +217,39 @@ export abstract class GeneratorBase {
                 case 'map': {
                     const elementType = primitiveValue.arguments![1]
                     if (elementType.kind === 'primitiveValueType') {
-                        out = `Object.fromEntries(${variableName})`
+                        out = `Object.fromEntries(${variableName} as ${this.getJavascriptType(
+                            valueType,
+                            true
+                        )})`
                     } else {
-                        out = `Object.fromEntries(Array.from(${variableName}, (entry) => [entry[0], entry[1].toObject()]))`
+                        out = `Object.fromEntries(Array.from((${variableName} as ${this.getJavascriptType(
+                            valueType,
+                            true
+                        )}), (entry) => [entry[0], entry[1].toObject()]))`
                     }
-                    break
                     writeNullable = true
+                    break
                 }
 
                 default: {
-                    out = `${variableName}`
+                    out = writePrimitiveTypes
+                        ? `${variableName} as ${this.getJavascriptType(valueType)}`
+                        : variableName
                     break
                 }
             }
         } else {
-            out = `${variableName}.toObject()`
-            writeNullable = true
+            out = `${variableName}${valueType.nullable ? '?' : ''}.toObject()`
         }
 
         if (valueType.nullable && writeNullable) {
-            out = `${variableName} ? ${out} : null`
+            out = `(${variableName} as ${this.getJavascriptType(valueType)}) ? ${out} : null`
         }
 
         return out
     }
 
-    protected _writeFieldEncoder(
-        variableName: string,
-        valueType: NexemaValueType
-    ): string {
+    protected _writeFieldEncoder(variableName: string, valueType: NexemaValueType): string {
         if (valueType.nullable) {
             return `if(${variableName}) {
                 ${this._getEncoder(variableName, valueType)}
@@ -229,78 +271,92 @@ export abstract class GeneratorBase {
 
     protected _writeDeepCloneValue(
         variableName: string,
-        valueType: NexemaValueType
+        valueType: NexemaValueType,
+        writePrimitiveTypes = false
     ): string {
+        let shouldWriteNullable = true
+        let result = ''
         if (valueType.kind === 'primitiveValueType') {
             const primitiveValue = valueType as NexemaPrimitiveValueType
             switch (primitiveValue.primitive) {
                 case 'binary':
-                    return `new Uint8Array(${variableName})`
+                    result = `new Uint8Array(${variableName} as Uint8Array)`
+                    break
 
-                case 'timestamp':
-                    return `new Date(${variableName})`
+                case 'timestamp': {
+                    result = `new Date(${variableName} as Date)`
+                    break
+                }
 
                 case 'list': {
                     const elementType = primitiveValue.arguments![0]
+                    const decl = `Array.from(${variableName} as ${this.getJavascriptType(
+                        valueType,
+                        true
+                    )}`
                     if (isJsPrimitive(elementType)) {
-                        return `Array.from(${variableName})`
+                        result = `${decl})`
+                        break
                     }
 
-                    return `Array.from(${variableName}, () => ${this._writeDeepCloneValue(
-                        'x',
-                        elementType
-                    )})`
+                    result = `${decl}, () => ${this._writeDeepCloneValue('x', elementType)})`
+                    break
                 }
 
                 case 'map': {
                     const elementType = primitiveValue.arguments![1]
+                    const decl = `new Map(${variableName} as ${this.getJavascriptType(
+                        valueType,
+                        true
+                    )}`
                     if (isJsPrimitive(elementType)) {
-                        return `new Map(${variableName})`
+                        result = `${decl})`
+                        break
                     }
 
-                    return `new Map(Array.from(${variableName}), ([key, value]) => [key, ${this._writeDeepCloneValue(
+                    result = `${decl}, ([key, value]) => [key, ${this._writeDeepCloneValue(
                         'value',
                         elementType
                     )}])`
+                    break
                 }
 
                 default:
-                    return variableName
+                    shouldWriteNullable = false
+                    result = writePrimitiveTypes
+                        ? `${variableName} as ${this.getJavascriptType(valueType)}`
+                        : variableName
+                    break
             }
         } else {
-            const ref = this.resolveReference(
-                (valueType as NexemaTypeValueType).objectId
-            )
+            const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
 
-            return `${ref.type.name}.clone()`
+            result = `${ref.type.name}.clone()`
         }
+
+        if (shouldWriteNullable && valueType.nullable) {
+            result = `(${variableName} as ${this.getJavascriptType(valueType)}) ? ${result} : null`
+        }
+
+        return result
     }
 
     protected _writeJsObj(value: JsObj): string {
         const type = typeof value
         if (type === 'string') {
             return `"${value}"`
-        } else if (
-            type === 'boolean' ||
-            type === 'bigint' ||
-            type === 'number'
-        ) {
+        } else if (type === 'boolean' || type === 'bigint' || type === 'number') {
             return value.toString()
         } else if (type === 'object') {
             return `new Map([${Object.entries(value)
                 .map(([key, value]) => `[${key}: ${this._writeJsObj(value)}]`)
                 .join(',')}])`
         } else {
-            return `[${(value as JsObj[])
-                .map((x) => this._writeJsObj(x))
-                .join(',')}]`
+            return `[${(value as JsObj[]).map((x) => this._writeJsObj(x)).join(',')}]`
         }
     }
 
-    private _getEncoder(
-        variableName: string,
-        valueType: NexemaValueType
-    ): string {
+    private _getEncoder(variableName: string, valueType: NexemaValueType): string {
         if (valueType.kind === 'primitiveValueType') {
             const primitiveValue = valueType as NexemaPrimitiveValueType
             if (primitiveValue.primitive === 'list') {
@@ -322,9 +378,7 @@ export abstract class GeneratorBase {
                 return `writer.${encodeMethod}(${variableName})`
             }
         } else {
-            const ref = this.resolveReference(
-                (valueType as NexemaTypeValueType).objectId
-            )
+            const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
             if (ref.type.modifier === 'enum') {
                 return `writer.encodeUint8(${variableName}.index)`
             } else {
@@ -352,9 +406,7 @@ export abstract class GeneratorBase {
                 return `reader.${decoder}()`
             }
         } else {
-            const ref = this.resolveReference(
-                (valueType as NexemaTypeValueType).objectId
-            )
+            const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
 
             const decl = this.getDeclarationForTypeReference(ref)
             if (ref.type.modifier === 'enum') {
