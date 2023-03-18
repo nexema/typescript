@@ -2,18 +2,32 @@
 import { CommonTypes, ImportAlias } from './constants'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaTypeDefinition } from './models'
-import { isJsPrimitive, writeDocumentation } from './utils'
+import { isJsPrimitive, toCamelCase, writeDocumentation } from './utils'
 
 export class StructGenerator extends GeneratorBase {
+    private _baseType?: NexemaTypeDefinition
+
     public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
         super(type, file)
+        if (type.baseType) {
+            this._baseType = this.resolveReference(type.baseType).type
+            this._fieldNames = {
+                ...this._fieldNames,
+                ...Object.fromEntries(
+                    this._baseType!.fields!.map((x) => [
+                        x.name,
+                        toCamelCase(x.name),
+                    ])
+                ),
+            }
+        }
     }
 
     public generate(): string {
         return `${this._writeDocs()}
-        export class ${this._type.name} extends ${
-            ImportAlias.Nexema
-        }.NexemaStruct<${this._type.name}> implements ${
+        export class ${
+            this._type.name
+        } extends ${this._writeExtends()} implements ${
             CommonTypes.NexemaMergeable
         }<${this._type.name}>, ${CommonTypes.NexemaClonable}<${
             this._type.name
@@ -39,6 +53,17 @@ export class StructGenerator extends GeneratorBase {
         }`
     }
 
+    private _writeExtends(): string {
+        if (this._type.baseType) {
+            const ref = this.resolveReference(this._type.baseType)
+            return `${this.getDeclarationForTypeReference(ref)}<${
+                this._type.name
+            }>`
+        } else {
+            return `${ImportAlias.Nexema}.NexemaStruct<${this._type.name}>`
+        }
+    }
+
     private _writeDocs(): string {
         return writeDocumentation(this._type.documentation ?? [])
     }
@@ -46,6 +71,7 @@ export class StructGenerator extends GeneratorBase {
     private _writeConstructor(): string {
         const fullnullable = this._type.fields!.every((x) => x.type!.nullable)
         const defaults = this._type.defaults ?? {}
+        const baseDefaults = this._baseType?.defaults ?? {}
         return `public constructor(${this._writeConstructorDataParameter()}) {
 
             super({
@@ -67,15 +93,53 @@ export class StructGenerator extends GeneratorBase {
                                 }`}`
                         )
                         .join(',')}
-                ]
+                ],
+                baseValues: ${
+                    this._baseType
+                        ? `[
+                    ${this._baseType!.fields!.map(
+                        (x) =>
+                            `data${fullnullable ? '?' : ''}.${`${
+                                this._fieldNames[x.name]
+                            } ${
+                                x.type!.nullable
+                                    ? '?? null'
+                                    : baseDefaults[x.name]
+                                    ? `?? ${this._writeJsObj(
+                                          baseDefaults[x.name]
+                                      )}`
+                                    : ''
+                            }`}`
+                    ).join(',')}
+                ]`
+                        : 'undefined'
+                }
             });
         }`
     }
 
     private _writeConstructorDataParameter(): string {
         return `data${
-            this._type.fields!.every((x) => x.type!.nullable) ? '?' : ''
+            this._type.fields!.every((x) => x.type!.nullable) &&
+            (this._baseType
+                ? this._baseType!.fields!.every((x) => x.type!.nullable)
+                : false)
+                ? '?'
+                : ''
         }: {
+            ${
+                this._baseType
+                    ? this._baseType!.fields!.map(
+                          (x) =>
+                              `${this._fieldNames[x.name]}${
+                                  x.type!.nullable ||
+                                  (this._baseType!.defaults ?? {})[x.name]
+                                      ? '?'
+                                      : ''
+                              }: ${this.getJavascriptType(x.type!)}`
+                      ).join(',')
+                    : ''
+            }
             ${this._type
                 .fields!.map(
                     (x) =>
@@ -106,41 +170,100 @@ export class StructGenerator extends GeneratorBase {
             `
         }
 
+        if (this._baseType) {
+            for (const field of this._baseType!.fields!) {
+                const jsType = this.getJavascriptType(field.type!)
+                output += `
+                public override get ${
+                    this._fieldNames[field.name]
+                }(): ${jsType} {
+                    return this._state.baseValues![${field.index}] as ${jsType}
+                }
+    
+                public override set ${
+                    this._fieldNames[field.name]
+                }(value: ${jsType}) {
+                    this._state.baseValues![${field.index}] = value;
+                }
+                `
+            }
+        }
+
         return output
     }
 
     private _writeEncodeMethod(): string {
-        return `public override encode(): Uint8Array {
+        let result = `public override encode(): Uint8Array {
             const writer = new ${CommonTypes.NexemabWriter}();
-            ${this._type
-                .fields!.map(
-                    (x) =>
-                        `${this._writeFieldEncoder(
-                            `this.${this._fieldNames[x.name]}`,
-                            x.type!
-                        )}`
-                )
-                .join('\n')}
-            return writer.takeBytes();
-        }`
+           `
+
+        if (this._baseType) {
+            result += `${this._baseType!.fields!.map(
+                (x) =>
+                    `${this._writeFieldEncoder(
+                        `this.${this._fieldNames[x.name]}`,
+                        x.type!
+                    )}`
+            ).join('\n')}`
+        }
+        result += `
+        ${this._type
+            .fields!.map(
+                (x) =>
+                    `${this._writeFieldEncoder(
+                        `this.${this._fieldNames[x.name]}`,
+                        x.type!
+                    )}`
+            )
+            .join('\n')}
+        return writer.takeBytes();}`
+        return result
     }
 
     private _writeMergeFromMethod(): string {
-        return `public mergeFrom(buffer: Uint8Array): void {
-            const reader = new ${CommonTypes.NexemabReader}(buffer);
-            ${this._type
-                .fields!.map(
-                    (x) =>
-                        `this._state.values[${
-                            x.index
-                        }] = ${this._writeFieldDecoder(x.type!)}`
-                )
-                .join('\n')}
-        }`
+        let result = `public mergeFrom(buffer: Uint8Array): void {
+            const reader = new ${CommonTypes.NexemabReader}(buffer);`
+
+        if (this._baseType) {
+            result += `
+            ${this._baseType!.fields!.map(
+                (x) =>
+                    `this._state.baseValues![${
+                        x.index
+                    }] = ${this._writeFieldDecoder(x.type!)}`
+            ).join('\n')}`
+        }
+
+        result += `
+        ${this._type
+            .fields!.map(
+                (x) =>
+                    `this._state.values[${x.index}] = ${this._writeFieldDecoder(
+                        x.type!
+                    )}`
+            )
+            .join('\n')}}`
+
+        return result
     }
 
     private _writeMergeUsingMethod(): string {
         return `public mergeUsing(other: ${this._type.name}): void {
+            ${
+                this._baseType
+                    ? this._baseType!.fields!.map(
+                          (x) =>
+                              `this._state.baseValues![${
+                                  x.index
+                              }] = ${this._writeDeepCloneValue(
+                                  `other._state.baseValues![${
+                                      x.index
+                                  }] as ${this.getJavascriptType(x.type!)}`,
+                                  x.type!
+                              )}`
+                      ).join('\n')
+                    : ''
+            }
             ${this._type
                 .fields!.map(
                     (x) =>
@@ -160,15 +283,38 @@ export class StructGenerator extends GeneratorBase {
     private _writeToObjectMethod(): string {
         return `public override toObject(): ${CommonTypes.JsObj} {
             return {
-                ${this._type.fields!.map(
-                    (x) =>
-                        `${this._fieldNames[x.name]}: ${this._writeValueToJsObj(
-                            `this._state.values[${
-                                x.index
-                            }] as ${this.getJavascriptType(x.type!)}`,
-                            x.type!
-                        )}`
-                )}
+                ${
+                    this._baseType
+                        ? `${this._baseType
+                              .fields!.map(
+                                  (x) =>
+                                      `${
+                                          this._fieldNames[x.name]
+                                      }: ${this._writeValueToJsObj(
+                                          `this._state.baseValues![${
+                                              x.index
+                                          }] as ${this.getJavascriptType(
+                                              x.type!
+                                          )}`,
+                                          x.type!
+                                      )}`
+                              )
+                              .join(', ')},`
+                        : ''
+                }
+                ${this._type
+                    .fields!.map(
+                        (x) =>
+                            `${
+                                this._fieldNames[x.name]
+                            }: ${this._writeValueToJsObj(
+                                `this._state.values[${
+                                    x.index
+                                }] as ${this.getJavascriptType(x.type!)}`,
+                                x.type!
+                            )}`
+                    )
+                    .join(',')}
             };
         }`
     }
@@ -176,6 +322,29 @@ export class StructGenerator extends GeneratorBase {
     private _writeCloneMethod(): string {
         return `public clone(): ${this._type.name} {
             return new ${this._type.name}({
+                ${
+                    this._baseType
+                        ? `${this._baseType!.fields!.map(
+                              (x) =>
+                                  `${this._fieldNames[x.name]}: ${
+                                      isJsPrimitive(x.type!)
+                                          ? `this._state.baseValues![${
+                                                x.index
+                                            }] as ${this.getJavascriptType(
+                                                x.type!
+                                            )}`
+                                          : this._writeDeepCloneValue(
+                                                `this._state.baseValues![${
+                                                    x.index
+                                                }] as ${this.getJavascriptType(
+                                                    x.type!
+                                                )}`,
+                                                x.type!
+                                            )
+                                  }`
+                          )},`
+                        : ''
+                }
                 ${this._type.fields!.map(
                     (x) =>
                         `${this._fieldNames[x.name]}: ${
@@ -196,15 +365,29 @@ export class StructGenerator extends GeneratorBase {
     }
 
     private _writeToStringMethod(): string {
-        return `public toString(): string {
-            return \`${this._type.name}(${this._type
-            .fields!.map(
-                (x) =>
-                    `${this._fieldNames[x.name]}: \${this._state.values[${
-                        x.index
-                    }]}`
+        let result = `public toString(): string {
+            return \`${this._type.name}(`
+
+        const fields: string[] = []
+        if (this._baseType) {
+            for (const field of this._baseType!.fields!) {
+                fields.push(
+                    `${
+                        this._fieldNames[field.name]
+                    }: \${this._state.baseValues![${field.index}]}`
+                )
+            }
+        }
+
+        for (const field of this._type.fields!) {
+            fields.push(
+                `${this._fieldNames[field.name]}: \${this._state.values[${
+                    field.index
+                }]}`
             )
-            .join(', ')})\`
-        }`
+        }
+
+        result += `${fields.join(', ')})\`}`
+        return result
     }
 }

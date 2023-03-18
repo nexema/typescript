@@ -11,9 +11,11 @@ export class BaseTypeGenerator extends GeneratorBase {
 
     public generate(): string {
         return `${this._writeDocs()}
-        export abstract class ${this._type.name} extends ${
+        export abstract class ${this._type.name}<T extends ${
             ImportAlias.Nexema
-        }.BaseNexemaType<${this._type.name}> {
+        }.NexemaStruct<T>> extends ${ImportAlias.Nexema}.NexemaStruct<${
+            this._type.name
+        }<T>> {
             ${this._writeGettersAndSetters()}
         }`
     }

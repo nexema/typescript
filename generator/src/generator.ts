@@ -58,11 +58,14 @@ export class Generator {
     private resolveImportFor(file: NexemaFile, p: string): string {
         const rel = path.relative(
             path.dirname(
-                path.join(this._settings.outputPath, file.path, file.fileName)
+                path.join(
+                    this._settings.outputPath,
+                    path.dirname(file.path),
+                    file.fileName
+                )
             ),
             p
         )
-
         return rel
     }
 
@@ -75,7 +78,7 @@ export class Generator {
                     )}`,
                     path: path.join(
                         this._settings.outputPath,
-                        file.path,
+                        path.dirname(file.path),
                         file.fileName
                     ),
                     type: type,

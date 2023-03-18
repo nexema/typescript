@@ -1,6 +1,8 @@
 import * as $nex from 'nexema'; 
 
-export abstract class MyBase extends $nex.BaseNexemaType<MyBase> {
+export abstract class MyBase<
+  T extends $nex.NexemaStruct<T>
+> extends $nex.NexemaStruct<MyBase<T>> {
   public abstract get stringField(): string;
   public abstract set stringField(value: string);
 

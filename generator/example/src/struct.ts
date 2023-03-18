@@ -1,5 +1,5 @@
 import * as $nex from 'nexema'; 
-    export class MyStruct
+        export class MyStruct
   extends $nex.NexemaStruct<MyStruct>
   implements $nex.NexemaMergeable<MyStruct>, $nex.NexemaClonable<MyStruct>
 {
@@ -45,6 +45,7 @@ import * as $nex from 'nexema';
     super({
       typeInfo: MyStruct._typeInfo,
       values: [data.stringField, data.boolField ?? true, data.listField],
+      baseValues: undefined,
     });
   }
 
@@ -74,6 +75,7 @@ import * as $nex from 'nexema';
 
   public override encode(): Uint8Array {
     const writer = new $nex.NexemabWriter();
+
     writer.encodeString(this.stringField);
     writer.encodeBool(this.boolField);
     writer.beginArray(this.listField.length);

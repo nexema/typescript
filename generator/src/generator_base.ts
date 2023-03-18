@@ -26,7 +26,7 @@ export abstract class GeneratorBase {
     }
 
     protected getDeclarationForTypeReference(ref: TypeReference): string {
-        if (ref.path === this._file.fileName) {
+        if (ref.path === this._file.path) {
             return ref.type.name
         }
 
@@ -161,6 +161,7 @@ export abstract class GeneratorBase {
         valueType: NexemaValueType
     ): string {
         let out = ''
+        let writeNullable = false
         if (valueType.kind === 'primitiveValueType') {
             const primitiveValue = valueType as NexemaPrimitiveValueType
             switch (primitiveValue.primitive) {
@@ -171,6 +172,7 @@ export abstract class GeneratorBase {
                     } else {
                         out = `${variableName}.map(x => x.toObject())`
                     }
+                    writeNullable = true
                     break
                 }
 
@@ -182,6 +184,7 @@ export abstract class GeneratorBase {
                         out = `Object.fromEntries(Array.from(${variableName}, (entry) => [entry[0], entry[1].toObject()]))`
                     }
                     break
+                    writeNullable = true
                 }
 
                 default: {
@@ -191,9 +194,10 @@ export abstract class GeneratorBase {
             }
         } else {
             out = `${variableName}.toObject()`
+            writeNullable = true
         }
 
-        if (valueType.nullable) {
+        if (valueType.nullable && writeNullable) {
             out = `${variableName} ? ${out} : null`
         }
 

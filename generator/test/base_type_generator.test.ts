@@ -65,7 +65,7 @@ it('should generate base type classes', () => {
         }
     )
 
-    const want = `export abstract class MyBase extends $nex.BaseNexemaType<MyBase> {
+    const want = `export abstract class MyBase<T extends $nex.NexemaStruct<T>> extends $nex.NexemaStruct<MyBase<T>> {
         public abstract get stringField(): string;
         public abstract set stringField(value: string);
 
