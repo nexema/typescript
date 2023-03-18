@@ -1,6 +1,6 @@
 export {
   BaseNexemaType,
-  NexemaClonable as Clonable,
+  NexemaClonable,
   NexemaEnum,
   NexemaMergeable,
   NexemaStruct,

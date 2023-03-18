@@ -1,6 +1,6 @@
 {
   "name": "nexema",
-  "version": "1.0.1",
+  "version": "1.0.8",
   "description": "Nexema runtime library",
   "main": "dist/cjs/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "test": "jest --coverage=false",
     "test:coverage": "jest --coverage --colors",
-    "deploy": "npm version patch && npm publish"
+    "deploy": "npm run test; npm run build; npm version patch && npm publish"
   },
   "repository": {
     "type": "git",
@@ -21,8 +21,9 @@
   "exports": {
     "require": "./dist/cjs/index.js",
     "import": "./dist/esm/index.js",
-    "types": "./dist/esm/index.d.ts"
+    "types": "./dist/types/index.d.ts"
   },
+  "types": "./dist/types/index.d.ts",
   "keywords": [
     "nexema",
     "binary",

@@ -7,6 +7,7 @@ export interface BaseNexemaTypeState {
 
 export interface NexemaStructState extends BaseNexemaTypeState {
   values: NexemaObj[];
+  baseValues?: NexemaObj[];
 }
 
 export interface NexemaUnionState extends BaseNexemaTypeState {
