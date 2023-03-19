@@ -17,3 +17,4 @@ export {
 } from "./primitives";
 export { FieldKind, NexemaField, NexemaFieldType } from "./definition";
 export { NexemaTypeInfo } from "./type_info";
+export { NexemaReflection } from "./reflection";
