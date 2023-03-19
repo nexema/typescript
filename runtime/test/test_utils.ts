@@ -114,6 +114,7 @@ export class StructA
         jsName: "firstName",
         name: "first_name",
         value: {
+          nullable: false,
           kind: "string",
         },
       },
@@ -123,8 +124,10 @@ export class StructA
         name: "tags",
         value: {
           kind: "list",
+          nullable: false,
           arguments: [
             {
+              nullable: false,
               kind: "string",
             },
           ],
@@ -136,12 +139,15 @@ export class StructA
         name: "preferences",
         value: {
           kind: "map",
+          nullable: false,
           arguments: [
             {
               kind: "string",
+              nullable: false,
             },
             {
               kind: "boolean",
+              nullable: false,
             },
           ],
         },
@@ -152,6 +158,7 @@ export class StructA
         name: "enum",
         value: {
           kind: "enum",
+          nullable: false,
         },
       },
     },
@@ -263,6 +270,7 @@ export class UnionA
         jsName: "firstName",
         name: "first_name",
         value: {
+          nullable: false,
           kind: "string",
         },
       },
@@ -272,8 +280,10 @@ export class UnionA
         name: "tags",
         value: {
           kind: "list",
+          nullable: false,
           arguments: [
             {
+              nullable: false,
               kind: "string",
             },
           ],
@@ -285,11 +295,14 @@ export class UnionA
         name: "preferences",
         value: {
           kind: "map",
+          nullable: false,
           arguments: [
             {
+              nullable: false,
               kind: "string",
             },
             {
+              nullable: false,
               kind: "boolean",
             },
           ],
@@ -300,6 +313,7 @@ export class UnionA
         jsName: "enum",
         name: "enum",
         value: {
+          nullable: false,
           kind: "enum",
         },
       },

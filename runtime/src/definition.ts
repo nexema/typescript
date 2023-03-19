@@ -1,13 +1,45 @@
 export interface NexemaField {
+  /**
+   * The original field's name, as defined in the .nex file
+   */
   name: string;
+
+  /**
+   * The field's JavaScript name
+   */
   jsName: string;
+
+  /**
+   * The fields index
+   */
   index: number;
+
+  /**
+   * The field's value type
+   */
   value?: NexemaFieldType;
 }
 
 export interface NexemaFieldType {
+  /**
+   * The field's value kind
+   */
   kind: FieldKind;
+
+  /**
+   * If the fields accepts null values
+   */
+  nullable: boolean;
+
+  /**
+   * If the type is generic, the list of arguments.
+   */
   arguments?: NexemaFieldType[];
+
+  /**
+   * If the kind is struct, enum or union, its type id.
+   */
+  typeId?: string;
 }
 
 export type FieldKind =
