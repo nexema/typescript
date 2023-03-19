@@ -39,6 +39,8 @@ export class UnionGenerator extends GeneratorBase {
 
             ${this._writeConstructor()}
 
+            ${this._writeDecodeStaticMethod()}
+
             ${this._writeGettersAndSetters()}
 
             ${this._writeEncodeMethod()}
@@ -252,6 +254,20 @@ export class UnionGenerator extends GeneratorBase {
     private _writeToStringMethod(): string {
         return `public toString(): string {
             return \`${this._type.name}(\${this.whichField}: \${this._state.currentValue})\`
+        }`
+    }
+
+    private _writeDecodeStaticMethod(): string {
+        return `public static decode(buffer: Uint8Array): ${this._type.name} {
+            const instance = Object.create(${this._type.name}.prototype) as ${this._type.name}
+            instance._state = {
+                typeInfo: ${this._type.name}._typeInfo,
+                currentValue: undefined,
+                fieldIndex: -1,
+            };
+
+            instance.mergeFrom(buffer);
+            return instance;
         }`
     }
 }

@@ -320,4 +320,22 @@ export class StructGenerator extends GeneratorBase {
         result += `${fields.join(', ')})\`}`
         return result
     }
+
+    private _writeDecodeStaticMethod(): string {
+        return `public static decode(buffer: Uint8Array): ${this._type.name} {
+            const instance = Object.create(${this._type.name}.prototype) as ${this._type.name}
+            instance._state = {
+                values: [${this._type.fields!.map(() => 'null').join(', ')}],
+                baseValues: ${
+                    this._baseType
+                        ? `[${this._baseType!.fields!.map(() => 'null').join(', ')}]`
+                        : 'undefined'
+                },
+                typeInfo: Foo._typeInfo,
+            }
+
+            instance.mergeFrom(buffer);
+            return instance;
+        }`
+    }
 }

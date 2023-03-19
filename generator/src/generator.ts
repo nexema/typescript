@@ -87,7 +87,7 @@ ${sourceCode}`
         }
 
         return {
-            exitCode: 1,
+            exitCode: 0,
             files: Array.from(files.values()),
         }
     }
@@ -108,12 +108,12 @@ ${sourceCode}`
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const typeReference = this._types.get(objectId)!
-        if (file.fileName !== typeReference.path) {
+        if (file.path !== typeReference.path) {
             this._currentFileImports.add(
-                `import * as ${typeReference.importAlias} from "${this.resolveImportFor(
+                `import * as ${typeReference.importAlias} from './${this.resolveImportFor(
                     file,
                     typeReference.path
-                )}"`
+                )}'`
             )
         }
 

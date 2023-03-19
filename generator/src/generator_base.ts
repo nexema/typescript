@@ -112,14 +112,6 @@ export abstract class GeneratorBase {
         return jsType
     }
 
-    protected _writeDecodeStaticMethod(): string {
-        return `public static decode(buffer: Uint8Array): ${this._type.name} {
-            const instance = new ${this._type.name}();
-            instance.mergeFrom(buffer);
-            return instance;
-        }`
-    }
-
     protected _writeHeader(
         docs: string[] | null,
         annotations: { [key: string]: JsObj } | null,
@@ -358,15 +350,15 @@ export abstract class GeneratorBase {
 
             if (ref.type.modifier === 'enum') {
                 if (valueType.nullable) {
-                    result = `${this.getDeclarationForTypeReference(
-                        ref
-                    )}.byIndex((${variableName} as ${this.getJavascriptType(
+                    result = `${this.getJavascriptType(
                         valueType
-                    )})?.index ?? 0)`
+                    )}.values[(${variableName} as ${this.getJavascriptType(
+                        valueType
+                    )})?.index ?? 0]`
                 } else {
-                    result = `${ref.type.name}.byIndex((${variableName} as ${this.getJavascriptType(
+                    result = `${this.getJavascriptType(
                         valueType
-                    )}).index)`
+                    )}.values[(${variableName} as ${this.getJavascriptType(valueType)}).index]`
                 }
             } else {
                 result = `(${variableName} as ${this.getJavascriptType(valueType)})${
