@@ -331,7 +331,7 @@ export class StructGenerator extends GeneratorBase {
                         ? `[${this._baseType!.fields!.map(() => 'null').join(', ')}]`
                         : 'undefined'
                 },
-                typeInfo: Foo._typeInfo,
+                typeInfo: ${this._type.name}._typeInfo,
             }
 
             instance.mergeFrom(buffer);

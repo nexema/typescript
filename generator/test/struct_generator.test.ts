@@ -134,7 +134,13 @@ describe('StructGenerator', () => {
             }
 
             public static decode(buffer: Uint8Array): MyStruct {
-              const instance = new MyStruct();
+              const instance = Object.create(MyStruct.prototype) as MyStruct
+              instance._state = {
+                values: [null, null, null],
+                baseValues: undefined,
+                typeInfo: MyStruct._typeInfo
+              }
+              
               instance.mergeFrom(buffer);
               return instance;
             }
@@ -474,7 +480,31 @@ describe('StructGenerator', () => {
       }
 
       public static decode(buffer: Uint8Array): A {
-        const instance = new A();
+        const instance = Object.create(A.prototype) as A
+        instance._state = {
+          values: [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
+          baseValues: undefined,
+          typeInfo: A._typeInfo,
+        }
+
         instance.mergeFrom(buffer);
         return instance;
       }
@@ -932,7 +962,13 @@ describe('StructGenerator', () => {
         }
 
         public static decode(buffer: Uint8Array): A {
-          const instance = new A();
+          const instance = Object.create(A.prototype) as A
+          instance._state = {
+            values: [null, null, null, null, null, null, null, null, null],
+            baseValues: undefined,
+            typeInfo: A._typeInfo,
+          }
+
           instance.mergeFrom(buffer);
           return instance;
         }
@@ -1295,7 +1331,13 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
       }
 
       public static decode(buffer: Uint8Array): A {
-        const instance = new A();
+        const instance = Object.create(A.prototype) as A
+        instance._state = {
+          values: [null],
+          baseValues: [null, null],
+          typeInfo: A._typeInfo,
+        }
+
         instance.mergeFrom(buffer);
         return instance;
       }
@@ -1605,7 +1647,26 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
     }
 
     public static decode(buffer: Uint8Array): A {
-      const instance = new A();
+      const instance = Object.create(A.prototype) as A
+      instance._state = {
+        values: [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        baseValues: undefined,
+        typeInfo: A._typeInfo,
+      }
+
       instance.mergeFrom(buffer);
       return instance;
     }
@@ -1835,20 +1896,20 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
   
     public mergeUsing(other: A): void {
       this._state.values[0] = (other._state.values[0] as B).clone();
-      this._state.values[1] = C.byIndex((other._state.values[1] as C).index);
+      this._state.values[1] = C.values[(other._state.values[1] as C).index];
       this._state.values[2] = (other._state.values[2] as B | null)?.clone()
-      this._state.values[3] = C.byIndex((other._state.values[3] as C | null)?.index ?? 0)
+      this._state.values[3] = C.values[(other._state.values[3] as C | null)?.index ?? 0]
       this._state.values[4] = Array.from(other._state.values[4] as Array<B>, () => (x as B).clone())
-      this._state.values[5] = Array.from(other._state.values[5] as Array<C>, () => C.byIndex((x as C).index))
+      this._state.values[5] = Array.from(other._state.values[5] as Array<C>, () => C.values[(x as C).index])
       this._state.values[6] = new Map(Array.from(other._state.values[6] as Map<string, B>, ([key, value]) => [key, (value as B).clone()]))
-      this._state.values[7] = new Map(Array.from(other._state.values[7] as Map<string, C>, ([key, value]) => [key, C.byIndex((value as C).index)]))
+      this._state.values[7] = new Map(Array.from(other._state.values[7] as Map<string, C>, ([key, value]) => [key, C.values[(value as C).index]]))
       this._state.values[8] = Array.from(
         other._state.values[8] as Array<B | null>,
         () => (x as B | null)?.clone()
       );
       this._state.values[9] = Array.from(
         other._state.values[9] as Array<C | null>,
-        () => C.byIndex((x as C | null)?.index ?? 0)
+        () => C.values[(x as C | null)?.index ?? 0]
       );
       this._state.values[10] = new Map(
         Array.from(
@@ -1859,7 +1920,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
       this._state.values[11] = new Map(
         Array.from(
           other._state.values[11] as Map<string, C | null>,
-          ([key, value]) => [key, C.byIndex((value as C | null)?.index ?? 0)]
+          ([key, value]) => [key, C.values[(value as C | null)?.index ?? 0]]
         )
       );
     }
@@ -1898,16 +1959,16 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
     public clone(): A {
       return new A({
         structField: (this._state.values[0] as B).clone(),
-        enumField: C.byIndex((this._state.values[1] as C).index),
+        enumField: C.values[(this._state.values[1] as C).index],
         nullStructField: (this._state.values[2] as B | null)?.clone(),
-        nullEnumField: C.byIndex((this._state.values[3] as C | null)?.index ?? 0),
+        nullEnumField: C.values[(this._state.values[3] as C | null)?.index ?? 0],
         listStructField: Array.from(this._state.values[4] as Array<B>, () => (x as B).clone()),
-        listEnumField: Array.from(this._state.values[5] as Array<C>, () => C.byIndex((x as C).index)),
+        listEnumField: Array.from(this._state.values[5] as Array<C>, () => C.values[(x as C).index]),
         mapStructField: new Map(
           Array.from(this._state.values[6] as Map<string, B>, ([key, value]) => [key, (value as B).clone()])
         ),
         mapEnumField: new Map(
-          Array.from(this._state.values[7] as Map<string, C>, ([key, value]) => [key, C.byIndex((value as C).index)])
+          Array.from(this._state.values[7] as Map<string, C>, ([key, value]) => [key, C.values[(value as C).index]])
         ),
         listStructNullField: Array.from(
           this._state.values[8] as Array<B | null>,
@@ -1915,7 +1976,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
         ),
         listEnumNullField: Array.from(
           this._state.values[9] as Array<C | null>,
-          () => C.byIndex((x as C | null)?.index ?? 0)
+          () => C.values[(x as C | null)?.index ?? 0]
         ),
         mapStructNullField: new Map(
           Array.from(
@@ -1926,7 +1987,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
         mapEnumNullField: new Map(
           Array.from(
             this._state.values[11] as Map<string, C | null>,
-            ([key, value]) => [key, C.byIndex((value as C | null)?.index ?? 0)]
+            ([key, value]) => [key, C.values[(value as C | null)?.index ?? 0]]
           )
         ),
       });

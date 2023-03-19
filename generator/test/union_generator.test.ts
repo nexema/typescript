@@ -134,6 +134,18 @@ describe('UnionGenerator', () => {
                     fieldIndex
                 });
             }
+
+            public static decode(buffer: Uint8Array): MyUnion {
+              const instance = Object.create(MyUnion.prototype) as MyUnion
+              instance._state = {
+                typeInfo: MyUnion._typeInfo,
+                currentValue: undefined,
+                fieldIndex: -1,
+              }
+            
+              instance.mergeFrom(buffer)
+              return instance
+            }
     
             public get stringField(): string {
                 return this._state.currentValue as string;
@@ -392,6 +404,18 @@ public constructor(data?: MyUnionBuilder) {
     });
 }
 
+public static decode(buffer: Uint8Array): MyUnion {
+  const instance = Object.create(MyUnion.prototype) as MyUnion
+  instance._state = {
+    typeInfo: MyUnion._typeInfo,
+    currentValue: undefined,
+    fieldIndex: -1,
+  }
+
+  instance.mergeFrom(buffer)
+  return instance
+}
+
 public get anEnum(): A {
     return this._state.currentValue as A;
 }
@@ -458,7 +482,7 @@ public mergeUsing(other: MyUnion): void {
             break;
 
         case 0:
-            this._state.currentValue = A.byIndex((other._state.currentValue as A).index)
+            this._state.currentValue = A.values[(other._state.currentValue as A).index]
             break;
 
         case 1:
@@ -486,7 +510,7 @@ public clone(): MyUnion {
     if(this._state.fieldIndex !== -1) {
         switch(this._state.fieldIndex) {
             case 0:
-                instance._state.currentValue = A.byIndex((this._state.currentValue as A).index)
+                instance._state.currentValue = A.values[(this._state.currentValue as A).index]
                 break;
 
             case 1:

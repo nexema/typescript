@@ -351,13 +351,15 @@ export abstract class GeneratorBase {
             if (ref.type.modifier === 'enum') {
                 if (valueType.nullable) {
                     result = `${this.getJavascriptType(
-                        valueType
+                        valueType,
+                        true
                     )}.values[(${variableName} as ${this.getJavascriptType(
                         valueType
                     )})?.index ?? 0]`
                 } else {
                     result = `${this.getJavascriptType(
-                        valueType
+                        valueType,
+                        true
                     )}.values[(${variableName} as ${this.getJavascriptType(valueType)}).index]`
                 }
             } else {
