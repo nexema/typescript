@@ -1,8 +1,20 @@
-import { GeneratorSettings, NexemaFile, NexemaSnapshot, NexemaTypeDefinition } from './models'
+import {
+    GeneratedFile,
+    GeneratorSettings,
+    NexemaFile,
+    NexemaSnapshot,
+    NexemaTypeDefinition,
+    PluginResult,
+} from './models'
 import prettier from 'prettier'
 import { TypeReference } from './type_reference'
 import path from 'path'
 import { toSnakeCase } from './utils'
+import { BaseTypeGenerator } from './base_type_generator'
+import { StructGenerator } from './struct_generator'
+import { UnionGenerator } from './union_generator'
+import { EnumGenerator } from './enum_generator'
+import { DefaultImports, PrettierSettings } from './constants'
 
 export class Generator {
     private static _singleton?: Generator
@@ -24,8 +36,58 @@ export class Generator {
         Generator._singleton = this
     }
 
-    public run(): void {
-        prettier.format('', {})
+    public run(): PluginResult {
+        const files = new Map<string, GeneratedFile>()
+        try {
+            for (const file of this._snapshot.files) {
+                const buffer: string[] = []
+                for (const type of file.types) {
+                    switch (type.modifier) {
+                        case 'base': {
+                            buffer.push(new BaseTypeGenerator(type, file).generate())
+                            break
+                        }
+
+                        case 'struct': {
+                            buffer.push(new StructGenerator(type, file).generate())
+                            break
+                        }
+
+                        case 'union': {
+                            buffer.push(new UnionGenerator(type, file).generate())
+                            break
+                        }
+
+                        case 'enum': {
+                            buffer.push(new EnumGenerator(type, file).generate())
+                            break
+                        }
+                    }
+                }
+
+                let sourceCode = buffer.join('\n')
+                sourceCode = `/* eslint-disable @typescript-eslint/no-non-null-assertion */
+${Array.from(this._currentFileImports.values()).join('\n')}
+${sourceCode}`
+                this.resetImports()
+
+                files.set(file.id, {
+                    id: file.id,
+                    name: `${file.fileName}.ts`,
+                    contents: prettier.format(sourceCode, PrettierSettings),
+                })
+            }
+        } catch (err) {
+            return {
+                exitCode: -1,
+                files: [],
+            }
+        }
+
+        return {
+            exitCode: 1,
+            files: Array.from(files.values()),
+        }
     }
 
     public getObject(id: string): NexemaTypeDefinition {
@@ -84,6 +146,7 @@ export class Generator {
 
     private resetImports(): void {
         this._currentFileImports.clear()
+        this._currentFileImports.add(DefaultImports.Nexema)
     }
 
     public static get instance(): Generator {

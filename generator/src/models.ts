@@ -9,7 +9,7 @@ export interface PluginResult {
 }
 
 export interface GeneratedFile {
-    id: number
+    id: string
     name: string
     contents: string
 }
@@ -28,13 +28,7 @@ export interface NexemaFile {
     types: NexemaTypeDefinition[]
 }
 
-export type JsObj =
-    | string
-    | number
-    | bigint
-    | boolean
-    | JsObj[]
-    | { [key: string]: JsObj }
+export type JsObj = string | number | bigint | boolean | JsObj[] | { [key: string]: JsObj }
 
 export interface NexemaTypeDefinition {
     id: string

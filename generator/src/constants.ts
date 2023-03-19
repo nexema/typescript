@@ -4,6 +4,10 @@ export const ImportAlias = {
     Nexema: '$nex',
 } as const
 
+export const DefaultImports = {
+    Nexema: "import * as $nex from 'nexema'",
+} as const
+
 export const CommonTypes = {
     NexemaTypeInfo: '$nex.NexemaTypeInfo',
     JsObj: '$nex.JsObj',
@@ -18,6 +22,9 @@ export const PrettierSettings: prettier.Options = {
     bracketSameLine: true,
     parser: 'typescript',
     quoteProps: 'preserve',
+    trailingComma: 'es5',
+    semi: false,
+    singleQuote: true,
 } as const
 
 export const EncoderMethods: { [key: string]: string } = {
