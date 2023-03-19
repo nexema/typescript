@@ -1,4 +1,4 @@
-import { Nexemable } from "./type";
+import { BaseNexemaType } from "./type";
 
 export type Hashable = string | number;
 export type Primitive = Hashable | bigint | boolean | null | Uint8Array | Date;
@@ -7,7 +7,11 @@ export type PrimitiveMapObj = { [key: Hashable]: NexemaObj };
 export type PrimitiveMap =
   | Map<Hashable | bigint | boolean, NexemaObj>
   | PrimitiveMapObj;
-export type NexemaObj = Primitive | PrimitiveList | PrimitiveMap | Nexemable;
+export type NexemaObj =
+  | Primitive
+  | PrimitiveList
+  | PrimitiveMap
+  | BaseNexemaType;
 export type JsObj =
   | string
   | number

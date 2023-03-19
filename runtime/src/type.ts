@@ -8,31 +8,12 @@ import {
 import { NexemabWriter } from "./nexemab/writer";
 import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
 import { NexemaStructState, NexemaUnionState } from "./state";
-
-/**
- * The very base class for every generated Nexema type.
- */
-export abstract class Nexemable {
-  /**
-   * Encodes the current instance to a Uint8Array
-   */
-  public abstract encode(): Uint8Array;
-
-  /**
-   * Converts the current instance to a JavaScript object
-   */
-  public abstract toObject(): JsObj;
-
-  /**
-   * Returns the kind of this Nexemable instance.
-   */
-  public abstract get kind(): "enum" | "struct" | "union";
-}
+import { NexemaTypeInfo } from "./type_info";
 
 /**
  * Provides a method to deep copy a Nexema type.
  */
-export abstract class NexemaClonable<T extends BaseNexemaType<T>> {
+export abstract class NexemaClonable<T extends BaseNexemaType> {
   /**
    * Returns an exact deep copy of this instance.
    */
@@ -40,27 +21,9 @@ export abstract class NexemaClonable<T extends BaseNexemaType<T>> {
 }
 
 /**
- * BaseNexemaType represents the base class for every generated Nexema type
- */
-export abstract class BaseNexemaType<T extends BaseNexemaType<T>>
-  implements Nexemable
-{
-  public abstract encode(): Uint8Array;
-
-  public abstract toObject(): JsObj;
-
-  public abstract get kind(): "enum" | "struct" | "union";
-
-  /**
-   * Returns true if this and [other] are strict equals, otherwise, false.
-   */
-  public abstract equals(other: T): boolean;
-}
-
-/**
  * NexemaMergeable provides methods to merge a type with other type or with binary information.
  */
-export abstract class NexemaMergeable<T extends BaseNexemaType<T>> {
+export abstract class NexemaMergeable<T extends BaseNexemaType> {
   /**
    * Merges the buffer into the current type, overriding any set field.
    *
@@ -77,11 +40,42 @@ export abstract class NexemaMergeable<T extends BaseNexemaType<T>> {
 }
 
 /**
+ * NexemaEquatable provides a method to compare two Nexema types
+ */
+export abstract class NexemaEquatable<T extends BaseNexemaType> {
+  /**
+   * Returns true if this and [other] are strict equals, otherwise, false.
+   */
+  public abstract equals(other: T): boolean;
+}
+
+/**
+ * BaseNexemaType represents the base class for every generated Nexema type
+ */
+export abstract class BaseNexemaType {
+  /**
+   * Encodes the current instance to a Uint8Array
+   */
+  public abstract encode(): Uint8Array;
+
+  /**
+   * Converts the current instance to a JavaScript object
+   */
+  public abstract toObject(): JsObj;
+
+  /**
+   * Returns the type information of the current BaseNexemaType.
+   */
+  public abstract getTypeInfo(): NexemaTypeInfo;
+}
+
+/**
  * NexemaStruct is the base class for every Nexema struct or base type.
  */
-export abstract class NexemaStruct<
-  T extends NexemaStruct<T>
-> extends BaseNexemaType<T> {
+export abstract class NexemaStruct<T extends NexemaStruct<T>>
+  extends BaseNexemaType
+  implements NexemaEquatable<T>
+{
   protected _state: NexemaStructState;
 
   protected constructor(state: NexemaStructState) {
@@ -89,7 +83,7 @@ export abstract class NexemaStruct<
     this._state = state;
   }
 
-  public override equals(other: T): boolean {
+  public equals(other: T): boolean {
     const values = this._state.values;
     const otherValues = other._state.values;
 
@@ -98,19 +92,19 @@ export abstract class NexemaStruct<
       const a = values[i];
       const b = otherValues[i];
 
-      if (FieldUtils.isPrimitive(field.value.kind)) {
+      if (FieldUtils.isPrimitive(field.value!.kind)) {
         if (!primitiveEquals(a as Primitive, b as Primitive)) {
           return false;
         }
-      } else if (field.value.kind === "list") {
-        const argumentType = field.value.arguments![0];
+      } else if (field.value!.kind === "list") {
+        const argumentType = field.value!.arguments![0];
         if (
           !listEquals(argumentType.kind, a as PrimitiveList, b as PrimitiveList)
         ) {
           return false;
         }
-      } else if (field.value.kind === "map") {
-        const valueType = field.value.arguments![1];
+      } else if (field.value!.kind === "map") {
+        const valueType = field.value!.arguments![1];
         if (!mapEquals(valueType.kind, a as PrimitiveMap, b as PrimitiveMap)) {
           return false;
         }
@@ -124,8 +118,8 @@ export abstract class NexemaStruct<
     return true;
   }
 
-  public override get kind(): "enum" | "struct" | "union" {
-    return "struct";
+  public override getTypeInfo(): NexemaTypeInfo {
+    return this._state.typeInfo;
   }
 }
 
@@ -136,8 +130,8 @@ export abstract class NexemaUnion<
     T extends NexemaUnion<T, TFields>,
     TFields extends string
   >
-  extends BaseNexemaType<T>
-  implements NexemaMergeable<T>
+  extends BaseNexemaType
+  implements NexemaMergeable<T>, NexemaEquatable<T>
 {
   protected _state: NexemaUnionState;
 
@@ -153,7 +147,7 @@ export abstract class NexemaUnion<
     this._state.fieldIndex = other._state.fieldIndex;
   }
 
-  public override equals(other: T): boolean {
+  public equals(other: T): boolean {
     if (this._state.fieldIndex !== other._state.fieldIndex) {
       return false;
     }
@@ -167,7 +161,7 @@ export abstract class NexemaUnion<
 
     const field = this._state.typeInfo.fieldsByIndex[this._state.fieldIndex];
 
-    switch (field.value.kind) {
+    switch (field.value!.kind) {
       case "string":
       case "boolean":
       case "uint":
@@ -196,7 +190,7 @@ export abstract class NexemaUnion<
         break;
 
       case "list":
-        const argumentType = field.value.arguments![0];
+        const argumentType = field.value!.arguments![0];
         if (
           !listEquals(argumentType.kind, a as PrimitiveList, b as PrimitiveList)
         ) {
@@ -205,7 +199,7 @@ export abstract class NexemaUnion<
         break;
 
       case "map":
-        const valueType = field.value.arguments![1];
+        const valueType = field.value!.arguments![1];
         if (!mapEquals(valueType.kind, a as PrimitiveMap, b as PrimitiveMap)) {
           return false;
         }
@@ -223,10 +217,6 @@ export abstract class NexemaUnion<
     return true;
   }
 
-  public override get kind(): "enum" | "struct" | "union" {
-    return "union";
-  }
-
   public get whichField(): TFields | "not-set" {
     if (this._state.fieldIndex === -1) {
       return "not-set";
@@ -242,18 +232,25 @@ export abstract class NexemaUnion<
     this._state.fieldIndex = -1;
     this._state.currentValue = undefined;
   }
+
+  public override getTypeInfo(): NexemaTypeInfo {
+    return this._state.typeInfo;
+  }
 }
 
 /**
  * NexemaEnum is the base class for every nexema enum type
  */
-export abstract class NexemaEnum<
-  T extends NexemaEnum<T>
-> extends BaseNexemaType<T> {
+export abstract class NexemaEnum<T extends NexemaEnum<T>>
+  extends BaseNexemaType
+  implements NexemaEquatable<T>
+{
   private _index: number;
   private _name: string;
 
-  public constructor(index: number, name: string) {
+  protected abstract get _typeInfo(): NexemaTypeInfo;
+
+  protected constructor(index: number, name: string) {
     super();
     this._index = index;
     this._name = name;
@@ -273,12 +270,8 @@ export abstract class NexemaEnum<
     return this._index;
   }
 
-  public override equals(other: T): boolean {
+  public equals(other: T): boolean {
     return this._index === other._index;
-  }
-
-  public override get kind(): "enum" | "struct" | "union" {
-    return "enum";
   }
 
   public override encode(): Uint8Array {
@@ -289,5 +282,9 @@ export abstract class NexemaEnum<
 
   public override toObject(): JsObj {
     return this._index;
+  }
+
+  public override getTypeInfo(): NexemaTypeInfo {
+    return this._typeInfo;
   }
 }

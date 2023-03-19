@@ -5,7 +5,6 @@ export {
   NexemaMergeable,
   NexemaStruct,
   NexemaUnion,
-  Nexemable,
 } from "./type";
 export { NexemabWriter } from "./nexemab/writer";
 export { NexemabReader } from "./nexemab/reader";

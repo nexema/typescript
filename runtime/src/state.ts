@@ -2,12 +2,12 @@ import { NexemaObj } from "./primitives";
 import { NexemaTypeInfo } from "./type_info";
 
 export interface BaseNexemaTypeState {
-  typeInfo: NexemaTypeInfo;
+  readonly typeInfo: NexemaTypeInfo;
 }
 
 export interface NexemaStructState extends BaseNexemaTypeState {
-  values: NexemaObj[];
-  baseValues?: NexemaObj[];
+  readonly values: NexemaObj[];
+  readonly baseValues?: NexemaObj[];
 }
 
 export interface NexemaUnionState extends BaseNexemaTypeState {

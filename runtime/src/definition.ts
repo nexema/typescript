@@ -2,7 +2,7 @@ export interface NexemaField {
   name: string;
   jsName: string;
   index: number;
-  value: NexemaFieldType;
+  value?: NexemaFieldType;
 }
 
 export interface NexemaFieldType {

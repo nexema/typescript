@@ -7,6 +7,7 @@ import { NexemabWriter } from "../src/nexemab/writer";
 import { NexemabReader } from "../src/nexemab/reader";
 import { JsObj } from "../src/primitives";
 import {
+  BaseNexemaType,
   NexemaClonable,
   NexemaEnum,
   NexemaMergeable,
@@ -16,8 +17,38 @@ import {
 import { NexemaTypeInfo } from "../src/type_info";
 
 export class EnumA extends NexemaEnum<EnumA> {
+  private static readonly _enumTypeInfo: NexemaTypeInfo = {
+    kind: "enum",
+    fieldsByJsName: {
+      unknown: 0,
+      red: 1,
+      blue: 2,
+    },
+    fieldsByIndex: {
+      0: {
+        index: 0,
+        jsName: "unknown",
+        name: "unknown",
+      },
+      1: {
+        index: 1,
+        jsName: "red",
+        name: "red",
+      },
+      2: {
+        index: 2,
+        jsName: "blue",
+        name: "blue",
+      },
+    },
+  };
+
   private constructor(index: number, name: string) {
     super(index, name);
+  }
+
+  protected get _typeInfo(): NexemaTypeInfo {
+    return EnumA._enumTypeInfo;
   }
 
   public static readonly unknown: EnumA = new EnumA(0, "unknown");
@@ -57,6 +88,7 @@ export class StructA
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
+    kind: "struct",
     fieldsByIndex: {
       0: {
         index: 0,
@@ -201,6 +233,7 @@ export class UnionA
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
+    kind: "union",
     fieldsByIndex: {
       0: {
         index: 0,
@@ -308,4 +341,9 @@ export class UnionA
     this._state.currentValue = value;
     this._state.fieldIndex = 3;
   }
+}
+
+function main() {
+  const blue = EnumA.blue;
+  const union: BaseNexemaType = new UnionA();
 }
