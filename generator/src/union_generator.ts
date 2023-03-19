@@ -140,10 +140,7 @@ export class UnionGenerator extends GeneratorBase {
                 ${this._type
                     .fields!.map(
                         (x) => `case ${x.index}: {
-                        ${this._writeFieldEncoder(
-                            `this._state.currentValue as ${this.getJavascriptType(x.type!)}`,
-                            x.type!
-                        )};
+                        ${this._writeFieldEncoder(`this._state.currentValue`, x.type!)};
                         break;
                     }`
                     )
@@ -184,8 +181,11 @@ export class UnionGenerator extends GeneratorBase {
                     break;
 
                     ${this.primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
-                        this._state.currentValue = other._state.currentValue;
-                        break;
+                    ${
+                        this.primitiveFields.length > 0
+                            ? '\nthis._state.currentValue = other._state.currentValue; break;'
+                            : ''
+                    }
 
                     ${this.nonPrimitiveFields
                         .map(
@@ -226,8 +226,11 @@ export class UnionGenerator extends GeneratorBase {
             if(this._state.fieldIndex !== -1) {
                 switch(this._state.fieldIndex) {
                     ${this.primitiveFields.map((x) => `case ${x.index}:`).join('\n')}
-                        instance._state.currentValue = this._state.currentValue;
-                        break;
+                    ${
+                        this.primitiveFields.length > 0
+                            ? 'instance._state.currentValue = this._state.currentValue; break;'
+                            : ''
+                    }
 
                     ${this.nonPrimitiveFields
                         .map(

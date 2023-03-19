@@ -39,19 +39,19 @@ export abstract class GeneratorBase {
         return this._context.resolveFor(this._file, objectId)
     }
 
-    protected getJavascriptType(type: NexemaValueType, omitNullability = false): string {
+    protected getJavascriptType(type: NexemaValueType, omitNullability?: boolean): string {
         let jsType: string
         if (type.kind === 'primitiveValueType') {
             const primitiveType = type as NexemaPrimitiveValueType
             switch (primitiveType.primitive) {
                 case 'string':
                     jsType = 'string'
-                    omitNullability = false
+                    omitNullability ??= false
                     break
 
                 case 'boolean':
                     jsType = 'boolean'
-                    omitNullability = false
+                    omitNullability ??= false
                     break
 
                 case 'binary':
@@ -67,7 +67,7 @@ export abstract class GeneratorBase {
                 case 'float32':
                 case 'float64':
                     jsType = 'number'
-                    omitNullability = false
+                    omitNullability ??= false
                     break
 
                 case 'int':
@@ -75,7 +75,7 @@ export abstract class GeneratorBase {
                 case 'uint64':
                 case 'int64':
                     jsType = 'bigint'
-                    omitNullability = false
+                    omitNullability ??= false
                     break
 
                 case 'timestamp':
@@ -84,7 +84,7 @@ export abstract class GeneratorBase {
 
                 case 'duration':
                     jsType = 'bigint'
-                    omitNullability = false
+                    omitNullability ??= false
                     break
 
                 case 'list':
@@ -265,15 +265,22 @@ export abstract class GeneratorBase {
         return out
     }
 
-    protected _writeFieldEncoder(variableName: string, valueType: NexemaValueType): string {
+    protected _writeFieldEncoder(
+        variableName: string,
+        valueType: NexemaValueType,
+        skipAlias = false,
+        skipNullability?: boolean
+    ): string {
         if (valueType.nullable) {
-            return `if(${variableName}) {
-                ${this._getEncoder(variableName, valueType)}
+            return `if(${variableName} ${
+                skipAlias ? '' : `as ${this.getJavascriptType(valueType)}`
+            }) {
+                ${this._getEncoder(variableName, valueType, false, skipNullability ?? true)}
             } else {
                 writer.encodeNull();
             }`
         } else {
-            return this._getEncoder(variableName, valueType)
+            return this._getEncoder(variableName, valueType, skipAlias, skipNullability ?? false)
         }
     }
 
@@ -391,22 +398,31 @@ export abstract class GeneratorBase {
         }
     }
 
-    private _getEncoder(variableName: string, valueType: NexemaValueType): string {
+    private _getEncoder(
+        variableName: string,
+        valueType: NexemaValueType,
+        skipAlias: boolean,
+        skipNullable = false
+    ): string {
+        if (!skipAlias) {
+            variableName = `(${variableName} as ${this.getJavascriptType(valueType, skipNullable)})`
+        }
+
         if (valueType.kind === 'primitiveValueType') {
             const primitiveValue = valueType as NexemaPrimitiveValueType
             if (primitiveValue.primitive === 'list') {
                 const elementType = primitiveValue.arguments![0]
                 return `writer.beginArray((${variableName}).length);
                 for(const value of ${variableName}) {
-                    ${this._writeFieldEncoder('value', elementType)}
+                    ${this._writeFieldEncoder('value', elementType, true, true)}
                 }`
             } else if (primitiveValue.primitive === 'map') {
                 const keyType = primitiveValue.arguments![0]
                 const elementType = primitiveValue.arguments![1]
                 return `writer.beginMap(${variableName}.size); 
                 for(const entry of ${variableName}.entries()) {
-                    ${this._writeFieldEncoder('entry[0]', keyType)}
-                    ${this._writeFieldEncoder('entry[1]', elementType)}
+                    ${this._writeFieldEncoder('entry[0]', keyType, true)}
+                    ${this._writeFieldEncoder('entry[1]', elementType, true, true)}
                 }`
             } else {
                 const encodeMethod = EncoderMethods[primitiveValue.primitive]

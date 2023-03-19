@@ -171,13 +171,13 @@ export class StructGenerator extends GeneratorBase {
 
         if (this._baseType) {
             result += `${this._baseType!.fields!.map(
-                (x) => `${this._writeFieldEncoder(`this.${this._fieldNames[x.name]}`, x.type!)}`
+                (x) => `${this._writeFieldEncoder(`this._state.baseValues![${x.index}]`, x.type!)}`
             ).join('\n')}`
         }
         result += `
         ${this._type
             .fields!.map(
-                (x) => `${this._writeFieldEncoder(`this.${this._fieldNames[x.name]}`, x.type!)}`
+                (x) => `${this._writeFieldEncoder(`this._state.values[${x.index}]`, x.type!)}`
             )
             .join('\n')}
         return writer.takeBytes();}`

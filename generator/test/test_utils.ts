@@ -12,8 +12,12 @@ import {
 import { GenerateContext } from '../src/generate_context'
 import { TypeReference } from '../src/type_reference'
 
-export function formatSource(input: string): string {
-    return prettier.format(input, PrettierSettings)
+export function formatSource(input: string, id?: string): string {
+    try {
+        return prettier.format(input, PrettierSettings)
+    } catch (err) {
+        throw `Failed to format: ${id ?? input}. Error: ${err}`
+    }
 }
 
 export function getStruct(data: {

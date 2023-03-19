@@ -166,12 +166,12 @@ describe('StructGenerator', () => {
             public override encode(): Uint8Array {
                 const writer = new $nex.NexemabWriter();
 
-                writer.encodeString(this.stringField);
-                writer.encodeBool(this.boolField);
-                writer.beginArray(this.listField.length);
-                for(const value of this.listField) {
+                writer.encodeString(this._state.values[0] as string);
+                writer.encodeBool(this._state.values[1] as boolean);
+                writer.beginArray((this._state.values[2] as Array<number | null>).length);
+                for(const value of this._state.values[2] as Array<number | null>) {
                     if(value) {
-                        writer.encodeFloat32(value);
+                        writer.encodeFloat32(value as number);
                     } else {
                         writer.encodeNull();
                     }
@@ -627,23 +627,23 @@ describe('StructGenerator', () => {
       public override encode(): Uint8Array {
         const writer = new $nex.NexemabWriter();
     
-        writer.encodeString(this.stringField);
-        writer.encodeBool(this.boolField);
-        writer.encodeVarint(this.intField);
-        writer.encodeInt8(this.int8Field);
-        writer.encodeInt16(this.int16Field);
-        writer.encodeInt32(this.int32Field);
-        writer.encodeInt64(this.int64Field);
-        writer.encodeUvarint(this.uintField);
-        writer.encodeUint8(this.uint8Field);
-        writer.encodeUint16(this.uint16Field);
-        writer.encodeUint32(this.uint32Field);
-        writer.encodeUint64(this.uint64Field);
-        writer.encodeFloat32(this.float32Field);
-        writer.encodeFloat64(this.float64Field);
-        writer.encodeBinary(this.binaryField);
-        writer.encodeTimestamp(this.timestampField);
-        writer.encodeDuration(this.durationField);
+        writer.encodeString(this._state.values[0] as string);
+        writer.encodeBool(this._state.values[1] as boolean);
+        writer.encodeVarint(this._state.values[2] as bigint);
+        writer.encodeInt8(this._state.values[3] as number);
+        writer.encodeInt16(this._state.values[4] as number);
+        writer.encodeInt32(this._state.values[5] as number);
+        writer.encodeInt64(this._state.values[6] as bigint);
+        writer.encodeUvarint(this._state.values[7] as bigint);
+        writer.encodeUint8(this._state.values[8] as number);
+        writer.encodeUint16(this._state.values[9] as number);
+        writer.encodeUint32(this._state.values[10] as number);
+        writer.encodeUint64(this._state.values[11] as bigint);
+        writer.encodeFloat32(this._state.values[12] as number);
+        writer.encodeFloat64(this._state.values[13] as number);
+        writer.encodeBinary(this._state.values[14] as Uint8Array);
+        writer.encodeTimestamp(this._state.values[15] as Date);
+        writer.encodeDuration(this._state.values[16] as bigint);
         return writer.takeBytes();
       }
     
@@ -1012,36 +1012,36 @@ describe('StructGenerator', () => {
         public override encode(): Uint8Array {
           const writer = new $nex.NexemabWriter();
       
-          if (this.stringField) {
-            writer.encodeString(this.stringField);
+          if (this._state.values[0] as string | null) {
+            writer.encodeString(this._state.values[0] as string);
           } else {
             writer.encodeNull();
           }
-          writer.beginArray(this.listField.length);
-          for (const value of this.listField) {
+          writer.beginArray((this._state.values[1] as Array<number>).length);
+          for (const value of this._state.values[1] as Array<number>) {
             writer.encodeFloat32(value);
           }
-          writer.beginArray(this.listValueNullField.length);
-          for (const value of this.listValueNullField) {
+          writer.beginArray((this._state.values[2] as Array<number | null>).length);
+          for (const value of this._state.values[2] as Array<number | null>) {
             if (value) {
-              writer.encodeFloat32(value);
+              writer.encodeFloat32(value  as number);
             } else {
               writer.encodeNull();
             }
           }
-          if (this.listNullField) {
-            writer.beginArray(this.listNullField.length);
-            for (const value of this.listNullField) {
+          if (this._state.values[3] as Array<number> | null) {
+            writer.beginArray((this._state.values[3] as Array<number>).length);
+            for (const value of this._state.values[3] as Array<number>) {
               writer.encodeFloat32(value);
             }
           } else {
             writer.encodeNull();
           }
-          if (this.listBothNullField) {
-            writer.beginArray(this.listBothNullField.length);
-            for (const value of this.listBothNullField) {
+          if (this._state.values[4] as Array<number | null> | null) {
+            writer.beginArray((this._state.values[4] as Array<number | null>).length);
+            for (const value of this._state.values[4] as Array<number | null>) {
               if (value) {
-                writer.encodeFloat32(value);
+                writer.encodeFloat32(value  as number);
               } else {
                 writer.encodeNull();
               }
@@ -1049,35 +1049,35 @@ describe('StructGenerator', () => {
           } else {
             writer.encodeNull();
           }
-          writer.beginMap(this.mapField.size);
-          for (const entry of this.mapField.entries()) {
+          writer.beginMap((this._state.values[5] as Map<string, number>).size);
+          for (const entry of (this._state.values[5] as Map<string, number>).entries()) {
             writer.encodeString(entry[0]);
             writer.encodeFloat32(entry[1]);
           }
-          writer.beginMap(this.mapValueNullField.size);
-          for (const entry of this.mapValueNullField.entries()) {
+          writer.beginMap((this._state.values[6] as Map<string, number | null>).size);
+          for (const entry of (this._state.values[6] as Map<string, number | null>).entries()) {
             writer.encodeString(entry[0]);
             if (entry[1]) {
-              writer.encodeFloat32(entry[1]);
+              writer.encodeFloat32(entry[1]  as number);
             } else {
               writer.encodeNull();
             }
           }
-          if (this.mapNullField) {
-            writer.beginMap(this.mapNullField.size);
-            for (const entry of this.mapNullField.entries()) {
+          if (this._state.values[7] as Map<string, number> | null) {
+            writer.beginMap((this._state.values[7] as Map<string, number>).size);
+            for (const entry of (this._state.values[7] as Map<string, number>).entries()) {
               writer.encodeString(entry[0]);
               writer.encodeFloat32(entry[1]);
             }
           } else {
             writer.encodeNull();
           }
-          if (this.maptBothNullField) {
-            writer.beginMap(this.maptBothNullField.size);
-            for (const entry of this.maptBothNullField.entries()) {
+          if (this._state.values[8] as Map<string, number | null> | null) {
+            writer.beginMap((this._state.values[8] as Map<string, number | null>).size);
+            for (const entry of (this._state.values[8] as Map<string, number | null>).entries()) {
               writer.encodeString(entry[0]);
               if (entry[1]) {
-                writer.encodeFloat32(entry[1]);
+                writer.encodeFloat32(entry[1] as number);
               } else {
                 writer.encodeNull();
               }
@@ -1326,9 +1326,9 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
     
       public override encode(): Uint8Array {
         const writer = new $nex.NexemabWriter();
-        writer.encodeVarint(this.varintField);
-        writer.encodeUvarint(this.uvarintField);
-        writer.encodeString(this.stringField);
+        writer.encodeVarint(this._state.baseValues![0] as bigint);
+        writer.encodeUvarint(this._state.baseValues![1] as bigint);
+        writer.encodeString(this._state.values[0] as string);
         return writer.takeBytes();
       }
     
@@ -1709,66 +1709,66 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
     public override encode(): Uint8Array {
       const writer = new $nex.NexemabWriter();
 
-      writer.encodeBinary(this.structField.encode());
-      writer.encodeUint8(this.enumField.index);
-      if (this.nullStructField) {
-        writer.encodeBinary(this.nullStructField.encode());
+      writer.encodeBinary((this._state.values[0] as B).encode());
+      writer.encodeUint8((this._state.values[1] as C).index);
+      if (this._state.values[2] as B | null) {
+        writer.encodeBinary((this._state.values[2] as B).encode());
       } else {
         writer.encodeNull();
       }
-      if (this.nullEnumField) {
-        writer.encodeUint8(this.nullEnumField.index);
+      if (this._state.values[3] as C | null) {
+        writer.encodeUint8((this._state.values[3] as C).index);
       } else {
         writer.encodeNull();
       }
-      writer.beginArray(this.listStructField.length);
-      for (const value of this.listStructField) {
+      writer.beginArray((this._state.values[4] as Array<B>).length);
+      for (const value of this._state.values[4] as Array<B>) {
         writer.encodeBinary(value.encode());
       }
-      writer.beginArray(this.listEnumField.length);
-      for (const value of this.listEnumField) {
+      writer.beginArray((this._state.values[5] as Array<C>).length);
+      for (const value of this._state.values[5] as Array<C>) {
         writer.encodeUint8(value.index);
       }
-      writer.beginMap(this.mapStructField.size);
-      for (const entry of this.mapStructField.entries()) {
+      writer.beginMap((this._state.values[6] as Map<string, B>).size);
+      for (const entry of (this._state.values[6] as Map<string, B>).entries()) {
         writer.encodeString(entry[0]);
         writer.encodeBinary(entry[1].encode());
       }
-      writer.beginMap(this.mapEnumField.size);
-      for (const entry of this.mapEnumField.entries()) {
+      writer.beginMap((this._state.values[7] as Map<string, C>).size);
+      for (const entry of (this._state.values[7] as Map<string, C>).entries()) {
         writer.encodeString(entry[0]);
         writer.encodeUint8(entry[1].index);
       }
-      writer.beginArray(this.listStructNullField.length);
-      for (const value of this.listStructNullField) {
+      writer.beginArray((this._state.values[8] as Array<B | null>).length);
+      for (const value of this._state.values[8] as Array<B | null>) {
         if (value) {
-          writer.encodeBinary(value.encode());
+          writer.encodeBinary((value as B).encode());
         } else {
           writer.encodeNull();
         }
       }
-      writer.beginArray(this.listEnumNullField.length);
-      for (const value of this.listEnumNullField) {
+      writer.beginArray((this._state.values[9] as Array<C | null>).length);
+      for (const value of (this._state.values[9] as Array<C | null>)) {
         if (value) {
-          writer.encodeUint8(value.index);
+          writer.encodeUint8((value as C).index);
         } else {
           writer.encodeNull();
         }
       }
-      writer.beginMap(this.mapStructNullField.size);
-      for (const entry of this.mapStructNullField.entries()) {
+      writer.beginMap((this._state.values[10] as Map<string, B | null>).size);
+      for (const entry of (this._state.values[10] as Map<string, B | null>).entries()) {
         writer.encodeString(entry[0]);
         if (entry[1]) {
-          writer.encodeBinary(entry[1].encode());
+          writer.encodeBinary((entry[1] as B).encode());
         } else {
           writer.encodeNull();
         }
       }
-      writer.beginMap(this.mapEnumNullField.size);
-      for (const entry of this.mapEnumNullField.entries()) {
+      writer.beginMap((this._state.values[11] as Map<string, C | null>).size);
+      for (const entry of (this._state.values[11] as Map<string, C | null>).entries()) {
         writer.encodeString(entry[0]);
         if (entry[1]) {
-          writer.encodeUint8(entry[1].index);
+          writer.encodeUint8((entry[1] as C).index);
         } else {
           writer.encodeNull();
         }
