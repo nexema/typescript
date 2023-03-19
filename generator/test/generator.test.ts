@@ -103,9 +103,7 @@ describe('Generator tests', () => {
         // ] as GeneratedFile[])
 
         for (const file of result.files) {
-            const p = `example/src/integration/${
-                snapshot.files.find((x) => x.id == file.id)!.path
-            }.ts`
+            const p = `example/src/${snapshot.files.find((x) => x.id == file.id)!.path}.ts`
             fs.mkdirSync(path.dirname(p), { recursive: true })
             fs.writeFileSync(p, file.contents)
         }
