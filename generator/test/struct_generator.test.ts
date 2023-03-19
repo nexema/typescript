@@ -3,6 +3,7 @@ import { Generator } from '../src/generator'
 import { NexemaFile, NexemaPrimitiveValueType } from '../src/models'
 import { StructGenerator } from '../src/struct_generator'
 import {
+    DefaultGenerateContext,
     formatSource,
     getBaseType,
     getEnum,
@@ -76,7 +77,8 @@ describe('StructGenerator', () => {
                 packageName: 'root',
                 path: 'struct.nex',
                 types: [],
-            }
+            },
+            DefaultGenerateContext
         )
 
         const want = `export class MyStruct extends $nex.NexemaStruct<MyStruct> implements $nex.NexemaMergeable<MyStruct>, $nex.NexemaClonable<MyStruct> {
@@ -255,7 +257,8 @@ describe('StructGenerator', () => {
                 path: 'root/a.nex',
                 packageName: 'root',
                 types: [],
-            }
+            },
+            DefaultGenerateContext
         )
 
         const want = `
@@ -804,7 +807,8 @@ describe('StructGenerator', () => {
                 path: 'root/a.nex',
                 packageName: 'root',
                 types: [],
-            }
+            },
+            DefaultGenerateContext
         )
 
         const want = `export class A
@@ -1238,7 +1242,7 @@ describe('StructGenerator', () => {
             ],
         } as NexemaFile
 
-        new Generator(
+        const g = new Generator(
             {
                 version: 1,
                 hashcode: '',
@@ -1253,7 +1257,11 @@ describe('StructGenerator', () => {
                 fields: [getField(0, 'string_field', getPrimitiveValueType('string'))],
                 baseTypeId: '5',
             }),
-            file
+            file,
+            {
+                getObject: g.getObject.bind(g),
+                resolveFor: g.resolveFor.bind(g),
+            }
         )
 
         const want = `
@@ -1382,7 +1390,7 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
             ],
         } as NexemaFile
 
-        new Generator(
+        const g = new Generator(
             {
                 version: 1,
                 hashcode: '',
@@ -1439,7 +1447,11 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
                     ),
                 ],
             }),
-            file
+            file,
+            {
+                getObject: g.getObject.bind(g),
+                resolveFor: g.resolveFor.bind(g),
+            }
         )
 
         const want = `

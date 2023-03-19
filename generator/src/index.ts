@@ -8,7 +8,10 @@ function main() {
     const content = fs.readFileSync(process.stdin.fd, 'utf-8')
     const snapshot = parseSnapshot(content)
 
-    const generator = new Generator(snapshot, {})
+    const generator = new Generator(snapshot, {
+        outputPath: '',
+        useOnlyMaps: true,
+    })
     generator.run()
 }
 

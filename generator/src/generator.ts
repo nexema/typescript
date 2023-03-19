@@ -15,10 +15,9 @@ import { StructGenerator } from './struct_generator'
 import { UnionGenerator } from './union_generator'
 import { EnumGenerator } from './enum_generator'
 import { DefaultImports, PrettierSettings } from './constants'
+import { GenerateContext } from './generate_context'
 
 export class Generator {
-    private static _singleton?: Generator
-
     private _snapshot: NexemaSnapshot
     private _settings: GeneratorSettings
     private _types: Map<string, TypeReference>
@@ -32,34 +31,36 @@ export class Generator {
 
         this.resetImports()
         this.scan()
-
-        Generator._singleton = this
     }
 
     public run(): PluginResult {
         const files = new Map<string, GeneratedFile>()
-        try {
-            for (const file of this._snapshot.files) {
+        const context: GenerateContext = {
+            getObject: this.getObject.bind(this),
+            resolveFor: this.resolveFor.bind(this),
+        }
+        for (const file of this._snapshot.files) {
+            try {
                 const buffer: string[] = []
                 for (const type of file.types) {
                     switch (type.modifier) {
                         case 'base': {
-                            buffer.push(new BaseTypeGenerator(type, file).generate())
+                            buffer.push(new BaseTypeGenerator(type, file, context).generate())
                             break
                         }
 
                         case 'struct': {
-                            buffer.push(new StructGenerator(type, file).generate())
+                            buffer.push(new StructGenerator(type, file, context).generate())
                             break
                         }
 
                         case 'union': {
-                            buffer.push(new UnionGenerator(type, file).generate())
+                            buffer.push(new UnionGenerator(type, file, context).generate())
                             break
                         }
 
                         case 'enum': {
-                            buffer.push(new EnumGenerator(type, file).generate())
+                            buffer.push(new EnumGenerator(type, file, context).generate())
                             break
                         }
                     }
@@ -76,11 +77,12 @@ ${sourceCode}`
                     name: `${file.fileName}.ts`,
                     contents: prettier.format(sourceCode, PrettierSettings),
                 })
-            }
-        } catch (err) {
-            return {
-                exitCode: -1,
-                files: [],
+            } catch (err) {
+                return {
+                    exitCode: -1,
+                    errorMessage: `File [${file.path}] Error: [${err}]`,
+                    files: [],
+                }
             }
         }
 
@@ -147,13 +149,5 @@ ${sourceCode}`
     private resetImports(): void {
         this._currentFileImports.clear()
         this._currentFileImports.add(DefaultImports.Nexema)
-    }
-
-    public static get instance(): Generator {
-        if (!this._singleton) {
-            throw 'No default Generator.'
-        }
-
-        return this._singleton
     }
 }

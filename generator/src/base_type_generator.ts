@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ImportAlias } from './constants'
+import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaTypeDefinition } from './models'
 
 export class BaseTypeGenerator extends GeneratorBase {
-    public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
-        super(type, file)
+    public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
+        super(type, file, context)
     }
 
     public generate(): string {

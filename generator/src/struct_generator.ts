@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, ImportAlias } from './constants'
+import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaTypeDefinition } from './models'
 import { isJsPrimitive, toCamelCase } from './utils'
@@ -7,8 +8,8 @@ import { isJsPrimitive, toCamelCase } from './utils'
 export class StructGenerator extends GeneratorBase {
     private _baseType?: NexemaTypeDefinition
 
-    public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
-        super(type, file)
+    public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
+        super(type, file, context)
         if (type.baseType) {
             this._baseType = this.resolveReference(type.baseType).type
             this._fieldNames = {

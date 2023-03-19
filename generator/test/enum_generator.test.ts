@@ -1,5 +1,5 @@
 import { EnumGenerator } from '../src/enum_generator'
-import { formatSource } from './test_utils'
+import { DefaultGenerateContext, formatSource } from './test_utils'
 
 it('should generate enum classes', () => {
     const generator = new EnumGenerator(
@@ -38,7 +38,8 @@ it('should generate enum classes', () => {
             packageName: 'root',
             path: 'root/enum.nex',
             types: [],
-        }
+        },
+        DefaultGenerateContext
     )
 
     const want = `

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, ImportAlias } from './constants'
+import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaPrimitiveValueType, NexemaTypeDefinition } from './models'
 
@@ -20,8 +21,8 @@ export class UnionGenerator extends GeneratorBase {
 
     nonPrimitiveFields = this._type.fields!.filter((x) => !this.primitiveFields.includes(x))
 
-    public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
-        super(type, file)
+    public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
+        super(type, file, context)
     }
 
     public generate(): string {

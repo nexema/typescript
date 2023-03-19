@@ -1,6 +1,6 @@
 import { BaseTypeGenerator } from '../src/base_type_generator'
-import { NexemaPrimitiveValueType } from '../src/models'
-import { formatSource } from './test_utils'
+import { NexemaPrimitiveValueType, NexemaTypeDefinition } from '../src/models'
+import { DefaultGenerateContext, formatSource } from './test_utils'
 
 it('should generate base type classes', () => {
     const generator = new BaseTypeGenerator(
@@ -61,7 +61,8 @@ it('should generate base type classes', () => {
             packageName: 'root',
             path: 'base.nex',
             types: [],
-        }
+        },
+        DefaultGenerateContext
     )
 
     const want = `export abstract class MyBase<T extends $nex.NexemaStruct<T>> extends $nex.NexemaStruct<MyBase<T>> {

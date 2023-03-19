@@ -9,6 +9,8 @@ import {
     NexemaTypeValueType,
     NexemaValueType,
 } from '../src/models'
+import { GenerateContext } from '../src/generate_context'
+import { TypeReference } from '../src/type_reference'
 
 export function formatSource(input: string): string {
     return prettier.format(input, PrettierSettings)
@@ -31,6 +33,25 @@ export function getStruct(data: {
         defaults: data.defaults ?? {},
         baseType: data.baseTypeId ?? null,
         modifier: 'struct',
+        documentation: data.documentation ?? [],
+    }
+}
+
+export function getUnion(data: {
+    id?: string
+    name: string
+    fields: NexemaTypeFieldDefinition[]
+    documentation?: string[]
+    annotations?: { [key: string]: any }
+}): NexemaTypeDefinition {
+    return {
+        id: data.id ?? '1',
+        name: data.name,
+        fields: data.fields,
+        annotations: data.annotations ?? {},
+        defaults: null,
+        baseType: null,
+        modifier: 'union',
         documentation: data.documentation ?? [],
     }
 }
@@ -134,4 +155,13 @@ export function getMapValueType(
         nullable: nullable,
         arguments: [key, value],
     } as NexemaPrimitiveValueType
+}
+
+export const DefaultGenerateContext: GenerateContext = {
+    getObject(typeId): NexemaTypeDefinition {
+        throw 'not-implemented'
+    },
+    resolveFor(file, typeId): TypeReference {
+        throw 'not-implemented'
+    },
 }

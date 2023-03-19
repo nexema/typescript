@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, DecoderMethods, EncoderMethods } from './constants'
-import { Generator } from './generator'
+import { GenerateContext } from './generate_context'
 import {
     JsObj,
     NexemaFile,
@@ -15,11 +15,13 @@ import { isJsPrimitive, toCamelCase } from './utils'
 export abstract class GeneratorBase {
     protected _type: NexemaTypeDefinition
     protected _file: NexemaFile
+    protected _context: GenerateContext
     protected _fieldNames: { [key: string]: string }
 
-    public constructor(type: NexemaTypeDefinition, file: NexemaFile) {
+    public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
         this._type = type
         this._file = file
+        this._context = context
         this._fieldNames = Object.fromEntries(
             type.fields!.map((x) => [x.name, toCamelCase(x.name)])
         )
@@ -34,7 +36,7 @@ export abstract class GeneratorBase {
     }
 
     protected resolveReference(objectId: string): TypeReference {
-        return Generator.instance.resolveFor(this._file, objectId)
+        return this._context.resolveFor(this._file, objectId)
     }
 
     protected getJavascriptType(type: NexemaValueType, omitNullability = false): string {
@@ -99,10 +101,7 @@ export abstract class GeneratorBase {
                     throw `unknown primitive ${primitiveType.primitive}`
             }
         } else {
-            const ref = Generator.instance.resolveFor(
-                this._file,
-                (type as NexemaTypeValueType).objectId
-            )
+            const ref = this._context.resolveFor(this._file, (type as NexemaTypeValueType).objectId)
             jsType = this.getDeclarationForTypeReference(ref)
         }
 
@@ -175,7 +174,7 @@ export abstract class GeneratorBase {
         if (type.kind === 'primitiveValueType') {
             kind = (type as NexemaPrimitiveValueType).primitive
         } else {
-            kind = Generator.instance.getObject((type as NexemaTypeValueType).objectId).modifier
+            kind = this._context.getObject((type as NexemaTypeValueType).objectId).modifier
         }
 
         return `{

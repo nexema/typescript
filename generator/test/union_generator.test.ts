@@ -1,7 +1,7 @@
 import { CommonTypes } from '../src/constants'
 import { NexemaPrimitiveValueType } from '../src/models'
 import { UnionGenerator } from '../src/union_generator'
-import { formatSource } from './test_utils'
+import { DefaultGenerateContext, formatSource } from './test_utils'
 
 it('should generate union classes', () => {
     const generator = new UnionGenerator(
@@ -62,7 +62,8 @@ it('should generate union classes', () => {
             packageName: 'root',
             path: 'union.nex',
             types: [],
-        }
+        },
+        DefaultGenerateContext
     )
 
     const want = `export class MyUnion extends $nex.NexemaUnion<MyUnion, "stringField" | "boolField" | "listField"> implements $nex.NexemaMergeable<MyUnion>, $nex.NexemaClonable<MyUnion> {

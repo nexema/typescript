@@ -5,6 +5,7 @@ export interface GeneratorSettings {
 
 export interface PluginResult {
     exitCode: number
+    errorMessage?: string
     files: GeneratedFile[]
 }
 
