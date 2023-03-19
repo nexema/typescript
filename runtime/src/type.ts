@@ -7,7 +7,11 @@ import {
 } from "./equality";
 import { NexemabWriter } from "./nexemab/writer";
 import { JsObj, Primitive, PrimitiveList, PrimitiveMap } from "./primitives";
-import { NexemaStructState, NexemaUnionState } from "./state";
+import {
+  BaseNexemaTypeState,
+  NexemaStructState,
+  NexemaUnionState,
+} from "./state";
 import { NexemaTypeInfo } from "./type_info";
 
 /**
@@ -53,6 +57,12 @@ export abstract class NexemaEquatable<T extends BaseNexemaType> {
  * BaseNexemaType represents the base class for every generated Nexema type
  */
 export abstract class BaseNexemaType {
+  protected _baseState?: BaseNexemaTypeState;
+
+  protected constructor(baseState?: BaseNexemaTypeState | undefined) {
+    this._baseState = baseState;
+  }
+
   /**
    * Encodes the current instance to a Uint8Array
    */
@@ -66,7 +76,18 @@ export abstract class BaseNexemaType {
   /**
    * Returns the type information of the current BaseNexemaType.
    */
-  public abstract getTypeInfo(): NexemaTypeInfo;
+  public getTypeInfo(): NexemaTypeInfo {
+    return this._baseState!.typeInfo;
+  }
+
+  /**
+   * Returns a boolean indicating if this type is of the same type that @param of
+   *
+   * @param of The other type to compare
+   */
+  public isSameType(of: BaseNexemaType): boolean {
+    return this._baseState!.typeInfo.typeId === of._baseState!.typeInfo.typeId;
+  }
 }
 
 /**
@@ -76,11 +97,16 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>>
   extends BaseNexemaType
   implements NexemaEquatable<T>
 {
-  protected _state: NexemaStructState;
+  protected get _state(): NexemaStructState {
+    return this._baseState as NexemaStructState;
+  }
+
+  protected set _state(state: NexemaStructState) {
+    this._baseState = state;
+  }
 
   protected constructor(state: NexemaStructState) {
-    super();
-    this._state = state;
+    super(state);
   }
 
   public equals(other: T): boolean {
@@ -117,10 +143,6 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>>
 
     return true;
   }
-
-  public override getTypeInfo(): NexemaTypeInfo {
-    return this._state.typeInfo;
-  }
 }
 
 /**
@@ -133,11 +155,16 @@ export abstract class NexemaUnion<
   extends BaseNexemaType
   implements NexemaMergeable<T>, NexemaEquatable<T>
 {
-  protected _state: NexemaUnionState;
+  protected get _state(): NexemaUnionState {
+    return this._baseState as NexemaUnionState;
+  }
+
+  protected set _state(state: NexemaUnionState) {
+    this._baseState = state;
+  }
 
   protected constructor(state: NexemaUnionState) {
-    super();
-    this._state = state;
+    super(state);
   }
 
   public abstract mergeFrom(buffer: Uint8Array): void;
@@ -254,6 +281,9 @@ export abstract class NexemaEnum<T extends NexemaEnum<T>>
     super();
     this._index = index;
     this._name = name;
+    this._baseState = {
+      typeInfo: this.getTypeInfo(),
+    };
   }
 
   /**

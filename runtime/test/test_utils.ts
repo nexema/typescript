@@ -18,6 +18,10 @@ import { NexemaTypeInfo } from "../src/type_info";
 
 export class EnumA extends NexemaEnum<EnumA> {
   private static readonly _enumTypeInfo: NexemaTypeInfo = {
+    typeId: "5645615135135",
+    inherits: null,
+    name: "EnumA",
+    new: () => EnumA.unknown,
     kind: "enum",
     fieldsByJsName: {
       unknown: 0,
@@ -87,7 +91,22 @@ export class StructA
     throw new Error("Method not implemented.");
   }
 
+  private static empty(): StructA {
+    const instance = Object.create(StructA.prototype) as StructA;
+    instance._state = {
+      typeInfo: StructA._typeInfo,
+      values: [],
+      baseValues: undefined,
+    };
+
+    return instance;
+  }
+
   private static readonly _typeInfo: NexemaTypeInfo = {
+    typeId: "5626816815415",
+    name: "StructA",
+    new: () => StructA.empty(),
+    inherits: null,
     kind: "struct",
     fieldsByIndex: {
       0: {
@@ -233,6 +252,10 @@ export class UnionA
   }
 
   private static readonly _typeInfo: NexemaTypeInfo = {
+    typeId: "626269892315315",
+    name: "UnionA",
+    inherits: null,
+    new: () => new UnionA(),
     kind: "union",
     fieldsByIndex: {
       0: {
@@ -341,9 +364,4 @@ export class UnionA
     this._state.currentValue = value;
     this._state.fieldIndex = 3;
   }
-}
-
-function main() {
-  const blue = EnumA.blue;
-  const union: BaseNexemaType = new UnionA();
 }
