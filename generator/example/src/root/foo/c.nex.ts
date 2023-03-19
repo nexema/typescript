@@ -20,6 +20,12 @@ export class Abc
         value: {
           kind: 'list',
           nullable: false,
+          arguments: [
+            {
+              kind: 'string',
+              nullable: false,
+            },
+          ],
         },
       },
       1: {
@@ -123,6 +129,7 @@ export class Abc
         break
       }
       case 0: {
+        writer.encodeVarint(0n)
         writer.beginArray((this._state.currentValue as Array<string>).length)
         for (const value of this._state.currentValue as Array<string>) {
           writer.encodeString(value)
@@ -130,10 +137,12 @@ export class Abc
         break
       }
       case 1: {
+        writer.encodeVarint(1n)
         writer.encodeUint64(this._state.currentValue as bigint)
         break
       }
       case 2: {
+        writer.encodeVarint(2n)
         writer.encodeUint8((this._state.currentValue as $b.Baz).index)
         break
       }

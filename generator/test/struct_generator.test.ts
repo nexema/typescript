@@ -114,7 +114,13 @@ describe('StructGenerator', () => {
                         name: "list_field",
                         value: {
                             kind: "list",
-                            nullable: false
+                            nullable: false,
+                            arguments: [
+                              {
+                                kind: 'float32',
+                                nullable: true,
+                              },
+                            ],
                         }
                     }
                 },
@@ -926,7 +932,13 @@ describe('StructGenerator', () => {
               name: "list_field",
               value: {
                 kind: "list",
-                nullable: false
+                nullable: false,
+                arguments: [
+                  {
+                    kind: 'float32',
+                    nullable: false
+                  }
+                ]
               },
             },
             2: {
@@ -935,7 +947,13 @@ describe('StructGenerator', () => {
               name: "list_value_null_field",
               value: {
                 kind: "list",
-                nullable: false
+                nullable: false,
+                arguments: [
+                  {
+                    kind: 'float32',
+                    nullable: true
+                  }
+                ]
               },
             },
             3: {
@@ -944,7 +962,13 @@ describe('StructGenerator', () => {
               name: "list_null_field",
               value: {
                 kind: "list",
-                nullable: true
+                nullable: true,
+                arguments: [
+                  {
+                    kind: 'float32',
+                    nullable: false
+                  }
+                ]
               },
             },
             4: {
@@ -953,7 +977,13 @@ describe('StructGenerator', () => {
               name: "list_both_null_field",
               value: {
                 kind: "list",
-                nullable: true
+                nullable: true,
+                arguments: [
+                  {
+                    kind: 'float32',
+                    nullable: true
+                  }
+                ]
               },
             },
             5: {
@@ -962,7 +992,17 @@ describe('StructGenerator', () => {
               name: "map_field",
               value: {
                 kind: "map",
-                nullable: false
+                nullable: false,
+                arguments: [
+                  {
+                    kind: 'string',
+                    nullable: false,
+                  },
+                  {
+                    kind: 'float32',
+                    nullable: false,
+                  },
+                ],
               },
             },
             6: {
@@ -971,7 +1011,17 @@ describe('StructGenerator', () => {
               name: "map_value_null_field",
               value: {
                 kind: "map",
-                nullable: false
+                nullable: false,
+                arguments: [
+                  {
+                    kind: 'string',
+                    nullable: false,
+                  },
+                  {
+                    kind: 'float32',
+                    nullable: true,
+                  },
+                ],
               },
             },
             7: {
@@ -980,7 +1030,17 @@ describe('StructGenerator', () => {
               name: "map_null_field",
               value: {
                 kind: "map",
-                nullable: true
+                nullable: true,
+                arguments: [
+                  {
+                    kind: 'string',
+                    nullable: false,
+                  },
+                  {
+                    kind: 'float32',
+                    nullable: false,
+                  },
+                ],
               },
             },
             8: {
@@ -989,7 +1049,17 @@ describe('StructGenerator', () => {
               name: "mapt_both_null_field",
               value: {
                 kind: "map",
-                nullable: true
+                nullable: true,
+                arguments: [
+                  {
+                    kind: 'string',
+                    nullable: false,
+                  },
+                  {
+                    kind: 'float32',
+                    nullable: true,
+                  },
+                ],
               },
             },
           },
@@ -1654,7 +1724,14 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_struct_field",
           value: {
             kind: "list",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'struct',
+                nullable: false,
+                typeId: '5',
+              }
+            ]
           },
         },
         5: {
@@ -1663,7 +1740,14 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_enum_field",
           value: {
             kind: "list",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'enum',
+                nullable: false,
+                typeId: '6',
+              }
+            ]
           },
         },
         6: {
@@ -1672,7 +1756,18 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_struct_field",
           value: {
             kind: "map",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'string',
+                nullable: false,
+              },
+              {
+                kind: 'struct',
+                nullable: false,
+                typeId: '5',
+              },
+            ],
           },
         },
         7: {
@@ -1681,7 +1776,18 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_enum_field",
           value: {
             kind: "map",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'string',
+                nullable: false,
+              },
+              {
+                kind: 'enum',
+                nullable: false,
+                typeId: '6',
+              },
+            ],
           },
         },
         8: {
@@ -1690,7 +1796,14 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_struct_null_field",
           value: {
             kind: "list",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'struct',
+                nullable: true,
+                typeId: '5',
+              },
+            ],
           },
         },
         9: {
@@ -1699,7 +1812,14 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_enum_null_field",
           value: {
             kind: "list",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'enum',
+                nullable: true,
+                typeId: '6',
+              },
+            ],
           },
         },
         10: {
@@ -1708,7 +1828,18 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_struct_null_field",
           value: {
             kind: "map",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'string',
+                nullable: false,
+              },
+              {
+                kind: 'struct',
+                nullable: true,
+                typeId: '5',
+              },
+            ],
           },
         },
         11: {
@@ -1717,7 +1848,18 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_enum_null_field",
           value: {
             kind: "map",
-            nullable: false
+            nullable: false,
+            arguments: [
+              {
+                kind: 'string',
+                nullable: false,
+              },
+              {
+                kind: 'enum',
+                nullable: true,
+                typeId: '6',
+              },
+            ],
           },
         },
       },

@@ -109,7 +109,13 @@ describe('UnionGenerator', () => {
                         name: "list_field",
                         value: {
                             kind: "list",
-                            nullable: false
+                            nullable: false,
+                            arguments: [
+                                {
+                                    kind: 'float32',
+                                    nullable: false
+                                }
+                            ]
                         }
                     }
                 },
@@ -194,14 +200,17 @@ describe('UnionGenerator', () => {
                         break;
                     }
                     case 0: {
+                        writer.encodeVarint(0n)
                         writer.encodeString(this._state.currentValue as string);
                         break;
                     }
                     case 1: {
+                        writer.encodeVarint(1n)
                         writer.encodeBool(this._state.currentValue as boolean);
                         break;
                     }
                     case 2: {
+                        writer.encodeVarint(2n)
                         writer.beginArray((this._state.currentValue as Array<number>).length);
                         for(const value of this._state.currentValue as Array<number>) {
                             writer.encodeFloat32(value);
@@ -467,10 +476,12 @@ public override encode(): Uint8Array {
             break;
         }
         case 0: {
+            writer.encodeVarint(0n)
             writer.encodeUint8((this._state.currentValue as A).index);
             break;
         }
         case 1: {
+            writer.encodeVarint(1n)
             writer.encodeBinary((this._state.currentValue as B).encode());
             break;
         }

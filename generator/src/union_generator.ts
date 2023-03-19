@@ -144,6 +144,7 @@ export class UnionGenerator extends GeneratorBase {
                 ${this._type
                     .fields!.map(
                         (x) => `case ${x.index}: {
+                        writer.encodeVarint(${x.index}n)
                         ${this._writeFieldEncoder(`this._state.currentValue`, x.type!)};
                         break;
                     }`

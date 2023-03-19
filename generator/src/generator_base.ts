@@ -215,18 +215,34 @@ export abstract class GeneratorBase {
     protected _writeNexemaFieldValue(type: NexemaValueType): string {
         let kind: string
         let objectId: string | undefined
+        let args: NexemaValueType[] | undefined
         if (type.kind === 'primitiveValueType') {
-            kind = (type as NexemaPrimitiveValueType).primitive
+            const primitiveType = type as NexemaPrimitiveValueType
+            kind = primitiveType.primitive
+            args = primitiveType.arguments
         } else {
             objectId = (type as NexemaTypeValueType).objectId
             kind = this._context.getObject(objectId).modifier
         }
 
-        return `{
+        let result = `{
             kind: "${kind}",
             nullable: ${type.nullable ?? false},
-            ${objectId ? `typeId: "${objectId}"` : ''}
-        }`
+        `
+
+        if (objectId) {
+            result += `${objectId ? `typeId: "${objectId}",` : ''}`
+        }
+
+        if (args) {
+            result += `${
+                args
+                    ? `arguments: [${args.map((x) => this._writeNexemaFieldValue(x)).join(', ')}]`
+                    : ''
+            }`
+        }
+
+        return result + `}`
     }
 
     protected _writeNexemaFieldsByJsName(): string {
