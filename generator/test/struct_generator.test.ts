@@ -2,7 +2,6 @@ import { CommonTypes } from '../src/constants'
 import { Generator } from '../src/generator'
 import { NexemaFile, NexemaPrimitiveValueType } from '../src/models'
 import { StructGenerator } from '../src/struct_generator'
-import fs from 'fs'
 import {
     formatSource,
     getBaseType,
