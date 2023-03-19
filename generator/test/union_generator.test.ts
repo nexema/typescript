@@ -79,13 +79,19 @@ describe('UnionGenerator', () => {
         const want = `export class MyUnion extends $nex.NexemaUnion<MyUnion, "stringField" | "boolField" | "listField"> implements $nex.NexemaMergeable<MyUnion>, $nex.NexemaClonable<MyUnion> {
     
             private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+                typeId: '1',
+                name: 'MyUnion',
+                new: () => MyUnion.createEmpty(),
+                inherits: null,
+                kind: "union",
                 fieldsByIndex: {
                     0: {
                         index: 0,
                         jsName: "stringField",
                         name: "string_field",
                         value: {
-                            kind: "string"
+                            kind: "string",
+                            nullable: false
                         }
                     },
                     1: {
@@ -93,7 +99,8 @@ describe('UnionGenerator', () => {
                         jsName: "boolField",
                         name: "bool_field",
                         value: {
-                            kind: "boolean"
+                            kind: "boolean",
+                            nullable: false
                         }
                     },
                     2: {
@@ -101,7 +108,8 @@ describe('UnionGenerator', () => {
                         jsName: "listField",
                         name: "list_field",
                         value: {
-                            kind: "list"
+                            kind: "list",
+                            nullable: false
                         }
                     }
                 },
@@ -145,6 +153,10 @@ describe('UnionGenerator', () => {
             
               instance.mergeFrom(buffer)
               return instance
+            }
+
+            public static createEmpty(): MyUnion {
+                return new MyUnion()
             }
     
             public get stringField(): string {
@@ -360,13 +372,20 @@ describe('UnionGenerator', () => {
         const want = `export class MyUnion extends $nex.NexemaUnion<MyUnion, "anEnum" | "aStruct"> implements $nex.NexemaMergeable<MyUnion>, $nex.NexemaClonable<MyUnion> {
 
 private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+    typeId: '1',
+    name: 'MyUnion',
+    new: () => MyUnion.createEmpty(),
+    inherits: null,
+    kind: "union",
     fieldsByIndex: {
         0: {
             index: 0,
             jsName: "anEnum",
             name: "an_enum",
             value: {
-                kind: "enum"
+                kind: "enum",
+                nullable: false,
+                typeId: '50',
             }
         },
         1: {
@@ -374,7 +393,9 @@ private static readonly _typeInfo: $nex.NexemaTypeInfo = {
             jsName: "aStruct",
             name: "a_struct",
             value: {
-                kind: "struct"
+                kind: "struct",
+                nullable: false,
+                typeId: '51',
             }
         }
     },
@@ -414,6 +435,10 @@ public static decode(buffer: Uint8Array): MyUnion {
 
   instance.mergeFrom(buffer)
   return instance
+}
+
+public static createEmpty(): MyUnion {
+  return new MyUnion()
 }
 
 public get anEnum(): A {

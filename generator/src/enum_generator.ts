@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ImportAlias } from './constants'
+import { CommonTypes, ImportAlias } from './constants'
 import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
 import { NexemaFile, NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
@@ -15,6 +15,8 @@ export class EnumGenerator extends GeneratorBase {
         export class ${this._type.name} extends ${ImportAlias.Nexema}.NexemaEnum<${
             this._type.name
         }> {
+            ${this._writeTypeInfo()}
+
             ${this._writeConstructor()}
 
             ${this._type.fields?.map((x) => this._writeField(x)).join('\n')}
@@ -71,5 +73,21 @@ export class EnumGenerator extends GeneratorBase {
 
         return `${byIndex}
         ${byName}`
+    }
+
+    protected override _writeTypeInfo(): string {
+        return `private static readonly _enumTypeInfo: ${CommonTypes.NexemaTypeInfo} = {
+            typeId: "${this._type.id}",
+            inherits: null,
+            name: "${this._type.name}",
+            new: () => ${this._type.name}.${this._type.fields![0].name},
+            kind: "enum",
+            fieldsByIndex: ${this._writeNexemaFields(true)},
+            fieldsByJsName: ${this._writeNexemaFieldsByJsName()}
+        }
+        
+        protected get _typeInfo(): ${CommonTypes.NexemaTypeInfo} {
+            return ${this._type.name}._enumTypeInfo;
+        }`
     }
 }

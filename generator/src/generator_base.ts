@@ -39,6 +39,57 @@ export abstract class GeneratorBase {
         return this._context.resolveFor(this._file, objectId)
     }
 
+    protected getJavascriptDefaultValueFor(type: NexemaValueType): string {
+        if (type.kind === 'primitiveValueType') {
+            switch ((type as NexemaPrimitiveValueType).primitive) {
+                case 'string':
+                    return "''"
+
+                case 'boolean':
+                    return 'false'
+
+                case 'uint':
+                case 'int':
+                case 'uint64':
+                case 'uint32':
+                case 'duration':
+                    return '0n'
+
+                case 'int8':
+                case 'int16':
+                case 'int32':
+                case 'int64':
+                case 'uint8':
+                case 'uint16':
+                case 'float32':
+                case 'float64':
+                    return '0'
+
+                case 'binary':
+                    return 'new Uint8Array()'
+
+                case 'list':
+                    return '[]'
+
+                case 'map':
+                    return 'new Map()'
+
+                case 'timestamp':
+                    return 'new Date(0)'
+
+                default:
+                    return 'undefined'
+            }
+        } else {
+            const ref = this.resolveReference((type as NexemaTypeValueType).objectId)
+            if (ref.type.modifier === 'enum') {
+                return `${this.getDeclarationForTypeReference(ref)}.${ref.type.fields![0].name}`
+            } else {
+                return `${this.getDeclarationForTypeReference(ref)}.createEmpty()`
+            }
+        }
+    }
+
     protected getJavascriptType(type: NexemaValueType, omitNullability?: boolean): string {
         let jsType: string
         if (type.kind === 'primitiveValueType') {
@@ -146,15 +197,15 @@ export abstract class GeneratorBase {
         return result
     }
 
-    protected _writeNexemaFields(): string {
+    protected _writeNexemaFields(skipValue = false): string {
         return `{
             ${this._type
                 .fields!.map(
                     (x) => `${x.index}: {
                 index: ${x.index},
                 jsName: "${this._fieldNames[x.name]}",
-                name: "${x.name}",
-                value: ${this._writeNexemaFieldValue(x.type!)}
+                name: "${x.name}", 
+                value: ${skipValue ? 'undefined' : `${this._writeNexemaFieldValue(x.type!)}`} 
             }`
                 )
                 .join(',')}
@@ -163,14 +214,18 @@ export abstract class GeneratorBase {
 
     protected _writeNexemaFieldValue(type: NexemaValueType): string {
         let kind: string
+        let objectId: string | undefined
         if (type.kind === 'primitiveValueType') {
             kind = (type as NexemaPrimitiveValueType).primitive
         } else {
-            kind = this._context.getObject((type as NexemaTypeValueType).objectId).modifier
+            objectId = (type as NexemaTypeValueType).objectId
+            kind = this._context.getObject(objectId).modifier
         }
 
         return `{
-            kind: "${kind}"
+            kind: "${kind}",
+            nullable: ${type.nullable ?? false},
+            ${objectId ? `typeId: "${objectId}"` : ''}
         }`
     }
 
@@ -181,6 +236,17 @@ export abstract class GeneratorBase {
 
     protected _writeTypeInfo(): string {
         return `private static readonly _typeInfo: ${CommonTypes.NexemaTypeInfo} = {
+            typeId: "${this._type.id}",
+            name: "${this._type.name}",
+            new: () => ${this._type.name}.createEmpty(),
+            inherits: ${
+                this._type.baseType
+                    ? `{
+                name: "${this.resolveReference(this._type.baseType).type.name}"
+            }`
+                    : 'null'
+            },
+            kind: "${this._type.modifier}",
             fieldsByIndex: ${this._writeNexemaFields()},
             fieldsByJsName: ${this._writeNexemaFieldsByJsName()}
         }`

@@ -84,13 +84,19 @@ describe('StructGenerator', () => {
         const want = `export class MyStruct extends $nex.NexemaStruct<MyStruct> implements $nex.NexemaMergeable<MyStruct>, $nex.NexemaClonable<MyStruct> {
     
             private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+                typeId: '1',
+                name: 'MyStruct',
+                new: () => MyStruct.createEmpty(),
+                inherits: null,
+                kind: 'struct',
                 fieldsByIndex: {
                     0: {
                         index: 0,
                         jsName: "stringField",
                         name: "string_field",
                         value: {
-                            kind: "string"
+                            kind: "string",
+                            nullable: false
                         }
                     },
                     1: {
@@ -98,7 +104,8 @@ describe('StructGenerator', () => {
                         jsName: "boolField",
                         name: "bool_field",
                         value: {
-                            kind: "boolean"
+                            kind: "boolean",
+                            nullable: false
                         }
                     },
                     2: {
@@ -106,7 +113,8 @@ describe('StructGenerator', () => {
                         jsName: "listField",
                         name: "list_field",
                         value: {
-                            kind: "list"
+                            kind: "list",
+                            nullable: false
                         }
                     }
                 },
@@ -133,6 +141,13 @@ describe('StructGenerator', () => {
                 });
             }
 
+            public static createEmpty(): MyStruct {
+              return new MyStruct({
+                stringField: '',
+                listField: [],
+              })
+            }
+
             public static decode(buffer: Uint8Array): MyStruct {
               const instance = Object.create(MyStruct.prototype) as MyStruct
               instance._state = {
@@ -144,7 +159,7 @@ describe('StructGenerator', () => {
               instance.mergeFrom(buffer);
               return instance;
             }
-    
+
             public get stringField(): string {
                 return this._state.values[0] as string;
             }
@@ -276,6 +291,11 @@ describe('StructGenerator', () => {
         export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A> {
 
       private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+        typeId: '1',
+        name: 'A',
+        new: () => A.createEmpty(),
+        inherits: null,
+        kind: "struct",
         fieldsByIndex: {
           0: {
             index: 0,
@@ -283,6 +303,7 @@ describe('StructGenerator', () => {
             name: "string_field",
             value: {
               kind: "string",
+              nullable: false
             },
           },
           1: {
@@ -291,6 +312,7 @@ describe('StructGenerator', () => {
             name: "bool_field",
             value: {
               kind: "boolean",
+              nullable: false
             },
           },
           2: {
@@ -299,6 +321,7 @@ describe('StructGenerator', () => {
             name: "int_field",
             value: {
               kind: "int",
+              nullable: false
             },
           },
           3: {
@@ -307,6 +330,7 @@ describe('StructGenerator', () => {
             name: "int8_field",
             value: {
               kind: "int8",
+              nullable: false
             },
           },
           4: {
@@ -315,6 +339,7 @@ describe('StructGenerator', () => {
             name: "int16_field",
             value: {
               kind: "int16",
+              nullable: false
             },
           },
           5: {
@@ -323,6 +348,7 @@ describe('StructGenerator', () => {
             name: "int32_field",
             value: {
               kind: "int32",
+              nullable: false
             },
           },
           6: {
@@ -331,6 +357,7 @@ describe('StructGenerator', () => {
             name: "int64_field",
             value: {
               kind: "int64",
+              nullable: false
             },
           },
           7: {
@@ -339,6 +366,7 @@ describe('StructGenerator', () => {
             name: "uint_field",
             value: {
               kind: "uint",
+              nullable: false
             },
           },
           8: {
@@ -347,6 +375,7 @@ describe('StructGenerator', () => {
             name: "uint8_field",
             value: {
               kind: "uint8",
+              nullable: false
             },
           },
           9: {
@@ -355,6 +384,7 @@ describe('StructGenerator', () => {
             name: "uint16_field",
             value: {
               kind: "uint16",
+              nullable: false
             },
           },
           10: {
@@ -363,6 +393,7 @@ describe('StructGenerator', () => {
             name: "uint32_field",
             value: {
               kind: "uint32",
+              nullable: false
             },
           },
           11: {
@@ -371,6 +402,7 @@ describe('StructGenerator', () => {
             name: "uint64_field",
             value: {
               kind: "uint64",
+              nullable: false
             },
           },
           12: {
@@ -379,6 +411,7 @@ describe('StructGenerator', () => {
             name: "float32_field",
             value: {
               kind: "float32",
+              nullable: false
             },
           },
           13: {
@@ -387,6 +420,7 @@ describe('StructGenerator', () => {
             name: "float64_field",
             value: {
               kind: "float64",
+              nullable: false
             },
           },
           14: {
@@ -395,6 +429,7 @@ describe('StructGenerator', () => {
             name: "binary_field",
             value: {
               kind: "binary",
+              nullable: false
             },
           },
           15: {
@@ -403,6 +438,7 @@ describe('StructGenerator', () => {
             name: "timestamp_field",
             value: {
               kind: "timestamp",
+              nullable: false
             },
           },
           16: {
@@ -411,6 +447,7 @@ describe('StructGenerator', () => {
             name: "duration_field",
             value: {
               kind: "duration",
+              nullable: false
             },
           },
         },
@@ -479,6 +516,28 @@ describe('StructGenerator', () => {
         });
       }
 
+      public static createEmpty(): A {
+        return new A({
+          stringField: '',
+          boolField: false,
+          intField: 0n,
+          int8Field: 0,
+          int16Field: 0,
+          int32Field: 0,
+          int64Field: 0,
+          uintField: 0n,
+          uint8Field: 0,
+          uint16Field: 0,
+          uint32Field: 0n,
+          uint64Field: 0n,
+          float32Field: 0,
+          float64Field: 0,
+          binaryField: new Uint8Array(),
+          timestampField: new Date(0),
+          durationField: 0n,
+        })
+      }
+
       public static decode(buffer: Uint8Array): A {
         const instance = Object.create(A.prototype) as A
         instance._state = {
@@ -508,7 +567,7 @@ describe('StructGenerator', () => {
         instance.mergeFrom(buffer);
         return instance;
       }
-    
+
       /**
        * A string field
        */
@@ -846,6 +905,11 @@ describe('StructGenerator', () => {
         implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A>
       {
         private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+          typeId: '1',
+          name: 'A',
+          new: () => A.createEmpty(),
+          inherits: null,
+          kind: 'struct',
           fieldsByIndex: {
             0: {
               index: 0,
@@ -853,6 +917,7 @@ describe('StructGenerator', () => {
               name: "string_field",
               value: {
                 kind: "string",
+                nullable: true
               },
             },
             1: {
@@ -861,6 +926,7 @@ describe('StructGenerator', () => {
               name: "list_field",
               value: {
                 kind: "list",
+                nullable: false
               },
             },
             2: {
@@ -869,6 +935,7 @@ describe('StructGenerator', () => {
               name: "list_value_null_field",
               value: {
                 kind: "list",
+                nullable: false
               },
             },
             3: {
@@ -877,6 +944,7 @@ describe('StructGenerator', () => {
               name: "list_null_field",
               value: {
                 kind: "list",
+                nullable: true
               },
             },
             4: {
@@ -885,6 +953,7 @@ describe('StructGenerator', () => {
               name: "list_both_null_field",
               value: {
                 kind: "list",
+                nullable: true
               },
             },
             5: {
@@ -893,6 +962,7 @@ describe('StructGenerator', () => {
               name: "map_field",
               value: {
                 kind: "map",
+                nullable: false
               },
             },
             6: {
@@ -901,6 +971,7 @@ describe('StructGenerator', () => {
               name: "map_value_null_field",
               value: {
                 kind: "map",
+                nullable: false
               },
             },
             7: {
@@ -909,6 +980,7 @@ describe('StructGenerator', () => {
               name: "map_null_field",
               value: {
                 kind: "map",
+                nullable: true
               },
             },
             8: {
@@ -917,6 +989,7 @@ describe('StructGenerator', () => {
               name: "mapt_both_null_field",
               value: {
                 kind: "map",
+                nullable: true
               },
             },
           },
@@ -959,6 +1032,20 @@ describe('StructGenerator', () => {
             ],
             baseValues: undefined,
           });
+        }
+
+        public static createEmpty(): A {
+          return new A({
+            stringField: null,
+            listField: [],
+            listValueNullField: [],
+            listNullField: null,
+            listBothNullField: null,
+            mapField: new Map(),
+            mapValueNullField: new Map(),
+            mapNullField: null,
+            maptBothNullField: null,
+          })
         }
 
         public static decode(buffer: Uint8Array): A {
@@ -1303,6 +1390,13 @@ describe('StructGenerator', () => {
         const want = `
 export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A> {
       private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+        typeId: '1',
+        name: 'A',
+        new: () => A.createEmpty(),
+        inherits: {
+          name: "Base",
+        },
+        kind: 'struct',
         fieldsByIndex: {
           0: {
             index: 0,
@@ -1310,6 +1404,7 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
             name: "string_field",
             value: {
               kind: "string",
+              nullable: false
             },
           },
         },
@@ -1328,6 +1423,14 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
           values: [data.stringField],
           baseValues: [data.varintField, data.uvarintField],
         });
+      }
+
+      public static createEmpty(): A {
+        return new A({
+          varintField: 0n,
+          uvarintField: 0n,
+          stringField: '',
+        })
       }
 
       public static decode(buffer: Uint8Array): A {
@@ -1499,6 +1602,11 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
         const want = `
 export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A> {
     private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+      typeId: '1',
+      name: 'A',
+      new: () => A.createEmpty(),
+      inherits: null,
+      kind: 'struct',
       fieldsByIndex: {
         0: {
           index: 0,
@@ -1506,6 +1614,8 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "struct_field",
           value: {
             kind: "struct",
+            nullable: false,
+            typeId: "5"
           },
         },
         1: {
@@ -1513,7 +1623,9 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           jsName: "enumField",
           name: "enum_field",
           value: {
-            kind: "enum"
+            kind: "enum",
+            nullable: false,
+            typeId: "6"
           }
         },
         2: {
@@ -1522,6 +1634,8 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "null_struct_field",
           value: {
             kind: "struct",
+            nullable: true,
+            typeId: "5"
           },
         },
         3: {
@@ -1530,6 +1644,8 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "null_enum_field",
           value: {
             kind: "enum",
+            nullable: true,
+            typeId: "6"
           },
         },
         4: {
@@ -1538,6 +1654,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_struct_field",
           value: {
             kind: "list",
+            nullable: false
           },
         },
         5: {
@@ -1546,6 +1663,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_enum_field",
           value: {
             kind: "list",
+            nullable: false
           },
         },
         6: {
@@ -1554,6 +1672,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_struct_field",
           value: {
             kind: "map",
+            nullable: false
           },
         },
         7: {
@@ -1562,6 +1681,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_enum_field",
           value: {
             kind: "map",
+            nullable: false
           },
         },
         8: {
@@ -1570,6 +1690,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_struct_null_field",
           value: {
             kind: "list",
+            nullable: false
           },
         },
         9: {
@@ -1578,6 +1699,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "list_enum_null_field",
           value: {
             kind: "list",
+            nullable: false
           },
         },
         10: {
@@ -1586,6 +1708,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_struct_null_field",
           value: {
             kind: "map",
+            nullable: false
           },
         },
         11: {
@@ -1594,6 +1717,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           name: "map_enum_null_field",
           value: {
             kind: "map",
+            nullable: false
           },
         },
       },
@@ -1644,6 +1768,23 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
           data.mapEnumNullField],
         baseValues: undefined,
       });
+    }
+
+    public static createEmpty(): A {
+      return new A({
+        structField: B.createEmpty(),
+        enumField: C.unknown,
+        nullStructField: null,
+        nullEnumField: null,
+        listStructField: [],
+        listEnumField: [],
+        mapStructField: new Map(),
+        mapEnumField: new Map(),
+        listStructNullField: [],
+        listEnumNullField: [],
+        mapStructNullField: new Map(),
+        mapEnumNullField: new Map(),
+      })
     }
 
     public static decode(buffer: Uint8Array): A {

@@ -48,6 +48,43 @@ it('should generate enum classes', () => {
     * MyEnum
     */
     export class MyEnum extends $nex.NexemaEnum<MyEnum> {
+        private static readonly _enumTypeInfo: $nex.NexemaTypeInfo = {
+          typeId: '1',
+          inherits: null,
+          name: 'MyEnum',
+          new: () => MyEnum.unknown,
+          kind: 'enum',
+          fieldsByIndex: {
+            0: {
+              index: 0,
+              jsName: 'unknown',
+              name: 'unknown',
+              value: undefined,
+            },
+            1: {
+              index: 1,
+              jsName: 'red',
+              name: 'red',
+              value: undefined,
+            },
+            2: {
+              index: 2,
+              jsName: 'blue',
+              name: 'blue',
+              value: undefined,
+            },
+          },
+          fieldsByJsName: {
+            unknown: 0,
+            red: 1,
+            blue: 2,
+          },
+        }
+        
+        protected get _typeInfo(): $nex.NexemaTypeInfo {
+          return MyEnum._enumTypeInfo
+        }
+
         private constructor(index: number, name: string) {
             super(index, name);
         }

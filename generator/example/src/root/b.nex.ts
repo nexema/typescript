@@ -2,6 +2,43 @@
 import * as $nex from 'nexema'
 
 export class Baz extends $nex.NexemaEnum<Baz> {
+  private static readonly _enumTypeInfo: $nex.NexemaTypeInfo = {
+    typeId: '3',
+    inherits: null,
+    name: 'Baz',
+    new: () => Baz.unknown,
+    kind: 'enum',
+    fieldsByIndex: {
+      0: {
+        index: 0,
+        jsName: 'unknown',
+        name: 'unknown',
+        value: undefined,
+      },
+      1: {
+        index: 1,
+        jsName: 'one',
+        name: 'one',
+        value: undefined,
+      },
+      2: {
+        index: 2,
+        jsName: 'two',
+        name: 'two',
+        value: undefined,
+      },
+    },
+    fieldsByJsName: {
+      unknown: 0,
+      one: 1,
+      two: 2,
+    },
+  }
+
+  protected get _typeInfo(): $nex.NexemaTypeInfo {
+    return Baz._enumTypeInfo
+  }
+
   private constructor(index: number, name: string) {
     super(index, name)
   }

@@ -7,6 +7,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nexema": "^1.0.9"
+    "nexema": "^1.0.13"
   }
 }

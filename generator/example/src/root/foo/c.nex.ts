@@ -7,6 +7,11 @@ export class Abc
   implements $nex.NexemaMergeable<Abc>, $nex.NexemaClonable<Abc>
 {
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+    typeId: '4',
+    name: 'Abc',
+    new: () => Abc.createEmpty(),
+    inherits: null,
+    kind: 'union',
     fieldsByIndex: {
       0: {
         index: 0,
@@ -14,6 +19,7 @@ export class Abc
         name: 'y',
         value: {
           kind: 'list',
+          nullable: false,
         },
       },
       1: {
@@ -22,6 +28,7 @@ export class Abc
         name: 'z',
         value: {
           kind: 'uint64',
+          nullable: false,
         },
       },
       2: {
@@ -30,6 +37,8 @@ export class Abc
         name: 'w',
         value: {
           kind: 'enum',
+          nullable: false,
+          typeId: '3',
         },
       },
     },
@@ -73,6 +82,10 @@ export class Abc
 
     instance.mergeFrom(buffer)
     return instance
+  }
+
+  public static createEmpty(): Abc {
+    return new Abc()
   }
 
   public get y(): Array<string> {

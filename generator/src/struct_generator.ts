@@ -2,7 +2,7 @@
 import { CommonTypes, ImportAlias } from './constants'
 import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
-import { NexemaFile, NexemaTypeDefinition } from './models'
+import { NexemaFile, NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
 import { isJsPrimitive, toCamelCase } from './utils'
 
 export class StructGenerator extends GeneratorBase {
@@ -31,6 +31,8 @@ export class StructGenerator extends GeneratorBase {
 
             ${this._writeConstructor()}
             
+            ${this._writeCreateEmptyStaticMethod()}
+
             ${this._writeDecodeStaticMethod()}
 
             ${this._writeGettersAndSetters()}
@@ -336,6 +338,43 @@ export class StructGenerator extends GeneratorBase {
 
             instance.mergeFrom(buffer);
             return instance;
+        }`
+    }
+
+    private _writeCreateEmptyStaticMethod(): string {
+        const writeField = (field: NexemaTypeFieldDefinition): string | undefined => {
+            const defaults = {
+                ...(this._type.defaults ?? {}),
+                ...(this._baseType?.defaults ?? {}),
+            }
+            let result = `${this._fieldNames[field.name]}:`
+
+            if (defaults[field.name]) {
+                return undefined
+            }
+
+            if (field.type!.nullable) {
+                result += 'null'
+            } else {
+                result += this.getJavascriptDefaultValueFor(field.type!)
+            }
+
+            return result
+        }
+
+        return `public static createEmpty(): ${this._type.name} {
+            return new ${this._type.name}({
+                ${
+                    this._baseType
+                        ? `${this._baseType!.fields!.map((x) => writeField(x))
+                              .filter((x) => x)
+                              .join(',')},`
+                        : ''
+                }
+                ${this._type!.fields!.map((x) => writeField(x))
+                    .filter((x) => x)
+                    .join(', ')}
+            });
         }`
     }
 }

@@ -8,6 +8,11 @@ export class Foo
   implements $nex.NexemaMergeable<Foo>, $nex.NexemaClonable<Foo>
 {
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+    typeId: '1',
+    name: 'Foo',
+    new: () => Foo.createEmpty(),
+    inherits: null,
+    kind: 'struct',
     fieldsByIndex: {
       0: {
         index: 0,
@@ -15,6 +20,7 @@ export class Foo
         name: 'a',
         value: {
           kind: 'string',
+          nullable: false,
         },
       },
       1: {
@@ -23,6 +29,8 @@ export class Foo
         name: 'b',
         value: {
           kind: 'enum',
+          nullable: false,
+          typeId: '2',
         },
       },
       2: {
@@ -31,6 +39,8 @@ export class Foo
         name: 'c',
         value: {
           kind: 'enum',
+          nullable: false,
+          typeId: '3',
         },
       },
       3: {
@@ -39,6 +49,8 @@ export class Foo
         name: 'd',
         value: {
           kind: 'union',
+          nullable: false,
+          typeId: '4',
         },
       },
     },
@@ -55,6 +67,15 @@ export class Foo
       typeInfo: Foo._typeInfo,
       values: [data.a, data.b, data.c, data.d],
       baseValues: undefined,
+    })
+  }
+
+  public static createEmpty(): Foo {
+    return new Foo({
+      a: '',
+      b: Bar.unspecified,
+      c: $b.Baz.unknown,
+      d: $c.Abc.createEmpty(),
     })
   }
 
@@ -153,6 +174,43 @@ export class Foo
 }
 
 export class Bar extends $nex.NexemaEnum<Bar> {
+  private static readonly _enumTypeInfo: $nex.NexemaTypeInfo = {
+    typeId: '2',
+    inherits: null,
+    name: 'Bar',
+    new: () => Bar.unspecified,
+    kind: 'enum',
+    fieldsByIndex: {
+      0: {
+        index: 0,
+        jsName: 'unspecified',
+        name: 'unspecified',
+        value: undefined,
+      },
+      1: {
+        index: 1,
+        jsName: 'red',
+        name: 'red',
+        value: undefined,
+      },
+      2: {
+        index: 2,
+        jsName: 'blue',
+        name: 'blue',
+        value: undefined,
+      },
+    },
+    fieldsByJsName: {
+      unspecified: 0,
+      red: 1,
+      blue: 2,
+    },
+  }
+
+  protected get _typeInfo(): $nex.NexemaTypeInfo {
+    return Bar._enumTypeInfo
+  }
+
   private constructor(index: number, name: string) {
     super(index, name)
   }

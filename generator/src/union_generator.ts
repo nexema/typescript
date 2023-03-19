@@ -41,6 +41,8 @@ export class UnionGenerator extends GeneratorBase {
 
             ${this._writeDecodeStaticMethod()}
 
+            ${this._writeCreateEmptyStaticMethod()}
+
             ${this._writeGettersAndSetters()}
 
             ${this._writeEncodeMethod()}
@@ -268,6 +270,12 @@ export class UnionGenerator extends GeneratorBase {
 
             instance.mergeFrom(buffer);
             return instance;
+        }`
+    }
+
+    private _writeCreateEmptyStaticMethod(): string {
+        return `public static createEmpty(): ${this._type.name} {
+            return new ${this._type.name}();
         }`
     }
 }
