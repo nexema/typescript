@@ -1,37 +1,45 @@
 import { EnumGenerator } from '../src/enum_generator'
 import { formatSource } from './test_utils'
-import fs from 'fs'
 
 it('should generate enum classes', () => {
-    const generator = new EnumGenerator({
-        id: '1',
-        name: 'MyEnum',
-        fields: [
-            {
-                index: 0,
-                name: 'unknown',
-                annotations: {},
-                documentation: [],
-            },
-            {
-                index: 1,
-                name: 'red',
-                annotations: {},
-                documentation: ['A red color'],
-            },
-            {
-                index: 2,
-                name: 'blue',
-                annotations: {},
-                documentation: ['A blue color'],
-            },
-        ],
-        modifier: 'enum',
-        baseType: null,
-        annotations: {},
-        defaults: {},
-        documentation: ['This is the documentation for', 'MyEnum'],
-    })
+    const generator = new EnumGenerator(
+        {
+            id: '1',
+            name: 'MyEnum',
+            fields: [
+                {
+                    index: 0,
+                    name: 'unknown',
+                    annotations: {},
+                    documentation: [],
+                },
+                {
+                    index: 1,
+                    name: 'red',
+                    annotations: {},
+                    documentation: ['A red color'],
+                },
+                {
+                    index: 2,
+                    name: 'blue',
+                    annotations: {},
+                    documentation: ['A blue color'],
+                },
+            ],
+            modifier: 'enum',
+            baseType: null,
+            annotations: {},
+            defaults: {},
+            documentation: ['This is the documentation for', 'MyEnum'],
+        },
+        {
+            id: '',
+            fileName: 'enum.nex',
+            packageName: 'root',
+            path: 'root/enum.nex',
+            types: [],
+        }
+    )
 
     const want = `
     /**
@@ -90,9 +98,4 @@ it('should generate enum classes', () => {
 
     const got = formatSource(generator.generate())
     expect(got).toStrictEqual(formatSource(want))
-    fs.writeFileSync(
-        'example/src/enum.ts',
-        `import * as $nex from 'nexema'; 
-    ${got}`
-    )
 })

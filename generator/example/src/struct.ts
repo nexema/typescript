@@ -100,8 +100,8 @@ import * as $nex from 'nexema';
   }
 
   public mergeUsing(other: MyStruct): void {
-    this._state.values[0] = other._state.values[0] as string;
-    this._state.values[1] = other._state.values[1] as boolean;
+    this._state.values[0] = other._state.values[0];
+    this._state.values[1] = other._state.values[1];
     this._state.values[2] = Array.from(
       other._state.values[2] as Array<number | null>
     );

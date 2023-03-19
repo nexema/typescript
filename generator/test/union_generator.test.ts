@@ -2,7 +2,6 @@ import { CommonTypes } from '../src/constants'
 import { NexemaPrimitiveValueType } from '../src/models'
 import { UnionGenerator } from '../src/union_generator'
 import { formatSource } from './test_utils'
-import fs from 'fs'
 
 it('should generate union classes', () => {
     const generator = new UnionGenerator(
@@ -281,9 +280,4 @@ it('should generate union classes', () => {
 
     const got = formatSource(generator.generate())
     expect(got).toStrictEqual(formatSource(want))
-    fs.writeFileSync(
-        'example/src/union.ts',
-        `import * as $nex from 'nexema'; 
-    ${got}`
-    )
 })

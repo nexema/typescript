@@ -190,9 +190,7 @@ export class UnionGenerator extends GeneratorBase {
                         .map(
                             (x) => `case ${x.index}: 
                                 this._state.currentValue = ${this._writeDeepCloneValue(
-                                    `other._state.currentValue as ${this.getJavascriptType(
-                                        x.type!
-                                    )}`,
+                                    `other._state.currentValue`,
                                     x.type!
                                 )}
                                 break;
@@ -209,10 +207,7 @@ export class UnionGenerator extends GeneratorBase {
                 ${this._type
                     .fields!.map(
                         (x) => `case ${x.index}: 
-                    return ${this._writeValueToJsObj(
-                        `this._state.currentValue as ${this.getJavascriptType(x.type!)}`,
-                        x.type!
-                    )}
+                    return ${this._writeValueToJsObj(`this._state.currentValue`, x.type!, true)}
                 `
                     )
                     .join('\n')}
@@ -237,9 +232,7 @@ export class UnionGenerator extends GeneratorBase {
                         .map(
                             (x) => `case ${x.index}: 
                                 instance._state.currentValue = ${this._writeDeepCloneValue(
-                                    `this._state.currentValue as ${this.getJavascriptType(
-                                        x.type!
-                                    )}`,
+                                    `this._state.currentValue`,
                                     x.type!
                                 )}
                                 break;

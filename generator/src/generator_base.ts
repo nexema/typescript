@@ -113,6 +113,14 @@ export abstract class GeneratorBase {
         return jsType
     }
 
+    protected _writeDecodeStaticMethod(): string {
+        return `public static decode(buffer: Uint8Array): ${this._type.name} {
+            const instance = new ${this._type.name}();
+            instance.mergeFrom(buffer);
+            return instance;
+        }`
+    }
+
     protected _writeHeader(
         docs: string[] | null,
         annotations: { [key: string]: JsObj } | null,
@@ -239,7 +247,16 @@ export abstract class GeneratorBase {
                 }
             }
         } else {
-            out = `${variableName}${valueType.nullable ? '?' : ''}.toObject()`
+            const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
+            if (ref.type.modifier === 'enum') {
+                out = `(${variableName} as ${this.getDeclarationForTypeReference(ref)})${
+                    valueType.nullable ? '?' : ''
+                }.index`
+            } else {
+                out = `(${variableName} as ${this.getDeclarationForTypeReference(ref)})${
+                    valueType.nullable ? '?' : ''
+                }.toObject()`
+            }
         }
 
         if (valueType.nullable && writeNullable) {
@@ -305,19 +322,21 @@ export abstract class GeneratorBase {
 
                 case 'map': {
                     const elementType = primitiveValue.arguments![1]
-                    const decl = `new Map(${variableName} as ${this.getJavascriptType(
-                        valueType,
-                        true
-                    )}`
                     if (isJsPrimitive(elementType)) {
-                        result = `${decl})`
+                        result = `new Map(${variableName} as ${this.getJavascriptType(
+                            valueType,
+                            true
+                        )})`
                         break
                     }
 
-                    result = `${decl}, ([key, value]) => [key, ${this._writeDeepCloneValue(
+                    result = `new Map(Array.from(${variableName} as ${this.getJavascriptType(
+                        valueType,
+                        true
+                    )}, ([key, value]) => [key, ${this._writeDeepCloneValue(
                         'value',
                         elementType
-                    )}])`
+                    )}]))`
                     break
                 }
 
@@ -331,7 +350,24 @@ export abstract class GeneratorBase {
         } else {
             const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
 
-            result = `${ref.type.name}.clone()`
+            if (ref.type.modifier === 'enum') {
+                if (valueType.nullable) {
+                    result = `${this.getDeclarationForTypeReference(
+                        ref
+                    )}.byIndex((${variableName} as ${this.getJavascriptType(
+                        valueType
+                    )})?.index ?? 0)`
+                } else {
+                    result = `${ref.type.name}.byIndex((${variableName} as ${this.getJavascriptType(
+                        valueType
+                    )}).index)`
+                }
+            } else {
+                result = `(${variableName} as ${this.getJavascriptType(valueType)})${
+                    valueType.nullable ? '?' : ''
+                }.clone()`
+            }
+            shouldWriteNullable = false
         }
 
         if (shouldWriteNullable && valueType.nullable) {
@@ -397,7 +433,7 @@ export abstract class GeneratorBase {
                 )})`
             } else if (primitiveValueType.primitive === 'map') {
                 const keyType = primitiveValueType.arguments![0]
-                const elementType = primitiveValueType.arguments![0]
+                const elementType = primitiveValueType.arguments![1]
                 return `new Map(Array.from({length: reader.beginDecodeMap()}, () => [${this._getDecoder(
                     keyType
                 )}, ${this._writeFieldDecoder(elementType)}]))`

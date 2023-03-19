@@ -29,6 +29,8 @@ export class StructGenerator extends GeneratorBase {
             ${this._writeTypeInfo()}
 
             ${this._writeConstructor()}
+            
+            ${this._writeDecodeStaticMethod()}
 
             ${this._writeGettersAndSetters()}
 

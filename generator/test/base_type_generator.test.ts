@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { BaseTypeGenerator } from '../src/base_type_generator'
 import { NexemaPrimitiveValueType } from '../src/models'
 import { formatSource } from './test_utils'
@@ -67,21 +66,18 @@ it('should generate base type classes', () => {
 
     const want = `export abstract class MyBase<T extends $nex.NexemaStruct<T>> extends $nex.NexemaStruct<MyBase<T>> {
         public abstract get stringField(): string;
+
         public abstract set stringField(value: string);
 
         public abstract get boolField(): boolean;
+
         public abstract set boolField(value: boolean);
 
         public abstract get listField(): Array<number | null>;
+
         public abstract set listField(value: Array<number | null>);
     }`
 
     const got = formatSource(generator.generate())
     expect(got).toStrictEqual(formatSource(want))
-    fs.writeFileSync(
-        'example/src/base.ts',
-        `import * as $nex from 'nexema'; 
-
-${got}`
-    )
 })

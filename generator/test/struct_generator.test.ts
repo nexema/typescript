@@ -1,14 +1,18 @@
-import fs from 'fs'
 import { CommonTypes } from '../src/constants'
-import { NexemaPrimitiveValueType } from '../src/models'
+import { Generator } from '../src/generator'
+import { NexemaFile, NexemaPrimitiveValueType } from '../src/models'
 import { StructGenerator } from '../src/struct_generator'
+import fs from 'fs'
 import {
     formatSource,
+    getBaseType,
+    getEnum,
     getField,
     getListValueType,
     getMapValueType,
     getPrimitiveValueType,
     getStruct,
+    getTypeValueType,
 } from './test_utils'
 
 describe('StructGenerator', () => {
@@ -127,6 +131,12 @@ describe('StructGenerator', () => {
                     baseValues: undefined
                 });
             }
+
+            public static decode(buffer: Uint8Array): MyStruct {
+              const instance = new MyStruct();
+              instance.mergeFrom(buffer);
+              return instance;
+            }
     
             public get stringField(): string {
                 return this._state.values[0] as string;
@@ -176,8 +186,8 @@ describe('StructGenerator', () => {
             }
     
             public mergeUsing(other: MyStruct): void {
-                this._state.values[0] = other._state.values[0] as string
-                this._state.values[1] = other._state.values[1] as boolean
+                this._state.values[0] = other._state.values[0]
+                this._state.values[1] = other._state.values[1]
                 this._state.values[2] = Array.from(other._state.values[2] as Array<number | null>)
             }
     
@@ -204,11 +214,6 @@ describe('StructGenerator', () => {
 
         const got = formatSource(generator.generate())
         expect(got).toStrictEqual(formatSource(want))
-        fs.writeFileSync(
-            'example/src/struct.ts',
-            `import * as $nex from 'nexema'; 
-        ${got}`
-        )
     })
 
     it('should generate struct with every primitive', () => {
@@ -465,6 +470,12 @@ describe('StructGenerator', () => {
           baseValues: undefined,
         });
       }
+
+      public static decode(buffer: Uint8Array): A {
+        const instance = new A();
+        instance.mergeFrom(buffer);
+        return instance;
+      }
     
       /**
        * A string field
@@ -656,25 +667,25 @@ describe('StructGenerator', () => {
       }
     
       public mergeUsing(other: A): void {
-        this._state.values[0] = other._state.values[0] as string;
-        this._state.values[1] = other._state.values[1] as boolean;
-        this._state.values[2] = other._state.values[2] as bigint;
-        this._state.values[3] = other._state.values[3] as number;
-        this._state.values[4] = other._state.values[4] as number;
-        this._state.values[5] = other._state.values[5] as number;
-        this._state.values[6] = other._state.values[6] as bigint;
-        this._state.values[7] = other._state.values[7] as bigint;
-        this._state.values[8] = other._state.values[8] as number;
-        this._state.values[9] = other._state.values[9] as number;
-        this._state.values[10] = other._state.values[10] as number;
-        this._state.values[11] = other._state.values[11] as bigint;
-        this._state.values[12] = other._state.values[12] as number;
-        this._state.values[13] = other._state.values[13] as number;
+        this._state.values[0] = other._state.values[0];
+        this._state.values[1] = other._state.values[1];
+        this._state.values[2] = other._state.values[2];
+        this._state.values[3] = other._state.values[3];
+        this._state.values[4] = other._state.values[4];
+        this._state.values[5] = other._state.values[5];
+        this._state.values[6] = other._state.values[6];
+        this._state.values[7] = other._state.values[7];
+        this._state.values[8] = other._state.values[8];
+        this._state.values[9] = other._state.values[9];
+        this._state.values[10] = other._state.values[10];
+        this._state.values[11] = other._state.values[11];
+        this._state.values[12] = other._state.values[12];
+        this._state.values[13] = other._state.values[13];
         this._state.values[14] = new Uint8Array(
           other._state.values[14] as Uint8Array
         );
         this._state.values[15] = new Date(other._state.values[15] as Date);
-        this._state.values[16] = other._state.values[16] as bigint;
+        this._state.values[16] = other._state.values[16];
       }
     
       public override toObject(): $nex.JsObj {
@@ -916,6 +927,12 @@ describe('StructGenerator', () => {
             baseValues: undefined,
           });
         }
+
+        public static decode(buffer: Uint8Array): A {
+          const instance = new A();
+          instance.mergeFrom(buffer);
+          return instance;
+        }
       
         public get stringField(): string | null {
           return this._state.values[0] as string | null;
@@ -1092,13 +1109,13 @@ describe('StructGenerator', () => {
           this._state.values[5] = new Map(
             Array.from({ length: reader.beginDecodeMap() }, () => [
               reader.decodeString(),
-              reader.decodeString(),
+              reader.decodeFloat32(),
             ])
           );
           this._state.values[6] = new Map(
             Array.from({ length: reader.beginDecodeMap() }, () => [
               reader.decodeString(),
-              reader.decodeString(),
+              reader.isNextNull() ? null : reader.decodeFloat32(),
             ])
           );
           this._state.values[7] = reader.isNextNull()
@@ -1106,7 +1123,7 @@ describe('StructGenerator', () => {
             : new Map(
                 Array.from({ length: reader.beginDecodeMap() }, () => [
                   reader.decodeString(),
-                  reader.decodeString(),
+                  reader.decodeFloat32(),
                 ])
               );
           this._state.values[8] = reader.isNextNull()
@@ -1114,7 +1131,7 @@ describe('StructGenerator', () => {
             : new Map(
                 Array.from({ length: reader.beginDecodeMap() }, () => [
                   reader.decodeString(),
-                  reader.decodeString(),
+                  reader.isNextNull() ? null : reader.decodeFloat32(),
                 ])
               );
         }
@@ -1201,12 +1218,715 @@ describe('StructGenerator', () => {
       }`
 
         const got = formatSource(generator.generate())
-        fs.writeFileSync(
-            'example/src/test.ts',
-            `
-        import * as $nex from 'nexema';
-        ${got}`
+        expect(got).toStrictEqual(formatSource(want))
+    })
+
+    it('should generate struct with a base type', () => {
+        const file = {
+            id: '1',
+            fileName: 'a.nex',
+            path: 'root/a.nex',
+            packageName: 'root',
+            types: [
+                getBaseType({
+                    id: '5',
+                    name: 'Base',
+                    fields: [
+                        getField(0, 'varint_field', getPrimitiveValueType('int')),
+                        getField(1, 'uvarint_field', getPrimitiveValueType('uint')),
+                    ],
+                }),
+            ],
+        } as NexemaFile
+
+        new Generator(
+            {
+                version: 1,
+                hashcode: '',
+                files: [file],
+            },
+            { outputPath: '', useOnlyMaps: true }
         )
+
+        const generator = new StructGenerator(
+            getStruct({
+                name: 'A',
+                fields: [getField(0, 'string_field', getPrimitiveValueType('string'))],
+                baseTypeId: '5',
+            }),
+            file
+        )
+
+        const want = `
+export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A> {
+      private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+        fieldsByIndex: {
+          0: {
+            index: 0,
+            jsName: "stringField",
+            name: "string_field",
+            value: {
+              kind: "string",
+            },
+          },
+        },
+        fieldsByJsName: {
+          stringField: 0,
+        },
+      };
+    
+      public constructor(data: {
+        varintField: bigint;
+        uvarintField: bigint;
+        stringField: string;
+      }) {
+        super({
+          typeInfo: A._typeInfo,
+          values: [data.stringField],
+          baseValues: [data.varintField, data.uvarintField],
+        });
+      }
+
+      public static decode(buffer: Uint8Array): A {
+        const instance = new A();
+        instance.mergeFrom(buffer);
+        return instance;
+      }
+    
+      public get stringField(): string {
+        return this._state.values[0] as string;
+      }
+    
+      public set stringField(value: string) {
+        this._state.values[0] = value;
+      }
+    
+      public override get varintField(): bigint {
+        return this._state.baseValues![0] as bigint;
+      }
+    
+      public override set varintField(value: bigint) {
+        this._state.baseValues![0] = value;
+      }
+    
+      public override get uvarintField(): bigint {
+        return this._state.baseValues![1] as bigint;
+      }
+    
+      public override set uvarintField(value: bigint) {
+        this._state.baseValues![1] = value;
+      }
+    
+      public override encode(): Uint8Array {
+        const writer = new $nex.NexemabWriter();
+        writer.encodeVarint(this.varintField);
+        writer.encodeUvarint(this.uvarintField);
+        writer.encodeString(this.stringField);
+        return writer.takeBytes();
+      }
+    
+      public mergeFrom(buffer: Uint8Array): void {
+        const reader = new $nex.NexemabReader(buffer);
+        this._state.baseValues![0] = reader.decodeVarint();
+        this._state.baseValues![1] = reader.decodeUvarint();
+        this._state.values[0] = reader.decodeString();
+      }
+    
+      public mergeUsing(other: A): void {
+        this._state.baseValues![0] = other._state.baseValues![0];
+        this._state.baseValues![1] = other._state.baseValues![1];
+        this._state.values[0] = other._state.values[0];
+      }
+    
+      public override toObject(): $nex.JsObj {
+        return {
+          varintField: this._state.baseValues![0] as bigint,
+          uvarintField: this._state.baseValues![1] as bigint,
+          stringField: this._state.values[0] as string,
+        };
+      }
+    
+      public clone(): A {
+        return new A({
+          varintField: this._state.baseValues![0] as bigint,
+          uvarintField: this._state.baseValues![1] as bigint,
+          stringField: this._state.values[0] as string,
+        });
+      }
+    
+      public toString(): string {
+        return \`A(varintField: \${this._state.baseValues![0]}, uvarintField: \${this._state.baseValues![1]}, stringField: \${this._state.values[0]})\`;
+      }
+    }`
+
+        const got = formatSource(generator.generate())
+        expect(got).toStrictEqual(formatSource(want))
+    })
+
+    it('should generate struct with a custom type', () => {
+        const file = {
+            id: '1',
+            fileName: 'a.nex',
+            path: 'root/a.nex',
+            packageName: 'root',
+            types: [
+                getStruct({
+                    id: '5',
+                    name: 'B',
+                    fields: [getField(0, 'string_field', getPrimitiveValueType('string'))],
+                }),
+                getEnum({
+                    id: '6',
+                    name: 'C',
+                    fields: ['unknown', 'red', 'blue'],
+                }),
+            ],
+        } as NexemaFile
+
+        new Generator(
+            {
+                version: 1,
+                hashcode: '',
+                files: [file],
+            },
+            { outputPath: '', useOnlyMaps: true }
+        )
+
+        const generator = new StructGenerator(
+            getStruct({
+                name: 'A',
+                fields: [
+                    getField(0, 'struct_field', getTypeValueType('5')),
+                    getField(1, 'enum_field', getTypeValueType('6')),
+                    getField(2, 'null_struct_field', getTypeValueType('5', true)),
+                    getField(3, 'null_enum_field', getTypeValueType('6', true)),
+                    getField(4, 'list_struct_field', getListValueType(getTypeValueType('5'))),
+                    getField(5, 'list_enum_field', getListValueType(getTypeValueType('6'))),
+                    getField(
+                        6,
+                        'map_struct_field',
+                        getMapValueType(getPrimitiveValueType('string'), getTypeValueType('5'))
+                    ),
+                    getField(
+                        7,
+                        'map_enum_field',
+                        getMapValueType(getPrimitiveValueType('string'), getTypeValueType('6'))
+                    ),
+                    getField(
+                        8,
+                        'list_struct_null_field',
+                        getListValueType(getTypeValueType('5', true))
+                    ),
+                    getField(
+                        9,
+                        'list_enum_null_field',
+                        getListValueType(getTypeValueType('6', true))
+                    ),
+                    getField(
+                        10,
+                        'map_struct_null_field',
+                        getMapValueType(
+                            getPrimitiveValueType('string'),
+                            getTypeValueType('5', true)
+                        )
+                    ),
+                    getField(
+                        11,
+                        'map_enum_null_field',
+                        getMapValueType(
+                            getPrimitiveValueType('string'),
+                            getTypeValueType('6', true)
+                        )
+                    ),
+                ],
+            }),
+            file
+        )
+
+        const want = `
+export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, $nex.NexemaClonable<A> {
+    private static readonly _typeInfo: $nex.NexemaTypeInfo = {
+      fieldsByIndex: {
+        0: {
+          index: 0,
+          jsName: "structField",
+          name: "struct_field",
+          value: {
+            kind: "struct",
+          },
+        },
+        1: {
+          index: 1,
+          jsName: "enumField",
+          name: "enum_field",
+          value: {
+            kind: "enum"
+          }
+        },
+        2: {
+          index: 2,
+          jsName: "nullStructField",
+          name: "null_struct_field",
+          value: {
+            kind: "struct",
+          },
+        },
+        3: {
+          index: 3,
+          jsName: "nullEnumField",
+          name: "null_enum_field",
+          value: {
+            kind: "enum",
+          },
+        },
+        4: {
+          index: 4,
+          jsName: "listStructField",
+          name: "list_struct_field",
+          value: {
+            kind: "list",
+          },
+        },
+        5: {
+          index: 5,
+          jsName: "listEnumField",
+          name: "list_enum_field",
+          value: {
+            kind: "list",
+          },
+        },
+        6: {
+          index: 6,
+          jsName: "mapStructField",
+          name: "map_struct_field",
+          value: {
+            kind: "map",
+          },
+        },
+        7: {
+          index: 7,
+          jsName: "mapEnumField",
+          name: "map_enum_field",
+          value: {
+            kind: "map",
+          },
+        },
+        8: {
+          index: 8,
+          jsName: "listStructNullField",
+          name: "list_struct_null_field",
+          value: {
+            kind: "list",
+          },
+        },
+        9: {
+          index: 9,
+          jsName: "listEnumNullField",
+          name: "list_enum_null_field",
+          value: {
+            kind: "list",
+          },
+        },
+        10: {
+          index: 10,
+          jsName: "mapStructNullField",
+          name: "map_struct_null_field",
+          value: {
+            kind: "map",
+          },
+        },
+        11: {
+          index: 11,
+          jsName: "mapEnumNullField",
+          name: "map_enum_null_field",
+          value: {
+            kind: "map",
+          },
+        },
+      },
+      fieldsByJsName: {
+        structField: 0,
+        enumField: 1,
+        nullStructField: 2,
+        nullEnumField: 3,
+        listStructField: 4,
+        listEnumField: 5,
+        mapStructField: 6,
+        mapEnumField: 7,
+        listStructNullField: 8,
+        listEnumNullField: 9,
+        mapStructNullField: 10,
+        mapEnumNullField: 11,
+      },
+    };
+  
+    public constructor(data: {
+      structField: B;
+      enumField: C;
+      nullStructField?: B | null;
+      nullEnumField?: C | null;
+      listStructField: Array<B>;
+      listEnumField: Array<C>;
+      mapStructField: Map<string, B>;
+      mapEnumField: Map<string, C>;
+      listStructNullField: Array<B | null>;
+      listEnumNullField: Array<C | null>;
+      mapStructNullField: Map<string, B | null>;
+      mapEnumNullField: Map<string, C | null>;
+    }) {
+      super({
+        typeInfo: A._typeInfo,
+        values: [
+          data.structField, 
+          data.enumField, 
+          data.nullStructField ?? null, 
+          data.nullEnumField ?? null, 
+          data.listStructField, 
+          data.listEnumField, 
+          data.mapStructField, 
+          data.mapEnumField,
+          data.listStructNullField,
+          data.listEnumNullField,
+          data.mapStructNullField,
+          data.mapEnumNullField],
+        baseValues: undefined,
+      });
+    }
+
+    public static decode(buffer: Uint8Array): A {
+      const instance = new A();
+      instance.mergeFrom(buffer);
+      return instance;
+    }
+
+    public get structField(): B {
+      return this._state.values[0] as B;
+    }
+    
+    public set structField(value: B) {
+      this._state.values[0] = value;
+    }
+    
+    public get enumField(): C {
+      return this._state.values[1] as C;
+    }
+    
+    public set enumField(value: C) {
+      this._state.values[1] = value;
+    }
+  
+    public get nullStructField(): B | null {
+      return this._state.values[2] as B | null;
+    }
+    
+    public set nullStructField(value: B | null) {
+      this._state.values[2] = value;
+    }
+    
+    public get nullEnumField(): C | null {
+      return this._state.values[3] as C | null;
+    }
+    
+    public set nullEnumField(value: C | null) {
+      this._state.values[3] = value;
+    }
+    
+    public get listStructField(): Array<B> {
+      return this._state.values[4] as Array<B>;
+    }
+    
+    public set listStructField(value: Array<B>) {
+      this._state.values[4] = value;
+    }
+    
+    public get listEnumField(): Array<C> {
+      return this._state.values[5] as Array<C>;
+    }
+    
+    public set listEnumField(value: Array<C>) {
+      this._state.values[5] = value;
+    }
+    
+    public get mapStructField(): Map<string, B> {
+      return this._state.values[6] as Map<string, B>;
+    }
+    
+    public set mapStructField(value: Map<string, B>) {
+      this._state.values[6] = value;
+    }
+    
+    public get mapEnumField(): Map<string, C> {
+      return this._state.values[7] as Map<string, C>;
+    }
+    
+    public set mapEnumField(value: Map<string, C>) {
+      this._state.values[7] = value;
+    }
+
+    public get listStructNullField(): Array<B | null> {
+      return this._state.values[8] as Array<B | null>;
+    }
+    
+    public set listStructNullField(value: Array<B | null>) {
+      this._state.values[8] = value;
+    }
+    
+    public get listEnumNullField(): Array<C | null> {
+      return this._state.values[9] as Array<C | null>;
+    }
+    
+    public set listEnumNullField(value: Array<C | null>) {
+      this._state.values[9] = value;
+    }
+    
+    public get mapStructNullField(): Map<string, B | null> {
+      return this._state.values[10] as Map<string, B | null>;
+    }
+    
+    public set mapStructNullField(value: Map<string, B | null>) {
+      this._state.values[10] = value;
+    }
+    
+    public get mapEnumNullField(): Map<string, C | null> {
+      return this._state.values[11] as Map<string, C | null>;
+    }
+    
+    public set mapEnumNullField(value: Map<string, C | null>) {
+      this._state.values[11] = value;
+    }
+  
+    public override encode(): Uint8Array {
+      const writer = new $nex.NexemabWriter();
+
+      writer.encodeBinary(this.structField.encode());
+      writer.encodeUint8(this.enumField.index);
+      if (this.nullStructField) {
+        writer.encodeBinary(this.nullStructField.encode());
+      } else {
+        writer.encodeNull();
+      }
+      if (this.nullEnumField) {
+        writer.encodeUint8(this.nullEnumField.index);
+      } else {
+        writer.encodeNull();
+      }
+      writer.beginArray(this.listStructField.length);
+      for (const value of this.listStructField) {
+        writer.encodeBinary(value.encode());
+      }
+      writer.beginArray(this.listEnumField.length);
+      for (const value of this.listEnumField) {
+        writer.encodeUint8(value.index);
+      }
+      writer.beginMap(this.mapStructField.size);
+      for (const entry of this.mapStructField.entries()) {
+        writer.encodeString(entry[0]);
+        writer.encodeBinary(entry[1].encode());
+      }
+      writer.beginMap(this.mapEnumField.size);
+      for (const entry of this.mapEnumField.entries()) {
+        writer.encodeString(entry[0]);
+        writer.encodeUint8(entry[1].index);
+      }
+      writer.beginArray(this.listStructNullField.length);
+      for (const value of this.listStructNullField) {
+        if (value) {
+          writer.encodeBinary(value.encode());
+        } else {
+          writer.encodeNull();
+        }
+      }
+      writer.beginArray(this.listEnumNullField.length);
+      for (const value of this.listEnumNullField) {
+        if (value) {
+          writer.encodeUint8(value.index);
+        } else {
+          writer.encodeNull();
+        }
+      }
+      writer.beginMap(this.mapStructNullField.size);
+      for (const entry of this.mapStructNullField.entries()) {
+        writer.encodeString(entry[0]);
+        if (entry[1]) {
+          writer.encodeBinary(entry[1].encode());
+        } else {
+          writer.encodeNull();
+        }
+      }
+      writer.beginMap(this.mapEnumNullField.size);
+      for (const entry of this.mapEnumNullField.entries()) {
+        writer.encodeString(entry[0]);
+        if (entry[1]) {
+          writer.encodeUint8(entry[1].index);
+        } else {
+          writer.encodeNull();
+        }
+      }
+      return writer.takeBytes();
+    }
+  
+    public mergeFrom(buffer: Uint8Array): void {
+      const reader = new $nex.NexemabReader(buffer);
+      this._state.values[0] = B.decode(reader.decodeBinary());
+      this._state.values[1] = C.byIndex(reader.decodeUint8()) ?? C.unknown;
+      this._state.values[2] = reader.isNextNull()
+        ? null
+        : B.decode(reader.decodeBinary());
+      this._state.values[3] = reader.isNextNull()
+        ? null
+        : C.byIndex(reader.decodeUint8()) ?? C.unknown;
+      this._state.values[4] = Array.from(
+        { length: reader.beginDecodeArray() },
+        () => B.decode(reader.decodeBinary())
+      );
+      this._state.values[5] = Array.from(
+        { length: reader.beginDecodeArray() },
+        () => C.byIndex(reader.decodeUint8()) ?? C.unknown
+      );
+      this._state.values[6] = new Map(
+        Array.from({ length: reader.beginDecodeMap() }, () => [
+          reader.decodeString(),
+          B.decode(reader.decodeBinary()),
+        ])
+      );
+      this._state.values[7] = new Map(
+        Array.from({ length: reader.beginDecodeMap() }, () => [
+          reader.decodeString(),
+          C.byIndex(reader.decodeUint8()) ?? C.unknown,
+        ])
+      );
+      this._state.values[8] = Array.from(
+        { length: reader.beginDecodeArray() },
+        () => (reader.isNextNull() ? null : B.decode(reader.decodeBinary()))
+      );
+      this._state.values[9] = Array.from(
+        { length: reader.beginDecodeArray() },
+        () =>
+          reader.isNextNull()
+            ? null
+            : C.byIndex(reader.decodeUint8()) ?? C.unknown
+      );
+      this._state.values[10] = new Map(
+        Array.from({ length: reader.beginDecodeMap() }, () => [
+          reader.decodeString(),
+          reader.isNextNull() ? null : B.decode(reader.decodeBinary()),
+        ])
+      );
+      this._state.values[11] = new Map(
+        Array.from({ length: reader.beginDecodeMap() }, () => [
+          reader.decodeString(),
+          reader.isNextNull()
+            ? null
+            : C.byIndex(reader.decodeUint8()) ?? C.unknown,
+        ])
+      );
+    }
+  
+    public mergeUsing(other: A): void {
+      this._state.values[0] = (other._state.values[0] as B).clone();
+      this._state.values[1] = C.byIndex((other._state.values[1] as C).index);
+      this._state.values[2] = (other._state.values[2] as B | null)?.clone()
+      this._state.values[3] = C.byIndex((other._state.values[3] as C | null)?.index ?? 0)
+      this._state.values[4] = Array.from(other._state.values[4] as Array<B>, () => (x as B).clone())
+      this._state.values[5] = Array.from(other._state.values[5] as Array<C>, () => C.byIndex((x as C).index))
+      this._state.values[6] = new Map(Array.from(other._state.values[6] as Map<string, B>, ([key, value]) => [key, (value as B).clone()]))
+      this._state.values[7] = new Map(Array.from(other._state.values[7] as Map<string, C>, ([key, value]) => [key, C.byIndex((value as C).index)]))
+      this._state.values[8] = Array.from(
+        other._state.values[8] as Array<B | null>,
+        () => (x as B | null)?.clone()
+      );
+      this._state.values[9] = Array.from(
+        other._state.values[9] as Array<C | null>,
+        () => C.byIndex((x as C | null)?.index ?? 0)
+      );
+      this._state.values[10] = new Map(
+        Array.from(
+          other._state.values[10] as Map<string, B | null>,
+          ([key, value]) => [key, (value as B | null)?.clone()]
+        )
+      );
+      this._state.values[11] = new Map(
+        Array.from(
+          other._state.values[11] as Map<string, C | null>,
+          ([key, value]) => [key, C.byIndex((value as C | null)?.index ?? 0)]
+        )
+      );
+    }
+  
+    public override toObject(): $nex.JsObj {
+      return {
+        structField: (this._state.values[0] as B).toObject(),
+        enumField: (this._state.values[1] as C).index,
+        nullStructField: (this._state.values[2] as B)?.toObject(),
+        nullEnumField: (this._state.values[3] as C)?.index,
+        listStructField: (this._state.values[4] as Array<B>).map(x => x.toObject()),
+        listEnumField: (this._state.values[5] as Array<C>).map(x => x.toObject()),
+        mapStructField: Object.fromEntries(Array.from((this._state.values[6]) as Map<string, B>, (entry) => [entry[0], entry[1].toObject()])),
+        mapEnumField: Object.fromEntries(Array.from(this._state.values[7] as Map<string, C>, (entry) => [entry[0], entry[1].toObject()])),
+        listStructNullField: (this._state.values[8] as Array<B | null>).map((x) =>
+          x.toObject()
+        ),
+        listEnumNullField: (this._state.values[9] as Array<C | null>).map((x) =>
+          x.toObject()
+        ),
+        mapStructNullField: Object.fromEntries(
+          Array.from(this._state.values[10] as Map<string, B | null>, (entry) => [
+            entry[0],
+            entry[1].toObject(),
+          ])
+        ),
+        mapEnumNullField: Object.fromEntries(
+          Array.from(this._state.values[11] as Map<string, C | null>, (entry) => [
+            entry[0],
+            entry[1].toObject(),
+          ])
+        ),
+      };
+    }
+  
+    public clone(): A {
+      return new A({
+        structField: (this._state.values[0] as B).clone(),
+        enumField: C.byIndex((this._state.values[1] as C).index),
+        nullStructField: (this._state.values[2] as B | null)?.clone(),
+        nullEnumField: C.byIndex((this._state.values[3] as C | null)?.index ?? 0),
+        listStructField: Array.from(this._state.values[4] as Array<B>, () => (x as B).clone()),
+        listEnumField: Array.from(this._state.values[5] as Array<C>, () => C.byIndex((x as C).index)),
+        mapStructField: new Map(
+          Array.from(this._state.values[6] as Map<string, B>, ([key, value]) => [key, (value as B).clone()])
+        ),
+        mapEnumField: new Map(
+          Array.from(this._state.values[7] as Map<string, C>, ([key, value]) => [key, C.byIndex((value as C).index)])
+        ),
+        listStructNullField: Array.from(
+          this._state.values[8] as Array<B | null>,
+          () => (x as B | null)?.clone()
+        ),
+        listEnumNullField: Array.from(
+          this._state.values[9] as Array<C | null>,
+          () => C.byIndex((x as C | null)?.index ?? 0)
+        ),
+        mapStructNullField: new Map(
+          Array.from(
+            this._state.values[10] as Map<string, B | null>,
+            ([key, value]) => [key, (value as B | null)?.clone()]
+          )
+        ),
+        mapEnumNullField: new Map(
+          Array.from(
+            this._state.values[11] as Map<string, C | null>,
+            ([key, value]) => [key, C.byIndex((value as C | null)?.index ?? 0)]
+          )
+        ),
+      });
+    }
+  
+    public toString(): string {
+      return \`A(structField: \${this._state.values[0]}, enumField: \${this._state.values[1]}, nullStructField: \${this._state.values[2]}, nullEnumField: \${this._state.values[3]}, listStructField: \${this._state.values[4]}, listEnumField: \${this._state.values[5]}, mapStructField: \${this._state.values[6]}, mapEnumField: \${this._state.values[7]}, listStructNullField: \${this._state.values[8]}, listEnumNullField: \${this._state.values[9]}, mapStructNullField: \${this._state.values[10]}, mapEnumNullField: \${this._state.values[11]})\`;
+    }
+  }`
+
+        const got = formatSource(generator.generate())
         expect(got).toStrictEqual(formatSource(want))
     })
 })

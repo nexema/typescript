@@ -1,9 +1,4 @@
-import {
-    GeneratorSettings,
-    NexemaFile,
-    NexemaSnapshot,
-    NexemaTypeDefinition,
-} from './models'
+import { GeneratorSettings, NexemaFile, NexemaSnapshot, NexemaTypeDefinition } from './models'
 import prettier from 'prettier'
 import { TypeReference } from './type_reference'
 import path from 'path'
@@ -34,7 +29,12 @@ export class Generator {
     }
 
     public getObject(id: string): NexemaTypeDefinition {
-        throw `type ${id} not found.`
+        if (!this._types.has(id)) {
+            throw `type ${id} not found.`
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return this._types.get(id)!.type
     }
 
     public resolveFor(file: NexemaFile, objectId: string): TypeReference {
@@ -46,9 +46,10 @@ export class Generator {
         const typeReference = this._types.get(objectId)!
         if (file.fileName !== typeReference.path) {
             this._currentFileImports.add(
-                `import * as ${
-                    typeReference.importAlias
-                } from "${this.resolveImportFor(file, typeReference.path)}"`
+                `import * as ${typeReference.importAlias} from "${this.resolveImportFor(
+                    file,
+                    typeReference.path
+                )}"`
             )
         }
 
@@ -58,11 +59,7 @@ export class Generator {
     private resolveImportFor(file: NexemaFile, p: string): string {
         const rel = path.relative(
             path.dirname(
-                path.join(
-                    this._settings.outputPath,
-                    path.dirname(file.path),
-                    file.fileName
-                )
+                path.join(this._settings.outputPath, path.dirname(file.path), file.fileName)
             ),
             p
         )
@@ -73,9 +70,7 @@ export class Generator {
         for (const file of this._snapshot.files) {
             for (const type of file.types) {
                 this._types.set(type.id, {
-                    importAlias: `$${toSnakeCase(
-                        path.parse(file.fileName).name
-                    )}`,
+                    importAlias: `$${toSnakeCase(path.parse(file.fileName).name)}`,
                     path: path.join(
                         this._settings.outputPath,
                         path.dirname(file.path),
