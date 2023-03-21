@@ -1,6 +1,3 @@
-import { NexemaField, NexemaFieldType } from "../definition";
-import { JsObj } from "../primitives";
-import { NexemaTypeInfo } from "../type_info";
 import { NexemabSpec } from "./spec";
 
 /**

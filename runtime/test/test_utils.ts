@@ -315,6 +315,7 @@ export class UnionA
         value: {
           nullable: false,
           kind: "enum",
+          arguments: [],
         },
       },
     },
