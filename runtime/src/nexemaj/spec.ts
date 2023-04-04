@@ -20,8 +20,6 @@ export const NexemajSpec = {
   Null: new Uint8Array([0x6e, 0x75, 0x6c, 0x6c]),
 } as const;
 
-export const DigitRegex = /^[-\d.]$/;
-
 export const Limits = {
   OneByte: 0x80,
   TwoBytes: 0x800,

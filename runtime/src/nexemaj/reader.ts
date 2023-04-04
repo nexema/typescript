@@ -1,18 +1,16 @@
 import { JsObj } from "../primitives";
-import { DigitRegex, JsonType, NexemajSpec, TokenType } from "./spec";
+import { JsonType, NexemajSpec, TokenType } from "./spec";
 
 export class NexemajReader {
   private static readonly _textDecoder: TextDecoder = new TextDecoder();
 
   private _buffer: Uint8Array;
-  private _dataView: DataView;
   private _offset: number;
   private _currentToken: number;
 
   constructor(buffer: Uint8Array) {
     this._buffer = buffer;
     this._offset = 0;
-    this._dataView = new DataView(this._buffer.buffer);
     this._currentToken = this._buffer[this._offset];
   }
 
