@@ -24,6 +24,14 @@ export class NexemajReader {
     this._currentToken = this._buffer[this._offset];
   }
 
+  private _expectedError(want: string): Error {
+    return new Error(
+      `[${this._offset}] -> Expected ${want} but got ${String.fromCharCode(
+        this._currentToken
+      )}`
+    );
+  }
+
   private _isNumber(input: number): boolean {
     // 44 = "-"
     // 58 = "9"
@@ -151,13 +159,7 @@ export class NexemajReader {
       if (this._currentToken === NexemajSpec.Comma) {
         this.next(); // Consume the ',' token
       } else if (this._currentToken !== NexemajSpec.ObjectEnd) {
-        throw new Error(
-          `[Pos ${
-            this._offset
-          }] Expected ',' or '}' but got ${String.fromCharCode(
-            this._currentToken
-          )}`
-        );
+        throw this._expectedError(", or }");
       }
 
       obj[key] = value;
@@ -177,11 +179,7 @@ export class NexemajReader {
       if (this._currentToken === NexemajSpec.Comma) {
         this.next();
       } else if (this._currentToken !== NexemajSpec.ArrayEnd) {
-        throw new Error(
-          `Expected ',' or ']' but got ${String.fromCharCode(
-            this._currentToken
-          )}`
-        );
+        throw this._expectedError(", or ]");
       }
 
       array.push(value);
@@ -192,9 +190,9 @@ export class NexemajReader {
   }
 
   /**
-   * Reads a JSON object.
+   * Reads a JSON element.
    *
-   * @returns The parsed object.
+   * @returns The parsed element.
    */
   public read(): JsObj {
     switch (this.whichType()) {
