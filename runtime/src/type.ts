@@ -74,6 +74,11 @@ export abstract class BaseNexemaType {
   public abstract toObject(): JsObj;
 
   /**
+   * Converts the current instance to a JSON string in a binary representation
+   */
+  public abstract toJson(): Uint8Array;
+
+  /**
    * Returns the type information of the current BaseNexemaType.
    */
   public getTypeInfo(): NexemaTypeInfo {
@@ -312,6 +317,12 @@ export abstract class NexemaEnum<T extends NexemaEnum<T>>
 
   public override toObject(): JsObj {
     return this._index;
+  }
+
+  public override toJson(): Uint8Array {
+    const buffer = new Uint8Array();
+    new DataView(buffer).setUint8(0, this._index);
+    return buffer;
   }
 
   public override getTypeInfo(): NexemaTypeInfo {

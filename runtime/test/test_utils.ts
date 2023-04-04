@@ -4,6 +4,7 @@
  */
 
 import { NexemabWriter } from "../src/nexemab/writer";
+import { NexemajWriter } from "../src/nexemaj/writer";
 import { NexemabReader } from "../src/nexemab/reader";
 import { JsObj } from "../src/primitives";
 import {
@@ -15,6 +16,7 @@ import {
   NexemaUnion,
 } from "../src/type";
 import { NexemaTypeInfo } from "../src/type_info";
+import { NexemajSpec } from "../src/nexemaj/spec";
 
 export class EnumA extends NexemaEnum<EnumA> {
   private static readonly _enumTypeInfo: NexemaTypeInfo = {
@@ -83,6 +85,29 @@ export class StructA
   extends NexemaStruct<StructA>
   implements NexemaMergeable<StructA>, NexemaClonable<StructA>
 {
+  public toJson(): Uint8Array {
+    const writer = new NexemajWriter();
+    writer.writeToken(NexemajSpec.ObjectStart);
+    writer.writeKey("firstName");
+    writer.writeString(this.firstName);
+    writer.writeKey("tags");
+    writer.writeToken(NexemajSpec.ArrayStart);
+    for (const element of this.tags) {
+      writer.writeString(element);
+    }
+    writer.writeArrayEnd();
+    writer.writeToken(NexemajSpec.ObjectStart);
+    for (const [key, value] of this.preferences) {
+      writer.writeKey(key);
+      writer.writeBool(value);
+    }
+    writer.writeObjectEnd();
+    writer.writeKey("enum");
+    writer.writeNumber(this.enum.index);
+    writer.writeObjectEnd();
+    return writer.asUint8Array();
+  }
+
   public encode(): Uint8Array {
     throw new Error("Method not implemented.");
   }
@@ -243,6 +268,9 @@ export class UnionA
   extends NexemaUnion<UnionA, "firstName" | "tags" | "preferences" | "enum">
   implements NexemaMergeable<UnionA>, NexemaClonable<UnionA>
 {
+  public toJson(): Uint8Array {
+    throw new Error("Method not implemented.");
+  }
   public override encode(): Uint8Array {
     const writer = new NexemabWriter();
     return writer.takeBytes();
