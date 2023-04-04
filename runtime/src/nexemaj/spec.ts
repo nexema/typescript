@@ -10,13 +10,17 @@ export const NexemajSpec = {
   Newline: 0x0a,
   Carriage: 0x0d,
   Tab: 0x09,
+  Space: 0x20,
   LetterN: 0x6e,
   LetterT: 0x74,
   LetterR: 0x72,
+  LetterF: 0x66,
   BooleanFalse: new Uint8Array([0x66, 0x61, 0x6c, 0x73, 0x65]),
   BooleanTrue: new Uint8Array([0x74, 0x72, 0x75, 0x65]),
   Null: new Uint8Array([0x6e, 0x75, 0x6c, 0x6c]),
 } as const;
+
+export const DigitRegex = /^[-\d.]$/;
 
 export const Limits = {
   OneByte: 0x80,
@@ -24,3 +28,25 @@ export const Limits = {
   ThreeBytesLower: 0xd800,
   ThreeBytesUpper: 0xe000,
 } as const;
+
+export enum TokenType {
+  INVALID = -1,
+  IDENT = 0,
+  COMMA = 1,
+  COLON = 2,
+  QUOTE = 3,
+  ARRAY_START = 4,
+  ARRAY_END = 5,
+  OBJECT_START = 6,
+  OBJECT_END = 7,
+}
+
+export enum JsonType {
+  NULL,
+  BOOLEAN_TRUE,
+  BOOLEAN_FALSE,
+  STRING,
+  NUMBER,
+  ARRAY,
+  OBJECT,
+}
