@@ -66,8 +66,13 @@ export class NexemajWriter {
 
         case NexemajSpec.Carriage: {
           view.setUint8(offset++, NexemajSpec.Backlash);
-          view.setUint8(offset++, NexemajSpec.LetterN);
+          view.setUint8(offset++, NexemajSpec.LetterR);
           break;
+        }
+
+        case NexemajSpec.Tab: {
+          view.setUint8(offset++, NexemajSpec.Backlash);
+          view.setUint8(offset++, NexemajSpec.LetterT);
         }
 
         default: {

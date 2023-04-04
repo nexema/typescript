@@ -19,12 +19,12 @@ describe("Nexemaj", () => {
     writer.writeKey("obj");
     writer.writeToken(NexemajSpec.ObjectStart);
     writer.writeKey("nested");
-    writer.writeString("hello");
+    writer.writeString(`hello"world`);
     writer.writeObjectEnd();
     writer.writeObjectEnd();
 
     const got = writer.asString();
-    const want = `{"test":true,"second":151241,"array":[13.2,false,null],"obj":{"nested":"hello"}}`;
+    const want = `{"test":true,"second":151241,"array":[13.2,false,null],"obj":{"nested":"hello\\"world"}}`;
     expect(got).toBe(want);
   });
 
