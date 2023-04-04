@@ -24,14 +24,6 @@ export class NexemajReader {
     this._currentToken = this._buffer[this._offset];
   }
 
-  private _expect(token: number): void {
-    if (this._currentToken !== token) {
-      throw `Expected character at ${this._offset} to be ${String.fromCharCode(
-        token
-      )}, got ${String.fromCharCode(this._currentToken)}`;
-    }
-  }
-
   private _isNumber(input: number): boolean {
     // 44 = "-"
     // 58 = "9"
