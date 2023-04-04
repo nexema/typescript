@@ -127,6 +127,11 @@ export class NexemajWriter {
     this._push(buffer);
   }
 
+  public writeDate(value: Date): void {
+    const asString = value.toISOString();
+    this._writeString(asString);
+  }
+
   public writeNull(): void {
     this._push(NexemajSpec.Null);
     this._writeChar(NexemajSpec.Comma);
