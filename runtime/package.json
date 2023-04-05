@@ -4,7 +4,7 @@
   "description": "Nexema runtime library",
   "main": "dist/cjs/index.js",
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm -rf coverage",
     "build:esm": "tsc --declaration --module es2020 --declarationDir ./dist/types --outDir dist/esm",
     "build:cjs": "tsc --declaration false --module commonjs --outDir dist/cjs",
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
