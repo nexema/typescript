@@ -3,12 +3,10 @@
  * are simplified versions useful for testing only and may not represent the latest generated code.
  */
 
-import { NexemabWriter } from "../src/nexemab/writer";
-import { NexemajWriter } from "../src/nexemaj/writer";
 import { NexemabReader } from "../src/nexemab/reader";
+import { NexemabWriter } from "../src/nexemab/writer";
 import { JsObj } from "../src/primitives";
 import {
-  BaseNexemaType,
   NexemaClonable,
   NexemaEnum,
   NexemaMergeable,
@@ -16,7 +14,29 @@ import {
   NexemaUnion,
 } from "../src/type";
 import { NexemaTypeInfo } from "../src/type_info";
-import { NexemajSpec } from "../src/nexemaj/spec";
+
+export function benchmark(
+  name: string,
+  callback: () => void,
+  warmupIterations: number = 1000,
+  benchmarkIterations: number = 5000
+): void {
+  // console.log(`Warming up for ${warmupIterations} iterations...`);
+  for (let i = 0; i < warmupIterations; i++) {
+    callback();
+  }
+
+  // console.log(`Benchmarking for ${benchmarkIterations} iterations...`);
+  const times: bigint[] = [];
+  for (let i = 0; i < benchmarkIterations; i++) {
+    const startTime = process.hrtime.bigint();
+    callback();
+    const elapsed = process.hrtime.bigint() - startTime;
+    times.push(elapsed);
+  }
+  const elapsed = Number(times.reduce((a, b) => a + b, 0n)) / times.length;
+  console.log(`${name} -> It took: ${elapsed} ns`);
+}
 
 export class EnumA extends NexemaEnum<EnumA> {
   private static readonly _enumTypeInfo: NexemaTypeInfo = {
@@ -86,26 +106,7 @@ export class StructA
   implements NexemaMergeable<StructA>, NexemaClonable<StructA>
 {
   public toJson(): Uint8Array {
-    const writer = new NexemajWriter();
-    writer.writeToken(NexemajSpec.ObjectStart);
-    writer.writeKey("firstName");
-    writer.writeString(this.firstName);
-    writer.writeKey("tags");
-    writer.writeToken(NexemajSpec.ArrayStart);
-    for (const element of this.tags) {
-      writer.writeString(element);
-    }
-    writer.writeArrayEnd();
-    writer.writeToken(NexemajSpec.ObjectStart);
-    for (const [key, value] of this.preferences) {
-      writer.writeKey(key);
-      writer.writeBool(value);
-    }
-    writer.writeObjectEnd();
-    writer.writeKey("enum");
-    writer.writeNumber(this.enum.index);
-    writer.writeObjectEnd();
-    return writer.asUint8Array();
+    return new Uint8Array();
   }
 
   public encode(): Uint8Array {
