@@ -1,6 +1,6 @@
 {
   "name": "nexema",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "Nexema runtime library",
   "main": "dist/cjs/index.js",
   "scripts": {
