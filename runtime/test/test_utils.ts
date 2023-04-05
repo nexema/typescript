@@ -105,8 +105,8 @@ export class StructA
   extends NexemaStruct<StructA>
   implements NexemaMergeable<StructA>, NexemaClonable<StructA>
 {
-  public toJson(): Uint8Array {
-    return new Uint8Array();
+  public toJson(): string {
+    return "";
   }
 
   public encode(): Uint8Array {
@@ -269,7 +269,7 @@ export class UnionA
   extends NexemaUnion<UnionA, "firstName" | "tags" | "preferences" | "enum">
   implements NexemaMergeable<UnionA>, NexemaClonable<UnionA>
 {
-  public toJson(): Uint8Array {
+  public toJson(): string {
     throw new Error("Method not implemented.");
   }
   public override encode(): Uint8Array {
