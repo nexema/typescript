@@ -8,7 +8,6 @@ export {
 } from "./type";
 export { NexemabWriter } from "./nexemab/writer";
 export { NexemabReader } from "./nexemab/reader";
-export { NexemajWriter } from "./nexemaj/writer";
 export { NexemajReader } from "./nexemaj/reader";
 export { TokenType, JsonType, NexemajSpec } from "./nexemaj/spec";
 export {
