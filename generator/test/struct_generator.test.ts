@@ -226,6 +226,10 @@ describe('StructGenerator', () => {
                     listField: Array.from(this._state.values[2] as Array<number | null>)
                 }
             }
+
+            public override toJson(): string {
+              return \`"stringField":\${this.stringField},"boolField":\${this.boolField},"listField":[\${this.listField.join(",")}]\`
+            }
     
             public clone(): MyStruct {
                 return new MyStruct({

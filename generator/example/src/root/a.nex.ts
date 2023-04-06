@@ -159,6 +159,8 @@ export class Foo
     }
   }
 
+  public override toJson(): string {}
+
   public clone(): Foo {
     return new Foo({
       a: this._state.values[0] as string,

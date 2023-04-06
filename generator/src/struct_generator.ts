@@ -2,7 +2,14 @@
 import { CommonTypes, ImportAlias } from './constants'
 import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
-import { NexemaFile, NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
+import {
+    NexemaFile,
+    NexemaPrimitiveValueType,
+    NexemaTypeDefinition,
+    NexemaTypeFieldDefinition,
+    NexemaTypeValueType,
+    NexemaValueType,
+} from './models'
 import { isJsPrimitive, toCamelCase } from './utils'
 
 export class StructGenerator extends GeneratorBase {
@@ -19,6 +26,15 @@ export class StructGenerator extends GeneratorBase {
                 ),
             }
         }
+    }
+
+    private get allFields(): NexemaTypeFieldDefinition[] {
+        const fields = this._type.fields!
+        if (this._baseType && this._baseType.fields) {
+            fields.push(...this._baseType.fields)
+        }
+
+        return fields
     }
 
     public generate(): string {
