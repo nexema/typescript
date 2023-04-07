@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 // declare module 'JsonEncoderWriter' {}
 
-import { NexemaPrimitiveValueType, NexemaTypeFieldDefinition, NexemaValueType } from './models'
+import { GenerateContext } from './generate_context'
+import {
+    NexemaFile,
+    NexemaPrimitiveValueType,
+    NexemaTypeFieldDefinition,
+    NexemaTypeValueType,
+    NexemaValueType,
+} from './models'
+import { TypeReference } from './type_reference'
 
 export function forStruct(fields: NexemaTypeFieldDefinition[]): string {
     let result = 'public override toJson(): string {'
@@ -14,6 +22,36 @@ export function forStruct(fields: NexemaTypeFieldDefinition[]): string {
 
     result += `return \`{${writtenFields.join(',')}}\`}`
     return result
+}
+
+export function forUnion(
+    context: GenerateContext,
+    file: NexemaFile,
+    fields: NexemaTypeFieldDefinition[]
+): string {
+    return `public override toJson(): string {
+        switch(this._state.fieldIndex) {
+            ${fields
+                .map(
+                    (x) => `case ${x.index}: {
+                    return \`${writeJsonEncode(
+                        `(this._state.currentValue as ${getJavascriptType(
+                            context,
+                            file,
+                            x.type!,
+                            false
+                        )})`,
+                        x.type!
+                    )}\`;
+                }`
+                )
+                .join('\n')}
+
+            default: {
+                return "null";
+            }
+        }
+    }`
 }
 
 function betweenBracesEscaped(input: string): string {
@@ -126,8 +164,96 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
                 break
         }
     } else {
-        out = `${variableName}.toJson()`
+        out = `\${${variableName}.toJson()}`
     }
 
     return out
+}
+
+function getJavascriptType(
+    context: GenerateContext,
+    file: NexemaFile,
+    type: NexemaValueType,
+    omitNullability?: boolean
+): string {
+    let jsType: string
+    if (type.kind === 'primitiveValueType') {
+        const primitiveType = type as NexemaPrimitiveValueType
+        switch (primitiveType.primitive) {
+            case 'string':
+                jsType = 'string'
+                omitNullability ??= false
+                break
+
+            case 'boolean':
+                jsType = 'boolean'
+                omitNullability ??= false
+                break
+
+            case 'binary':
+                jsType = 'Uint8Array'
+                break
+
+            case 'int8':
+            case 'uint8':
+            case 'int16':
+            case 'uint16':
+            case 'int32':
+            case 'uint32':
+            case 'float32':
+            case 'float64':
+                jsType = 'number'
+                omitNullability ??= false
+                break
+
+            case 'int':
+            case 'uint':
+            case 'uint64':
+            case 'int64':
+                jsType = 'bigint'
+                omitNullability ??= false
+                break
+
+            case 'timestamp':
+                jsType = 'Date'
+                break
+
+            case 'duration':
+                jsType = 'bigint'
+                omitNullability ??= false
+                break
+
+            case 'list':
+                jsType = `Array<${getJavascriptType(context, file, primitiveType.arguments![0])}>`
+                break
+
+            case 'map':
+                jsType = `Map<${getJavascriptType(
+                    context,
+                    file,
+                    primitiveType.arguments![0]
+                )}, ${getJavascriptType(context, file, primitiveType.arguments![1])}>`
+                break
+
+            default:
+                throw `unknown primitive ${primitiveType.primitive}`
+        }
+    } else {
+        const ref = context.resolveFor(file, (type as NexemaTypeValueType).objectId)
+        jsType = getDeclarationForTypeReference(file, ref)
+    }
+
+    if (type.nullable && !omitNullability) {
+        jsType += '| null'
+    }
+
+    return jsType
+}
+
+function getDeclarationForTypeReference(file: NexemaFile, ref: TypeReference): string {
+    if (ref.path === file.path) {
+        return ref.type.name
+    }
+
+    return `${ref.importAlias}.${ref.type.name}`
 }

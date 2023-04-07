@@ -133,6 +133,12 @@ export class Foo
     return writer.takeBytes()
   }
 
+  public override toJson(): string {
+    return `{"a":"${
+      this.a
+    }","b":${this.b.toJson()},"c":${this.c.toJson()},"d":${this.d.toJson()}}`
+  }
+
   public mergeFrom(buffer: Uint8Array): void {
     const reader = new $nex.NexemabReader(buffer)
     this._state.values[0] = reader.decodeString()
@@ -158,8 +164,6 @@ export class Foo
       d: (this._state.values[3] as $c.Abc).toObject(),
     }
   }
-
-  public override toJson(): string {}
 
   public clone(): Foo {
     return new Foo({

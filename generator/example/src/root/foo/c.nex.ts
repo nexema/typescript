@@ -150,6 +150,26 @@ export class Abc
     return writer.takeBytes()
   }
 
+  public override toJson(): string {
+    switch (this._state.fieldIndex) {
+      case 0: {
+        return `[${(this._state.currentValue as Array<string>)
+          .map((x) => `"${x}"`)
+          .join(',')}]`
+      }
+      case 1: {
+        return `"${this._state.currentValue as bigint}"`
+      }
+      case 2: {
+        return `${(this._state.currentValue as $b.Baz).toJson()}`
+      }
+
+      default: {
+        return 'null'
+      }
+    }
+  }
+
   public mergeFrom(buffer: Uint8Array): void {
     const reader = new $nex.NexemabReader(buffer)
     if (reader.isNextNull()) {

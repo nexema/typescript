@@ -205,6 +205,12 @@ describe('StructGenerator', () => {
                 }
                 return writer.takeBytes();
             }
+
+            public override toJson(): string {
+              return \`{"string_field":"\${this.string_field}","bool_field":\${
+                this.bool_field
+              },"list_field":[\${this.list_field.map((x) => \`\${x}\`).join(',')}]}\`
+            }
     
             public mergeFrom(buffer: Uint8Array): void {
                 const reader = new $nex.NexemabReader(buffer);
@@ -225,10 +231,6 @@ describe('StructGenerator', () => {
                     boolField: this._state.values[1] as boolean,
                     listField: Array.from(this._state.values[2] as Array<number | null>)
                 }
-            }
-
-            public override toJson(): string {
-              return \`"stringField":\${this.stringField},"boolField":\${this.boolField},"listField":[\${this.listField.join(",")}]\`
             }
     
             public clone(): MyStruct {

@@ -2,14 +2,8 @@
 import { CommonTypes, ImportAlias } from './constants'
 import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
-import {
-    NexemaFile,
-    NexemaPrimitiveValueType,
-    NexemaTypeDefinition,
-    NexemaTypeFieldDefinition,
-    NexemaTypeValueType,
-    NexemaValueType,
-} from './models'
+import * as json_encoder from './json_encoder'
+import { NexemaFile, NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
 import { isJsPrimitive, toCamelCase } from './utils'
 
 export class StructGenerator extends GeneratorBase {
@@ -54,6 +48,8 @@ export class StructGenerator extends GeneratorBase {
             ${this._writeGettersAndSetters()}
 
             ${this._writeEncodeMethod()}
+
+            ${json_encoder.forStruct(this.allFields)}
 
             ${this._writeMergeFromMethod()}
 

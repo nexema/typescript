@@ -1,28 +1,39 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CommonTypes, ImportAlias } from './constants'
 import { GenerateContext } from './generate_context'
+import * as json_encoder from './json_encoder'
 import { GeneratorBase } from './generator_base'
-import { NexemaFile, NexemaPrimitiveValueType, NexemaTypeDefinition } from './models'
+import {
+    NexemaFile,
+    NexemaPrimitiveValueType,
+    NexemaTypeDefinition,
+    NexemaTypeFieldDefinition,
+} from './models'
 
 export class UnionGenerator extends GeneratorBase {
-    primitiveFields = this._type.fields!.filter((x) => {
-        if (x.type!.kind === 'primitiveValueType') {
-            const primitive = (x.type! as NexemaPrimitiveValueType).primitive
-            return (
-                primitive !== 'list' &&
-                primitive !== 'map' &&
-                primitive !== 'binary' &&
-                primitive !== 'timestamp'
-            )
-        }
-
-        return false
-    })
-
-    nonPrimitiveFields = this._type.fields!.filter((x) => !this.primitiveFields.includes(x))
+    private readonly primitiveFields: NexemaTypeFieldDefinition[]
+    private readonly nonPrimitiveFields: NexemaTypeFieldDefinition[]
 
     public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
         super(type, file, context)
+
+        this.primitiveFields = this._type.fields!.filter((x) => {
+            if (x.type!.kind === 'primitiveValueType') {
+                const primitive = (x.type! as NexemaPrimitiveValueType).primitive
+                return (
+                    primitive !== 'list' &&
+                    primitive !== 'map' &&
+                    primitive !== 'binary' &&
+                    primitive !== 'timestamp'
+                )
+            }
+
+            return false
+        })
+
+        this.nonPrimitiveFields = this._type.fields!.filter(
+            (x) => !this.primitiveFields.includes(x)
+        )
     }
 
     public generate(): string {
@@ -46,6 +57,8 @@ export class UnionGenerator extends GeneratorBase {
             ${this._writeGettersAndSetters()}
 
             ${this._writeEncodeMethod()}
+
+            ${json_encoder.forUnion(this._context, this._file, this._type.fields!)}
 
             ${this._writeMergeFromMethod()}
 
