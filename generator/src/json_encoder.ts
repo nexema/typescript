@@ -12,8 +12,36 @@ export function forStruct(fields: NexemaTypeFieldDefinition[]): string {
         writtenFields.push(local)
     }
 
-    result += `return \`${writtenFields.join(',')}\`}`
+    result += `return \`{${writtenFields.join(',')}}\`}`
     return result
+}
+
+function betweenBracesEscaped(input: string): string {
+    return `\${${input}}`
+}
+
+function betweenBraces(input: string): string {
+    return `{${input}}`
+}
+
+function betweenBrackets(input: string): string {
+    return `[${input}]`
+}
+
+function betweenQuotes(input: string): string {
+    return `"${input}"`
+}
+
+function stringInterpo(input: string): string {
+    return `\`${input}\``
+}
+
+function ternary(first: string, second: string): string {
+    return `${first} ? ${second} : null`
+}
+
+function mapWithJoin(input: string, conversion: string): string {
+    return `${input}.map(x => ${stringInterpo(conversion)}).join(",")`
 }
 
 function writeJsonEncode(variableName: string, valueType: NexemaValueType): string {
@@ -22,9 +50,9 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
         const primitiveType = valueType as NexemaPrimitiveValueType
         switch (primitiveType.primitive) {
             case 'string':
-                out = `"\${${variableName}}"`
+                out = betweenQuotes(betweenBracesEscaped(variableName))
                 if (valueType.nullable) {
-                    out = `\${${variableName} ? \`${out}\` : null}`
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
                 }
                 break
 
@@ -32,10 +60,9 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
             case 'uint':
             case 'int64':
             case 'uint64': {
+                out = betweenQuotes(betweenBracesEscaped(variableName))
                 if (valueType.nullable) {
-                    out = `\${${variableName} ? \`\${${variableName}.toString()}\` : null}`
-                } else {
-                    out = `\${${variableName}.toString()}`
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
                 }
                 break
             }
@@ -50,32 +77,47 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
             case 'float64':
             case 'boolean':
             case 'duration':
-                if (valueType.nullable) {
-                    out = `\${${variableName} ?? null}`
-                } else {
-                    out = `\${${variableName}}`
-                }
+                out = betweenBracesEscaped(variableName)
                 break
 
             case 'timestamp':
-                out = `\${${variableName}.toISOString()}`
+                out = betweenQuotes(betweenBracesEscaped(`${variableName}.toISOString()`))
                 if (valueType.nullable) {
-                    out = `${variableName} ? \`\${${out}}\` : null`
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
                 }
                 break
 
             case 'list': {
                 const elementType = primitiveType.arguments![0]
-                out = `[${variableName}.map(x => ${writeJsonEncode('x', elementType)}).join(",")]`
+                const elementEncode = writeJsonEncode('x', elementType)
+
+                out = betweenBrackets(
+                    betweenBracesEscaped(mapWithJoin(variableName, elementEncode))
+                )
+                if (valueType.nullable) {
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
+                }
                 break
             }
 
             case 'map': {
-                const map = new Map<string, number>()
-                const reuslt = Array.from(map, ([key, value]) => '')
                 const keyType = primitiveType.arguments![0]
+                const keyEncode = writeJsonEncode('key', keyType)
+
                 const elementType = primitiveType.arguments![1]
-                out = `{}`
+                const elementEncode = writeJsonEncode('value', elementType)
+
+                out = betweenBraces(
+                    betweenBracesEscaped(
+                        `Array.from(${variableName}, (([key, value]) => ${stringInterpo(
+                            `${keyEncode}:${elementEncode}`
+                        )})).join(",")`
+                    )
+                )
+
+                if (valueType.nullable) {
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
+                }
                 break
             }
 
