@@ -23,10 +23,12 @@ export class StructGenerator extends GeneratorBase {
     }
 
     private get allFields(): NexemaTypeFieldDefinition[] {
-        const fields = this._type.fields!
+        const fields: NexemaTypeFieldDefinition[] = []
         if (this._baseType && this._baseType.fields) {
             fields.push(...this._baseType.fields)
         }
+
+        fields.push(...this._type.fields!)
 
         return fields
     }

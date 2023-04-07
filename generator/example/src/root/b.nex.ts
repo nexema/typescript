@@ -49,11 +49,11 @@ export class Baz extends $nex.NexemaEnum<Baz> {
 
   public static readonly two: Baz = new Baz(2, 'two')
 
-  public static readonly values: ReadonlyArray<Baz> = [
+  public static readonly values: ReadonlyArray<Baz> = Object.freeze([
     Baz.unknown,
     Baz.one,
     Baz.two,
-  ]
+  ])
 
   public static byIndex(index: number): Baz | undefined {
     switch (index) {

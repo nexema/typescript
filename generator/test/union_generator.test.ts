@@ -220,6 +220,26 @@ describe('UnionGenerator', () => {
                 }
                 return writer.takeBytes();
             }
+
+            public override toJson(): string {
+              switch (this._state.fieldIndex) {
+                case 0: {
+                  return \`"\${this._state.currentValue as string}"\`
+                }
+                case 1: {
+                  return \`\${this._state.currentValue as boolean}\`
+                }
+                case 2: {
+                  return \`[\${(this._state.currentValue as Array<number>)
+                    .map((x) => \`\${x}\`)
+                    .join(',')}]\`
+                }
+            
+                default: {
+                  return 'null'
+                }
+              }
+            }
     
             public mergeFrom(buffer: Uint8Array): void {
                 const reader = new $nex.NexemabReader(buffer);
@@ -487,6 +507,21 @@ public override encode(): Uint8Array {
         }
     }
     return writer.takeBytes();
+}
+
+public override toJson(): string {
+  switch (this._state.fieldIndex) {
+    case 0: {
+      return \`\${(this._state.currentValue as A).toJson()}\`
+    }
+    case 1: {
+      return \`\${(this._state.currentValue as B).toJson()}\`
+    }
+
+    default: {
+      return 'null'
+    }
+  }
 }
 
 public mergeFrom(buffer: Uint8Array): void {

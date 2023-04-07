@@ -227,11 +227,11 @@ export class Bar extends $nex.NexemaEnum<Bar> {
 
   public static readonly blue: Bar = new Bar(2, 'blue')
 
-  public static readonly values: ReadonlyArray<Bar> = [
+  public static readonly values: ReadonlyArray<Bar> = Object.freeze([
     Bar.unspecified,
     Bar.red,
     Bar.blue,
-  ]
+  ])
 
   public static byIndex(index: number): Bar | undefined {
     switch (index) {

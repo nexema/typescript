@@ -747,6 +747,26 @@ describe('StructGenerator', () => {
         writer.encodeDuration(this._state.values[16] as bigint);
         return writer.takeBytes();
       }
+
+      public override toJson(): string {
+        return \`{"string_field":"\${this.string_field}","bool_field":\${
+          this.bool_field
+        },"int_field":"\${this.int_field}","int8_field":\${
+          this.int8_field
+        },"int16_field":\${this.int16_field},"int32_field":\${
+          this.int32_field
+        },"int64_field":"\${this.int64_field}","uint_field":"\${
+          this.uint_field
+        }","uint8_field":\${this.uint8_field},"uint16_field":\${
+          this.uint16_field
+        },"uint32_field":\${this.uint32_field},"uint64_field":"\${
+          this.uint64_field
+        }","float32_field":\${this.float32_field},"float64_field":\${
+          this.float64_field
+        },"binary_field":unknown,"timestamp_field":"\${this.timestamp_field.toISOString()}","duration_field":\${
+          this.duration_field
+        }}\`
+      }
     
       public mergeFrom(buffer: Uint8Array): void {
         const reader = new $nex.NexemabReader(buffer);
@@ -1286,7 +1306,45 @@ describe('StructGenerator', () => {
           }
           return writer.takeBytes();
         }
-      
+
+        public override toJson(): string {
+        return \`{"string_field":\${
+          this.string_field ? \`"\${this.string_field}"\` : null
+        },"list_field":[\${this.list_field
+          .map((x) => \`\${x}\`)
+          .join(',')}],"list_value_null_field":[\${this.list_value_null_field
+          .map((x) => \`\${x}\`)
+          .join(',')}],"list_null_field":\${
+          this.list_null_field
+            ? \`[\${this.list_null_field.map((x) => \`\${x}\`).join(',')}]\`
+            : null
+        },"list_both_null_field":\${
+          this.list_both_null_field
+            ? \`[\${this.list_both_null_field.map((x) => \`\${x}\`).join(',')}]\`
+            : null
+        },"map_field":{\${Array.from(
+          this.map_field,
+          ([key, value]) => \`"\${key}":\${value}\`
+        ).join(',')}},"map_value_null_field":{\${Array.from(
+          this.map_value_null_field,
+          ([key, value]) => \`"\${key}":\${value}\`
+        ).join(',')}},"map_null_field":\${
+          this.map_null_field
+            ? \`{\${Array.from(
+                this.map_null_field,
+                ([key, value]) => \`"\${key}":\${value}\`
+              ).join(',')}}\`
+            : null
+        },"mapt_both_null_field":\${
+          this.mapt_both_null_field
+            ? \`{\${Array.from(
+                this.mapt_both_null_field,
+                ([key, value]) => \`"\${key}":\${value}\`
+              ).join(',')}}\`
+            : null
+        }}\`
+      }
+              
         public mergeFrom(buffer: Uint8Array): void {
           const reader = new $nex.NexemabReader(buffer);
           this._state.values[0] = reader.isNextNull() ? null : reader.decodeString();
@@ -1551,6 +1609,10 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
         writer.encodeUvarint(this._state.baseValues![1] as bigint);
         writer.encodeString(this._state.values[0] as string);
         return writer.takeBytes();
+      }
+
+      public override toJson(): string {
+        return \`{"varint_field":"\${this.varint_field}","uvarint_field":"\${this.uvarint_field}","string_field":"\${this.string_field}"}\`
       }
     
       public mergeFrom(buffer: Uint8Array): void {
@@ -2124,6 +2186,30 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
         }
       }
       return writer.takeBytes();
+    }
+
+    public override toJson(): string {
+      return \`{"struct_field":\${this.struct_field.toJson()},"enum_field":\${this.enum_field.toJson()},"null_struct_field":\${this.null_struct_field.toJson()},"null_enum_field":\${this.null_enum_field.toJson()},"list_struct_field":[\${this.list_struct_field
+        .map((x) => \`\${x.toJson()}\`)
+        .join(',')}],"list_enum_field":[\${this.list_enum_field
+        .map((x) => \`\${x.toJson()}\`)
+        .join(',')}],"map_struct_field":{\${Array.from(
+        this.map_struct_field,
+        ([key, value]) => \`"\${key}":\${value.toJson()}\`
+      ).join(',')}},"map_enum_field":{\${Array.from(
+        this.map_enum_field,
+        ([key, value]) => \`"\${key}":\${value.toJson()}\`
+      ).join(',')}},"list_struct_null_field":[\${this.list_struct_null_field
+        .map((x) => \`\${x.toJson()}\`)
+        .join(',')}],"list_enum_null_field":[\${this.list_enum_null_field
+        .map((x) => \`\${x.toJson()}\`)
+        .join(',')}],"map_struct_null_field":{\${Array.from(
+        this.map_struct_null_field,
+        ([key, value]) => \`"\${key}":\${value.toJson()}\`
+      ).join(',')}},"map_enum_null_field":{\${Array.from(
+        this.map_enum_null_field,
+        ([key, value]) => \`"\${key}":\${value.toJson()}\`
+      ).join(',')}}}\`
     }
   
     public mergeFrom(buffer: Uint8Array): void {
