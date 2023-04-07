@@ -9,6 +9,7 @@ import {
     NexemaTypeDefinition,
     NexemaTypeFieldDefinition,
 } from './models'
+import { getJavascriptType } from './utils'
 
 export class UnionGenerator extends GeneratorBase {
     private readonly primitiveFields: NexemaTypeFieldDefinition[]
@@ -95,7 +96,11 @@ export class UnionGenerator extends GeneratorBase {
 
         for (const field of this._type.fields!) {
             types += `type ${this._type.name}_${this._fieldNames[field.name]} = {
-                ${this._fieldNames[field.name]}: ${this.getJavascriptType(field.type!)},
+                ${this._fieldNames[field.name]}: ${getJavascriptType(
+                this._context,
+                this._file,
+                field.type!
+            )},
             ${this._type
                 .fields!.filter((x) => x.index !== field.index)
                 .map((x) => `${this._fieldNames[x.name]}?: never`)}
@@ -130,7 +135,7 @@ export class UnionGenerator extends GeneratorBase {
         let output = ''
 
         for (const field of this._type.fields!) {
-            const jsType = this.getJavascriptType(field.type!)
+            const jsType = getJavascriptType(this._context, this._file, field.type!)
             output += `${this._writeHeader(field.documentation, field.annotations, true)}
             public get ${this._fieldNames[field.name]}(): ${jsType} {
                 return this._state.currentValue as ${jsType}

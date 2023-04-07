@@ -10,7 +10,12 @@ import {
     NexemaValueType,
 } from './models'
 import { TypeReference } from './type_reference'
-import { isJsPrimitive, toCamelCase } from './utils'
+import {
+    getDeclarationForTypeReference,
+    getJavascriptType,
+    isJsPrimitive,
+    toCamelCase,
+} from './utils'
 
 export abstract class GeneratorBase {
     protected _type: NexemaTypeDefinition
@@ -25,14 +30,6 @@ export abstract class GeneratorBase {
         this._fieldNames = Object.fromEntries(
             type.fields!.map((x) => [x.name, toCamelCase(x.name)])
         )
-    }
-
-    protected getDeclarationForTypeReference(ref: TypeReference): string {
-        if (ref.path === this._file.path) {
-            return ref.type.name
-        }
-
-        return `${ref.importAlias}.${ref.type.name}`
     }
 
     protected resolveReference(objectId: string): TypeReference {
@@ -83,84 +80,13 @@ export abstract class GeneratorBase {
         } else {
             const ref = this.resolveReference((type as NexemaTypeValueType).objectId)
             if (ref.type.modifier === 'enum') {
-                return `${this.getDeclarationForTypeReference(ref)}.${ref.type.fields![0].name}`
+                return `${getDeclarationForTypeReference(this._file, ref)}.${
+                    ref.type.fields![0].name
+                }`
             } else {
-                return `${this.getDeclarationForTypeReference(ref)}.createEmpty()`
+                return `${getDeclarationForTypeReference(this._file, ref)}.createEmpty()`
             }
         }
-    }
-
-    protected getJavascriptType(type: NexemaValueType, omitNullability?: boolean): string {
-        let jsType: string
-        if (type.kind === 'primitiveValueType') {
-            const primitiveType = type as NexemaPrimitiveValueType
-            switch (primitiveType.primitive) {
-                case 'string':
-                    jsType = 'string'
-                    omitNullability ??= false
-                    break
-
-                case 'boolean':
-                    jsType = 'boolean'
-                    omitNullability ??= false
-                    break
-
-                case 'binary':
-                    jsType = 'Uint8Array'
-                    break
-
-                case 'int8':
-                case 'uint8':
-                case 'int16':
-                case 'uint16':
-                case 'int32':
-                case 'uint32':
-                case 'float32':
-                case 'float64':
-                    jsType = 'number'
-                    omitNullability ??= false
-                    break
-
-                case 'int':
-                case 'uint':
-                case 'uint64':
-                case 'int64':
-                    jsType = 'bigint'
-                    omitNullability ??= false
-                    break
-
-                case 'timestamp':
-                    jsType = 'Date'
-                    break
-
-                case 'duration':
-                    jsType = 'bigint'
-                    omitNullability ??= false
-                    break
-
-                case 'list':
-                    jsType = `Array<${this.getJavascriptType(primitiveType.arguments![0])}>`
-                    break
-
-                case 'map':
-                    jsType = `Map<${this.getJavascriptType(
-                        primitiveType.arguments![0]
-                    )}, ${this.getJavascriptType(primitiveType.arguments![1])}>`
-                    break
-
-                default:
-                    throw `unknown primitive ${primitiveType.primitive}`
-            }
-        } else {
-            const ref = this._context.resolveFor(this._file, (type as NexemaTypeValueType).objectId)
-            jsType = this.getDeclarationForTypeReference(ref)
-        }
-
-        if (type.nullable && !omitNullability) {
-            jsType += '| null'
-        }
-
-        return jsType
     }
 
     protected _writeHeader(
@@ -281,12 +207,16 @@ export abstract class GeneratorBase {
                 case 'list': {
                     const elementType = primitiveValue.arguments![0]
                     if (elementType.kind === 'primitiveValueType') {
-                        out = `Array.from(${variableName} as ${this.getJavascriptType(
+                        out = `Array.from(${variableName} as ${getJavascriptType(
+                            this._context,
+                            this._file,
                             valueType,
                             true
                         )})`
                     } else {
-                        out = `(${variableName} as ${this.getJavascriptType(
+                        out = `(${variableName} as ${getJavascriptType(
+                            this._context,
+                            this._file,
                             valueType,
                             true
                         )}).map(x => x.toObject())`
@@ -298,12 +228,16 @@ export abstract class GeneratorBase {
                 case 'map': {
                     const elementType = primitiveValue.arguments![1]
                     if (elementType.kind === 'primitiveValueType') {
-                        out = `Object.fromEntries(${variableName} as ${this.getJavascriptType(
+                        out = `Object.fromEntries(${variableName} as ${getJavascriptType(
+                            this._context,
+                            this._file,
                             valueType,
                             true
                         )})`
                     } else {
-                        out = `Object.fromEntries(Array.from((${variableName} as ${this.getJavascriptType(
+                        out = `Object.fromEntries(Array.from((${variableName} as ${getJavascriptType(
+                            this._context,
+                            this._file,
                             valueType,
                             true
                         )}), (entry) => [entry[0], entry[1].toObject()]))`
@@ -314,7 +248,11 @@ export abstract class GeneratorBase {
 
                 default: {
                     out = writePrimitiveTypes
-                        ? `${variableName} as ${this.getJavascriptType(valueType)}`
+                        ? `${variableName} as ${getJavascriptType(
+                              this._context,
+                              this._file,
+                              valueType
+                          )}`
                         : variableName
                     break
                 }
@@ -322,18 +260,22 @@ export abstract class GeneratorBase {
         } else {
             const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
             if (ref.type.modifier === 'enum') {
-                out = `(${variableName} as ${this.getDeclarationForTypeReference(ref)})${
+                out = `(${variableName} as ${getDeclarationForTypeReference(this._file, ref)})${
                     valueType.nullable ? '?' : ''
                 }.index`
             } else {
-                out = `(${variableName} as ${this.getDeclarationForTypeReference(ref)})${
+                out = `(${variableName} as ${getDeclarationForTypeReference(this._file, ref)})${
                     valueType.nullable ? '?' : ''
                 }.toObject()`
             }
         }
 
         if (valueType.nullable && writeNullable) {
-            out = `(${variableName} as ${this.getJavascriptType(valueType)}) ? ${out} : null`
+            out = `(${variableName} as ${getJavascriptType(
+                this._context,
+                this._file,
+                valueType
+            )}) ? ${out} : null`
         }
 
         return out
@@ -347,7 +289,7 @@ export abstract class GeneratorBase {
     ): string {
         if (valueType.nullable) {
             return `if(${variableName} ${
-                skipAlias ? '' : `as ${this.getJavascriptType(valueType)}`
+                skipAlias ? '' : `as ${getJavascriptType(this._context, this._file, valueType)}`
             }) {
                 ${this._getEncoder(variableName, valueType, false, skipNullability ?? true)}
             } else {
@@ -387,7 +329,9 @@ export abstract class GeneratorBase {
 
                 case 'list': {
                     const elementType = primitiveValue.arguments![0]
-                    const decl = `Array.from(${variableName} as ${this.getJavascriptType(
+                    const decl = `Array.from(${variableName} as ${getJavascriptType(
+                        this._context,
+                        this._file,
                         valueType,
                         true
                     )}`
@@ -403,14 +347,18 @@ export abstract class GeneratorBase {
                 case 'map': {
                     const elementType = primitiveValue.arguments![1]
                     if (isJsPrimitive(elementType)) {
-                        result = `new Map(${variableName} as ${this.getJavascriptType(
+                        result = `new Map(${variableName} as ${getJavascriptType(
+                            this._context,
+                            this._file,
                             valueType,
                             true
                         )})`
                         break
                     }
 
-                    result = `new Map(Array.from(${variableName} as ${this.getJavascriptType(
+                    result = `new Map(Array.from(${variableName} as ${getJavascriptType(
+                        this._context,
+                        this._file,
                         valueType,
                         true
                     )}, ([key, value]) => [key, ${this._writeDeepCloneValue(
@@ -423,7 +371,11 @@ export abstract class GeneratorBase {
                 default:
                     shouldWriteNullable = false
                     result = writePrimitiveTypes
-                        ? `${variableName} as ${this.getJavascriptType(valueType)}`
+                        ? `${variableName} as ${getJavascriptType(
+                              this._context,
+                              this._file,
+                              valueType
+                          )}`
                         : variableName
                     break
             }
@@ -432,28 +384,44 @@ export abstract class GeneratorBase {
 
             if (ref.type.modifier === 'enum') {
                 if (valueType.nullable) {
-                    result = `${this.getJavascriptType(
+                    result = `${getJavascriptType(
+                        this._context,
+                        this._file,
                         valueType,
                         true
-                    )}.values[(${variableName} as ${this.getJavascriptType(
+                    )}.values[(${variableName} as ${getJavascriptType(
+                        this._context,
+                        this._file,
                         valueType
                     )})?.index ?? 0]`
                 } else {
-                    result = `${this.getJavascriptType(
+                    result = `${getJavascriptType(
+                        this._context,
+                        this._file,
                         valueType,
                         true
-                    )}.values[(${variableName} as ${this.getJavascriptType(valueType)}).index]`
+                    )}.values[(${variableName} as ${getJavascriptType(
+                        this._context,
+                        this._file,
+                        valueType
+                    )}).index]`
                 }
             } else {
-                result = `(${variableName} as ${this.getJavascriptType(valueType)})${
-                    valueType.nullable ? '?' : ''
-                }.clone()`
+                result = `(${variableName} as ${getJavascriptType(
+                    this._context,
+                    this._file,
+                    valueType
+                )})${valueType.nullable ? '?' : ''}.clone()`
             }
             shouldWriteNullable = false
         }
 
         if (shouldWriteNullable && valueType.nullable) {
-            result = `(${variableName} as ${this.getJavascriptType(valueType)}) ? ${result} : null`
+            result = `(${variableName} as ${getJavascriptType(
+                this._context,
+                this._file,
+                valueType
+            )}) ? ${result} : null`
         }
 
         return result
@@ -481,7 +449,12 @@ export abstract class GeneratorBase {
         skipNullable = false
     ): string {
         if (!skipAlias) {
-            variableName = `(${variableName} as ${this.getJavascriptType(valueType, skipNullable)})`
+            variableName = `(${variableName} as ${getJavascriptType(
+                this._context,
+                this._file,
+                valueType,
+                skipNullable
+            )})`
         }
 
         if (valueType.kind === 'primitiveValueType') {
@@ -535,7 +508,7 @@ export abstract class GeneratorBase {
         } else {
             const ref = this.resolveReference((valueType as NexemaTypeValueType).objectId)
 
-            const decl = this.getDeclarationForTypeReference(ref)
+            const decl = getDeclarationForTypeReference(this._file, ref)
             if (ref.type.modifier === 'enum') {
                 return `${decl}.byIndex(reader.decodeUint8()) ?? ${decl}.${toCamelCase(
                     ref.type.fields![0].name

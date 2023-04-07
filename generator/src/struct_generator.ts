@@ -4,7 +4,12 @@ import { GenerateContext } from './generate_context'
 import { GeneratorBase } from './generator_base'
 import * as json_encoder from './json_encoder'
 import { NexemaFile, NexemaTypeDefinition, NexemaTypeFieldDefinition } from './models'
-import { isJsPrimitive, toCamelCase } from './utils'
+import {
+    getDeclarationForTypeReference,
+    getJavascriptType,
+    isJsPrimitive,
+    toCamelCase,
+} from './utils'
 
 export class StructGenerator extends GeneratorBase {
     private _baseType?: NexemaTypeDefinition
@@ -68,7 +73,7 @@ export class StructGenerator extends GeneratorBase {
     private _writeExtends(): string {
         if (this._type.baseType) {
             const ref = this.resolveReference(this._type.baseType)
-            return `${this.getDeclarationForTypeReference(ref)}<${this._type.name}>`
+            return `${getDeclarationForTypeReference(this._file, ref)}<${this._type.name}>`
         } else {
             return `${ImportAlias.Nexema}.NexemaStruct<${this._type.name}>`
         }
@@ -131,7 +136,7 @@ export class StructGenerator extends GeneratorBase {
                                   x.type!.nullable || (this._baseType!.defaults ?? {})[x.name]
                                       ? '?'
                                       : ''
-                              }: ${this.getJavascriptType(x.type!)}`
+                              }: ${getJavascriptType(this._context, this._file, x.type!)}`
                       ).join(',')
                     : ''
             }
@@ -140,7 +145,7 @@ export class StructGenerator extends GeneratorBase {
                     (x) =>
                         `${this._fieldNames[x.name]}${
                             x.type!.nullable || (this._type.defaults ?? {})[x.name] ? '?' : ''
-                        }: ${this.getJavascriptType(x.type!)}`
+                        }: ${getJavascriptType(this._context, this._file, x.type!)}`
                 )
                 .join(',')}
         }`
@@ -150,7 +155,7 @@ export class StructGenerator extends GeneratorBase {
         let output = ''
 
         for (const field of this._type.fields!) {
-            const jsType = this.getJavascriptType(field.type!)
+            const jsType = getJavascriptType(this._context, this._file, field.type!)
             output += `${this._writeHeader(field.documentation, field.annotations, true)}
             public get ${this._fieldNames[field.name]}(): ${jsType} {
                 return this._state.values[${field.index}] as ${jsType}
@@ -164,7 +169,7 @@ export class StructGenerator extends GeneratorBase {
 
         if (this._baseType) {
             for (const field of this._baseType!.fields!) {
-                const jsType = this.getJavascriptType(field.type!)
+                const jsType = getJavascriptType(this._context, this._file, field.type!)
                 output += `
                 public override get ${this._fieldNames[field.name]}(): ${jsType} {
                     return this._state.baseValues![${field.index}] as ${jsType}
@@ -288,7 +293,11 @@ export class StructGenerator extends GeneratorBase {
                                       isJsPrimitive(x.type!)
                                           ? `this._state.baseValues![${
                                                 x.index
-                                            }] as ${this.getJavascriptType(x.type!)}`
+                                            }] as ${getJavascriptType(
+                                                this._context,
+                                                this._file,
+                                                x.type!
+                                            )}`
                                           : this._writeDeepCloneValue(
                                                 `this._state.baseValues![${x.index}]`,
                                                 x.type!,
@@ -302,7 +311,9 @@ export class StructGenerator extends GeneratorBase {
                     (x) =>
                         `${this._fieldNames[x.name]}: ${
                             isJsPrimitive(x.type!)
-                                ? `this._state.values[${x.index}] as ${this.getJavascriptType(
+                                ? `this._state.values[${x.index}] as ${getJavascriptType(
+                                      this._context,
+                                      this._file,
                                       x.type!
                                   )}`
                                 : this._writeDeepCloneValue(
