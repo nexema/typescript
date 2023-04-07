@@ -101,11 +101,11 @@ it('should generate enum classes', () => {
          */
         public static readonly blue: MyEnum = new MyEnum(2, "blue");
 
-        public static readonly values: ReadonlyArray<MyEnum> = [
+        public static readonly values: ReadonlyArray<MyEnum> = Object.freeze([
             MyEnum.unknown,
             MyEnum.red,
             MyEnum.blue,
-        ];
+        ]);
 
            public static byIndex(index: number): MyEnum | undefined {
              switch (index) {

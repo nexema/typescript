@@ -42,9 +42,9 @@ export class EnumGenerator extends GeneratorBase {
     }
 
     private _writeValuesField(): string {
-        return `public static readonly values: ReadonlyArray<${this._type.name}> = [
+        return `public static readonly values: ReadonlyArray<${this._type.name}> = Object.freeze([
             ${this._type.fields!.map((x) => `${this._type.name}.${toCamelCase(x.name)}`).join(',')}
-        ]`
+        ])`
     }
 
     private _writeMethods(): string {
