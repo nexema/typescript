@@ -20,3 +20,4 @@ export {
 export { FieldKind, NexemaField, NexemaFieldType } from "./definition";
 export { NexemaTypeInfo } from "./type_info";
 export { NexemaReflection } from "./reflection";
+export { Base64 } from "./base64";
