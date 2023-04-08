@@ -10,19 +10,29 @@ function main() {
             .map((x) => x.split('='))
             .map((x) => [x[0], x[1]])
     )
-    const content = fs.readFileSync(process.stdin.fd, 'utf-8')
+    let content: string
+    try {
+        content = fs.readFileSync(process.stdin.fd, 'utf-8')
+    } catch (err) {
+        out({
+            exitCode: 401,
+            error: 'no-stdin-to-read',
+        })
+        return
+    }
+
     let snapshot: NexemaSnapshot
     try {
         snapshot = parseSnapshot(content)
     } catch (err) {
         out({
             exitCode: 400,
-            error: 'error-invalid-snapshot',
+            error: 'invalid-snapshot',
         })
         return
     }
 
-    const outputPath = args.get('output-path')
+    const outputPath = args.get('--output-path')
     if (!outputPath) {
         out({
             exitCode: 400,

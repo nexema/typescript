@@ -80,7 +80,7 @@ ${sourceCode}`
             } catch (err) {
                 return {
                     exitCode: -1,
-                    errorMessage: `File [${file.path}] Error: [${err}]`,
+                    error: `File [${file.path}] Error: [${err}]`,
                     files: [],
                 }
             }
