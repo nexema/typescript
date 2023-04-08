@@ -15,6 +15,7 @@ export const CommonTypes = {
     NexemabReader: '$nex.NexemabReader',
     NexemaClonable: '$nex.NexemaClonable',
     NexemaMergeable: '$nex.NexemaMergeable',
+    Base64Encoder: '$nex.Base64.bytesToBase64',
 } as const
 
 export const PrettierSettings: prettier.Options = {

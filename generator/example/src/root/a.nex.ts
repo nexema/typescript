@@ -53,19 +53,46 @@ export class Foo
           typeId: '4',
         },
       },
+      4: {
+        index: 4,
+        jsName: 'bin',
+        name: 'bin',
+        value: {
+          kind: 'binary',
+          nullable: false,
+        },
+      },
+      6: {
+        index: 6,
+        jsName: 'nbin',
+        name: 'nbin',
+        value: {
+          kind: 'binary',
+          nullable: true,
+        },
+      },
     },
     fieldsByJsName: {
       a: 0,
       b: 1,
       c: 2,
       d: 3,
+      bin: 4,
+      nbin: 6,
     },
   }
 
-  public constructor(data: { a: string; b: Bar; c: $b.Baz; d: $c.Abc }) {
+  public constructor(data: {
+    a: string
+    b: Bar
+    c: $b.Baz
+    d: $c.Abc
+    bin: Uint8Array
+    nbin?: Uint8Array | null
+  }) {
     super({
       typeInfo: Foo._typeInfo,
-      values: [data.a, data.b, data.c, data.d],
+      values: [data.a, data.b, data.c, data.d, data.bin, data.nbin ?? null],
       baseValues: undefined,
     })
   }
@@ -76,13 +103,15 @@ export class Foo
       b: Bar.unspecified,
       c: $b.Baz.unknown,
       d: $c.Abc.createEmpty(),
+      bin: new Uint8Array(),
+      nbin: null,
     })
   }
 
   public static decode(buffer: Uint8Array): Foo {
     const instance = Object.create(Foo.prototype) as Foo
     instance._state = {
-      values: [null, null, null, null],
+      values: [null, null, null, null, null, null],
       baseValues: undefined,
       typeInfo: Foo._typeInfo,
     }
@@ -123,6 +152,22 @@ export class Foo
     this._state.values[3] = value
   }
 
+  public get bin(): Uint8Array {
+    return this._state.values[4] as Uint8Array
+  }
+
+  public set bin(value: Uint8Array) {
+    this._state.values[4] = value
+  }
+
+  public get nbin(): Uint8Array | null {
+    return this._state.values[6] as Uint8Array | null
+  }
+
+  public set nbin(value: Uint8Array | null) {
+    this._state.values[6] = value
+  }
+
   public override encode(): Uint8Array {
     const writer = new $nex.NexemabWriter()
 
@@ -130,13 +175,23 @@ export class Foo
     writer.encodeUint8((this._state.values[1] as Bar).index)
     writer.encodeUint8((this._state.values[2] as $b.Baz).index)
     writer.encodeBinary((this._state.values[3] as $c.Abc).encode())
+    writer.encodeBinary(this._state.values[4] as Uint8Array)
+    if (this._state.values[6] as Uint8Array | null) {
+      writer.encodeBinary(this._state.values[6] as Uint8Array)
+    } else {
+      writer.encodeNull()
+    }
     return writer.takeBytes()
   }
 
   public override toJson(): string {
     return `{"a":"${
       this.a
-    }","b":${this.b.toJson()},"c":${this.c.toJson()},"d":${this.d.toJson()}}`
+    }","b":${this.b.toJson()},"c":${this.c.toJson()},"d":${this.d.toJson()},"bin":"${$nex.Base64.bytesToBase64(
+      this.bin
+    )}","nbin":${
+      this.nbin ? `"${$nex.Base64.bytesToBase64(this.nbin)}"` : null
+    }}`
   }
 
   public mergeFrom(buffer: Uint8Array): void {
@@ -146,6 +201,8 @@ export class Foo
     this._state.values[2] =
       $b.Baz.byIndex(reader.decodeUint8()) ?? $b.Baz.unknown
     this._state.values[3] = $c.Abc.decode(reader.decodeBinary())
+    this._state.values[4] = reader.decodeBinary()
+    this._state.values[6] = reader.isNextNull() ? null : reader.decodeBinary()
   }
 
   public mergeUsing(other: Foo): void {
@@ -154,6 +211,10 @@ export class Foo
     this._state.values[2] =
       $b.Baz.values[(other._state.values[2] as $b.Baz).index]
     this._state.values[3] = (other._state.values[3] as $c.Abc).clone()
+    this._state.values[4] = new Uint8Array(other._state.values[4] as Uint8Array)
+    this._state.values[6] = (other._state.values[6] as Uint8Array | null)
+      ? new Uint8Array(other._state.values[6] as Uint8Array)
+      : null
   }
 
   public override toObject(): $nex.JsObj {
@@ -162,6 +223,8 @@ export class Foo
       b: (this._state.values[1] as Bar).index,
       c: (this._state.values[2] as $b.Baz).index,
       d: (this._state.values[3] as $c.Abc).toObject(),
+      bin: this._state.values[4] as Uint8Array,
+      nbin: this._state.values[6] as Uint8Array | null,
     }
   }
 
@@ -171,11 +234,15 @@ export class Foo
       b: Bar.values[(this._state.values[1] as Bar).index],
       c: $b.Baz.values[(this._state.values[2] as $b.Baz).index],
       d: (this._state.values[3] as $c.Abc).clone(),
+      bin: new Uint8Array(this._state.values[4] as Uint8Array),
+      nbin: (this._state.values[6] as Uint8Array | null)
+        ? new Uint8Array(this._state.values[6] as Uint8Array)
+        : null,
     })
   }
 
   public toString(): string {
-    return `Foo(a: ${this._state.values[0]}, b: ${this._state.values[1]}, c: ${this._state.values[2]}, d: ${this._state.values[3]})`
+    return `Foo(a: ${this._state.values[0]}, b: ${this._state.values[1]}, c: ${this._state.values[2]}, d: ${this._state.values[3]}, bin: ${this._state.values[4]}, nbin: ${this._state.values[6]})`
   }
 }
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 // declare module 'JsonEncoderWriter' {}
 
+import { CommonTypes } from './constants'
 import { GenerateContext } from './generate_context'
 import {
     NexemaFile,
@@ -158,9 +159,18 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
                 break
             }
 
-            default:
-                out = 'unknown'
+            case 'binary': {
+                out = betweenQuotes(
+                    betweenBracesEscaped(`${CommonTypes.Base64Encoder}(${variableName})`)
+                )
+                if (valueType.nullable) {
+                    out = betweenBracesEscaped(ternary(variableName, stringInterpo(out)))
+                }
                 break
+            }
+
+            default:
+                throw `unknown type ${JSON.stringify(valueType)}`
         }
     } else {
         out = `\${${variableName}.toJson()}`

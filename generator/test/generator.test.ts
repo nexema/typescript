@@ -1,6 +1,6 @@
-import { Generator } from '../src/generator'
-import { GeneratedFile } from '../src/models'
 import fs from 'fs'
+import path from 'path'
+import { Generator } from '../src/generator'
 import {
     getEnum,
     getField,
@@ -10,7 +10,6 @@ import {
     getTypeValueType,
     getUnion,
 } from './test_utils'
-import path from 'path'
 
 describe('Generator tests', () => {
     it('should generate an output for a set of files', () => {
@@ -38,6 +37,8 @@ describe('Generator tests', () => {
                                 getField(1, 'b', getTypeValueType('2')),
                                 getField(2, 'c', getTypeValueType('3')),
                                 getField(3, 'd', getTypeValueType('4')),
+                                getField(4, 'bin', getPrimitiveValueType('binary')),
+                                getField(6, 'nbin', getPrimitiveValueType('binary', true)),
                             ],
                         }),
                         getEnum({
