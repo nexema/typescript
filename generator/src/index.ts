@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs'
-import { NexemaSnapshot, parseSnapshot } from './models'
+import { NexemaSnapshot, PluginResult, parseSnapshot } from './models'
 import { Generator } from './generator'
 
 function main() {
@@ -15,13 +15,19 @@ function main() {
     try {
         snapshot = parseSnapshot(content)
     } catch (err) {
-        out('{"error":"error-invalid-snapshot"}')
+        out({
+            exitCode: 400,
+            error: 'error-invalid-snapshot',
+        })
         return
     }
 
     const outputPath = args.get('output-path')
     if (!outputPath) {
-        out('{"error":"missing-output-path"}')
+        out({
+            exitCode: 400,
+            error: 'missing-output-path',
+        })
         return
     }
 
@@ -31,15 +37,20 @@ function main() {
     })
     const result = generator.run()
     if (result.exitCode) {
-        out(`{"error":"error-${result.exitCode}"}`)
+        out({
+            exitCode: result.exitCode,
+        })
         return
     }
 
-    out(JSON.stringify(result.files))
+    out({
+        exitCode: 0,
+        files: result.files,
+    })
 }
 
-function out(content: string): void {
-    process.stdout.write(`${content}\n`)
+function out(content: PluginResult): void {
+    process.stdout.write(`${JSON.stringify(content)}\n`)
 }
 
 main()

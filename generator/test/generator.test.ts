@@ -83,25 +83,8 @@ describe('Generator tests', () => {
         const generator = new Generator(snapshot, { outputPath: '', useOnlyMaps: true })
 
         const result = generator.run()
-        expect(result.errorMessage).toBeUndefined()
+        expect(result.error).toBeUndefined()
         expect(result.exitCode).toBe(0)
-        // expect(result.files).toBe([
-        //     {
-        //         id: '1',
-        //         contents: '',
-        //         name: 'a.nex.ts',
-        //     },
-        //     {
-        //         id: '2',
-        //         contents: '',
-        //         name: 'b.nex.ts',
-        //     },
-        //     {
-        //         id: '3',
-        //         contents: '',
-        //         name: 'c.nex.ts',
-        //     },
-        // ] as GeneratedFile[])
 
         for (const file of result.files) {
             const p = `example/src/${snapshot.files.find((x) => x.id == file.id)!.path}.ts`
