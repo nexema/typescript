@@ -1,2 +1,3 @@
 # typescript
-TypeScript/JavaScript implementation of the messagepack-schema
+
+TypeScript/JavaScript implementation of Nexema.
