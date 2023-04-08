@@ -1,6 +1,6 @@
 {
   "name": "nexema-generator",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "Nexema TypeScript/JavaScript code generator",
   "main": "./dist/index.js",
   "bin": {
@@ -14,7 +14,8 @@
     "local": "sudo npm i -g && nexemajsgen",
     "test": "jest --coverage=false && cd example && npx ts-node test/index.ts",
     "test:coverage": "jest --coverage --colors",
-    "deploy": "npm run test; npm run build; npm version patch && npm publish"
+    "deploy": "npm run test; npm run build; npm version patch && npm publish",
+    "deploy:dry": "npm run test; npm run build; npm version patch && npm publish --dry-run"
   },
   "keywords": [
     "nexema",
