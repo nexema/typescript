@@ -22,6 +22,7 @@ function testEncoding() {
             d: new Abc({
                 y: ['first', 'second', 'last'],
             }),
+            bin: new Uint8Array([]),
         }).encode(),
         new Uint8Array([
             22, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 2, 2, 42, 0, 220, 6, 10, 102,
@@ -43,6 +44,7 @@ function testEncoding() {
             d: new Abc({
                 y: ['first', 'second', 'last'],
             }),
+            bin: new Uint8Array([24, 12, 45]),
         }),
         (a: Foo, b: Foo) => a.equals(b)
     )

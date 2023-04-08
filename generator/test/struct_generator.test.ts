@@ -763,7 +763,7 @@ describe('StructGenerator', () => {
           this.uint64_field
         }","float32_field":\${this.float32_field},"float64_field":\${
           this.float64_field
-        },"binary_field":unknown,"timestamp_field":"\${this.timestamp_field.toISOString()}","duration_field":\${
+        },"binary_field":"\${$nex.Base64.bytesToBase64(this.binary_field)}","timestamp_field":"\${this.timestamp_field.toISOString()}","duration_field":\${
           this.duration_field
         }}\`
       }
