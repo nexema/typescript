@@ -34,7 +34,6 @@ it('should generate enum classes', () => {
         },
         {
             id: '',
-            fileName: 'enum.nex',
             packageName: 'root',
             path: 'root/enum.nex',
             types: [],

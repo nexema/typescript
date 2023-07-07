@@ -72,7 +72,6 @@ describe('StructGenerator', () => {
                 documentation: [],
             },
             {
-                fileName: 'struct.nex',
                 id: 'abc',
                 packageName: 'root',
                 path: 'struct.nex',
@@ -286,7 +285,6 @@ describe('StructGenerator', () => {
             }),
             {
                 id: '1',
-                fileName: 'a.nex',
                 path: 'root/a.nex',
                 packageName: 'root',
                 types: [],
@@ -924,7 +922,6 @@ describe('StructGenerator', () => {
             }),
             {
                 id: '1',
-                fileName: 'a.nex',
                 path: 'root/a.nex',
                 packageName: 'root',
                 types: [],

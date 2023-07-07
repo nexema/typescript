@@ -22,7 +22,6 @@ export interface NexemaSnapshot {
 }
 
 export interface NexemaFile {
-    fileName: string
     packageName: string
     path: string
     id: string

@@ -67,7 +67,6 @@ describe('UnionGenerator', () => {
                 documentation: [],
             },
             {
-                fileName: 'union.nex',
                 id: 'abc',
                 packageName: 'root',
                 path: 'union.nex',
