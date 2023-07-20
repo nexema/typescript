@@ -103,7 +103,7 @@ describe('StructGenerator', () => {
                         jsName: "boolField",
                         name: "bool_field",
                         value: {
-                            kind: "boolean",
+                            kind: "bool",
                             nullable: false
                         }
                     },
@@ -321,7 +321,7 @@ describe('StructGenerator', () => {
             jsName: "boolField",
             name: "bool_field",
             value: {
-              kind: "boolean",
+              kind: "bool",
               nullable: false
             },
           },

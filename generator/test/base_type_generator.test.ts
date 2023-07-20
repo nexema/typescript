@@ -25,7 +25,7 @@ it('should generate base type classes', () => {
                     type: {
                         kind: 'primitiveValueType',
                         nullable: false,
-                        primitive: 'boolean',
+                        primitive: 'bool',
                     } as NexemaPrimitiveValueType,
                     annotations: {},
                     documentation: [],

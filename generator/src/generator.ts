@@ -136,11 +136,6 @@ ${sourceCode}`
                 })
             }
         }
-
-        console.debug(
-            `scanned types:`,
-            Array.from(this._types.entries(), ([key, value]) => [key, value.type.name])
-        )
     }
 
     private resetImports(): void {
