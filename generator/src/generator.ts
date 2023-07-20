@@ -78,6 +78,7 @@ ${sourceCode}`
                     contents: prettier.format(sourceCode, PrettierSettings),
                 })
             } catch (err) {
+                console.error('an error happened', err)
                 return {
                     exitCode: -1,
                     error: `File [${file.path}] Error: [${err}]`,
@@ -130,16 +131,16 @@ ${sourceCode}`
             for (const type of file.types) {
                 this._types.set(type.id, {
                     importAlias: `$${toSnakeCase(path.parse(file.path).name)}`,
-                    path: path.join(
-                        this._settings.outputPath,
-                        file.path
-                        // path.dirname(file.path),
-                        // file.fileName
-                    ),
+                    path: path.join(this._settings.outputPath, file.path),
                     type: type,
                 })
             }
         }
+
+        console.debug(
+            `scanned types:`,
+            Array.from(this._types.entries(), ([key, value]) => [key, value.type.name])
+        )
     }
 
     private resetImports(): void {

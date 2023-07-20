@@ -39,7 +39,7 @@ describe('StructGenerator', () => {
                         type: {
                             kind: 'primitiveValueType',
                             nullable: false,
-                            primitive: 'boolean',
+                            primitive: 'bool',
                         } as NexemaPrimitiveValueType,
                         annotations: {},
                         documentation: [],
@@ -257,7 +257,7 @@ describe('StructGenerator', () => {
                     getField(0, 'string_field', getPrimitiveValueType('string'), {
                         documentation: ['A string field'],
                     }),
-                    getField(1, 'bool_field', getPrimitiveValueType('boolean')),
+                    getField(1, 'bool_field', getPrimitiveValueType('bool')),
                     getField(2, 'int_field', getPrimitiveValueType('int')),
                     getField(3, 'int8_field', getPrimitiveValueType('int8')),
                     getField(4, 'int16_field', getPrimitiveValueType('int16')),

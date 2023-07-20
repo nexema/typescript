@@ -42,7 +42,7 @@ export abstract class GeneratorBase {
                 case 'string':
                     return "''"
 
-                case 'boolean':
+                case 'bool':
                     return 'false'
 
                 case 'uint':
@@ -435,7 +435,7 @@ export abstract class GeneratorBase {
             return value.toString()
         } else if (type === 'object') {
             return `new Map([${Object.entries(value)
-                .map(([key, value]) => `[${key}: ${this._writeJsObj(value)}]`)
+                .map(([key, value]) => `[${key}, ${this._writeJsObj(value)}]`)
                 .join(',')}])`
         } else {
             return `[${(value as JsObj[]).map((x) => this._writeJsObj(x)).join(',')}]`
