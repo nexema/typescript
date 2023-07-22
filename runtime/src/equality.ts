@@ -119,8 +119,6 @@ export function mapEquals(
         if (!(av as any).equals(bv)) {
           return false;
         }
-
-        return false;
       }
     }
   } else {

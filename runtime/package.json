@@ -1,6 +1,6 @@
 {
   "name": "nexema",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Nexema runtime library",
   "main": "dist/cjs/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "build": "npm run clean && npm run lint && npm run build:esm && npm run build:cjs",
     "test": "jest --coverage=false",
     "test:coverage": "jest --coverage --colors",
-    "deploy": "npm run test; npm run build; npm version patch && npm publish",
+    "deploy": "npm run test && npm run build && npm version patch && npm publish",
     "benchmark": "ts-node test/benchmarks.ts"
   },
   "repository": {
