@@ -13,6 +13,7 @@ export interface GeneratedFile {
     id: string
     name: string
     contents: string
+    filePath: string
 }
 
 export interface NexemaSnapshot {

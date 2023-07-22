@@ -75,6 +75,7 @@ ${sourceCode}`
                 files.set(file.id, {
                     id: file.id,
                     name: `${path.basename(file.path)}.ts`,
+                    filePath: file.path,
                     contents: prettier.format(sourceCode, PrettierSettings),
                 })
             } catch (err) {

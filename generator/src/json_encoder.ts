@@ -9,14 +9,17 @@ import {
     NexemaTypeFieldDefinition,
     NexemaValueType,
 } from './models'
-import { getJavascriptType } from './utils'
+import { getJavascriptType, toCamelCase } from './utils'
 
 export function forStruct(fields: NexemaTypeFieldDefinition[]): string {
     let result = 'public override toJson(): string {'
 
     const writtenFields: string[] = []
     for (const field of fields) {
-        const local = `"${field.name}":${writeJsonEncode(`this.${field.name}`, field.type!)}`
+        const local = `"${field.name}":${writeJsonEncode(
+            `this.${toCamelCase(field.name)}`,
+            field.type!
+        )}`
         writtenFields.push(local)
     }
 

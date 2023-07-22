@@ -206,9 +206,9 @@ describe('StructGenerator', () => {
             }
 
             public override toJson(): string {
-              return \`{"string_field":"\${this.string_field}","bool_field":\${
-                this.bool_field
-              },"list_field":[\${this.list_field.map((x) => \`\${x}\`).join(',')}]}\`
+              return \`{"string_field":"\${this.stringField}","bool_field":\${
+                this.boolField
+              },"list_field":[\${this.listField.map((x) => \`\${x}\`).join(',')}]}\`
             }
     
             public mergeFrom(buffer: Uint8Array): void {
@@ -747,22 +747,22 @@ describe('StructGenerator', () => {
       }
 
       public override toJson(): string {
-        return \`{"string_field":"\${this.string_field}","bool_field":\${
-          this.bool_field
-        },"int_field":"\${this.int_field}","int8_field":\${
-          this.int8_field
-        },"int16_field":\${this.int16_field},"int32_field":\${
-          this.int32_field
-        },"int64_field":"\${this.int64_field}","uint_field":"\${
-          this.uint_field
-        }","uint8_field":\${this.uint8_field},"uint16_field":\${
-          this.uint16_field
-        },"uint32_field":\${this.uint32_field},"uint64_field":"\${
-          this.uint64_field
-        }","float32_field":\${this.float32_field},"float64_field":\${
-          this.float64_field
-        },"binary_field":"\${$nex.Base64.bytesToBase64(this.binary_field)}","timestamp_field":"\${this.timestamp_field.toISOString()}","duration_field":\${
-          this.duration_field
+        return \`{"string_field":"\${this.stringField}","bool_field":\${
+          this.boolField
+        },"int_field":"\${this.intField}","int8_field":\${
+          this.int8Field
+        },"int16_field":\${this.int16Field},"int32_field":\${
+          this.int32Field
+        },"int64_field":"\${this.int64Field}","uint_field":"\${
+          this.uintField
+        }","uint8_field":\${this.uint8Field},"uint16_field":\${
+          this.uint16Field
+        },"uint32_field":\${this.uint32Field},"uint64_field":"\${
+          this.uint64Field
+        }","float32_field":\${this.float32Field},"float64_field":\${
+          this.float64Field
+        },"binary_field":"\${$nex.Base64.bytesToBase64(this.binaryField)}","timestamp_field":"\${this.timestampField.toISOString()}","duration_field":\${
+          this.durationField
         }}\`
       }
     
@@ -1306,36 +1306,36 @@ describe('StructGenerator', () => {
 
         public override toJson(): string {
         return \`{"string_field":\${
-          this.string_field ? \`"\${this.string_field}"\` : null
-        },"list_field":[\${this.list_field
+          this.stringField ? \`"\${this.stringField}"\` : null
+        },"list_field":[\${this.listField
           .map((x) => \`\${x}\`)
-          .join(',')}],"list_value_null_field":[\${this.list_value_null_field
+          .join(',')}],"list_value_null_field":[\${this.listValueNullField
           .map((x) => \`\${x}\`)
           .join(',')}],"list_null_field":\${
-          this.list_null_field
-            ? \`[\${this.list_null_field.map((x) => \`\${x}\`).join(',')}]\`
+          this.listNullField
+            ? \`[\${this.listNullField.map((x) => \`\${x}\`).join(',')}]\`
             : null
         },"list_both_null_field":\${
-          this.list_both_null_field
-            ? \`[\${this.list_both_null_field.map((x) => \`\${x}\`).join(',')}]\`
+          this.listBothNullField
+            ? \`[\${this.listBothNullField.map((x) => \`\${x}\`).join(',')}]\`
             : null
         },"map_field":{\${Array.from(
-          this.map_field,
+          this.mapField,
           ([key, value]) => \`"\${key}":\${value}\`
         ).join(',')}},"map_value_null_field":{\${Array.from(
-          this.map_value_null_field,
+          this.mapValueNullField,
           ([key, value]) => \`"\${key}":\${value}\`
         ).join(',')}},"map_null_field":\${
-          this.map_null_field
+          this.mapNullField
             ? \`{\${Array.from(
-                this.map_null_field,
+                this.mapNullField,
                 ([key, value]) => \`"\${key}":\${value}\`
               ).join(',')}}\`
             : null
         },"mapt_both_null_field":\${
-          this.mapt_both_null_field
+          this.maptBothNullField
             ? \`{\${Array.from(
-                this.mapt_both_null_field,
+                this.maptBothNullField,
                 ([key, value]) => \`"\${key}":\${value}\`
               ).join(',')}}\`
             : null
@@ -1609,7 +1609,7 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
       }
 
       public override toJson(): string {
-        return \`{"varint_field":"\${this.varint_field}","uvarint_field":"\${this.uvarint_field}","string_field":"\${this.string_field}"}\`
+        return \`{"varint_field":"\${this.varintField}","uvarint_field":"\${this.uvarintField}","string_field":"\${this.stringField}"}\`
       }
     
       public mergeFrom(buffer: Uint8Array): void {
@@ -2186,25 +2186,25 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
     }
 
     public override toJson(): string {
-      return \`{"struct_field":\${this.struct_field.toJson()},"enum_field":\${this.enum_field.toJson()},"null_struct_field":\${this.null_struct_field.toJson()},"null_enum_field":\${this.null_enum_field.toJson()},"list_struct_field":[\${this.list_struct_field
+      return \`{"struct_field":\${this.structField.toJson()},"enum_field":\${this.enumField.toJson()},"null_struct_field":\${this.nullStructField.toJson()},"null_enum_field":\${this.nullEnumField.toJson()},"list_struct_field":[\${this.listStructField
         .map((x) => \`\${x.toJson()}\`)
-        .join(',')}],"list_enum_field":[\${this.list_enum_field
+        .join(',')}],"list_enum_field":[\${this.listEnumField
         .map((x) => \`\${x.toJson()}\`)
         .join(',')}],"map_struct_field":{\${Array.from(
-        this.map_struct_field,
+        this.mapStructField,
         ([key, value]) => \`"\${key}":\${value.toJson()}\`
       ).join(',')}},"map_enum_field":{\${Array.from(
-        this.map_enum_field,
+        this.mapEnumField,
         ([key, value]) => \`"\${key}":\${value.toJson()}\`
-      ).join(',')}},"list_struct_null_field":[\${this.list_struct_null_field
+      ).join(',')}},"list_struct_null_field":[\${this.listStructNullField
         .map((x) => \`\${x.toJson()}\`)
-        .join(',')}],"list_enum_null_field":[\${this.list_enum_null_field
+        .join(',')}],"list_enum_null_field":[\${this.listEnumNullField
         .map((x) => \`\${x.toJson()}\`)
         .join(',')}],"map_struct_null_field":{\${Array.from(
-        this.map_struct_null_field,
+        this.mapStructNullField,
         ([key, value]) => \`"\${key}":\${value.toJson()}\`
       ).join(',')}},"map_enum_null_field":{\${Array.from(
-        this.map_enum_null_field,
+        this.mapEnumNullField,
         ([key, value]) => \`"\${key}":\${value.toJson()}\`
       ).join(',')}}}\`
     }

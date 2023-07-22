@@ -126,7 +126,7 @@ describe('UnionGenerator', () => {
             };
     
             public constructor(data?: MyUnionBuilder) {
-                let currentValue = undefined;
+                let currentValue: any;
                 let fieldIndex = -1;
                 if(data) {
                     if(data.stringField) {
@@ -434,7 +434,7 @@ private static readonly _typeInfo: $nex.NexemaTypeInfo = {
 };
 
 public constructor(data?: MyUnionBuilder) {
-    let currentValue = undefined;
+    let currentValue: any;
     let fieldIndex = -1;
     if(data) {
         if(data.anEnum) {
