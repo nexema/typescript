@@ -1,4 +1,4 @@
-import { NexemaField } from "./definition";
+import { NexemaField, NexemaMetadata } from "./definition";
 import { BaseNexemaType } from "./type";
 
 export interface NexemaTypeInfo {
@@ -23,6 +23,11 @@ export interface NexemaTypeInfo {
   readonly name: string;
 
   /**
+   * The type's full name which is unique to this specific type.
+   */
+  readonly fullName: string;
+
+  /**
    * The id of the type.
    */
   readonly typeId: string;
@@ -34,6 +39,11 @@ export interface NexemaTypeInfo {
    * @returns A new, empty instance of T
    */
   readonly new: () => BaseNexemaType;
+
+  /**
+   * Metadata associated to the type.
+   */
+  readonly metadata?: NexemaMetadata;
 
   /**
    * The details of the base type T implements, if any

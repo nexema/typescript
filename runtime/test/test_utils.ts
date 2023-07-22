@@ -43,6 +43,7 @@ export class EnumA extends NexemaEnum<EnumA> {
     typeId: "5645615135135",
     inherits: null,
     name: "EnumA",
+    fullName: "example.com/EnumA",
     new: () => EnumA.unknown,
     kind: "enum",
     fieldsByJsName: {
@@ -131,6 +132,7 @@ export class StructA
   private static readonly _typeInfo: NexemaTypeInfo = {
     typeId: "5626816815415",
     name: "StructA",
+    fullName: "example.com/StructA",
     new: () => StructA.empty(),
     inherits: null,
     kind: "struct",
@@ -290,6 +292,7 @@ export class UnionA
   private static readonly _typeInfo: NexemaTypeInfo = {
     typeId: "626269892315315",
     name: "UnionA",
+    fullName: "example.com/UnionA",
     inherits: null,
     new: () => new UnionA(),
     kind: "union",
