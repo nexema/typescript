@@ -51,7 +51,7 @@ export function getJavascriptType(
                 omitNullability ??= false
                 break
 
-            case 'boolean':
+            case 'bool':
                 jsType = 'boolean'
                 omitNullability ??= false
                 break

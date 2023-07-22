@@ -52,11 +52,3 @@ export enum JsonType {
 export const EscapeSequences = {
   34: "",
 } as const;
-
-export const replacements = {
-  [NexemajSpec.Quotes]: [NexemajSpec.Backlash, NexemajSpec.Quotes],
-  [NexemajSpec.Backlash]: [NexemajSpec.Backlash, NexemajSpec.Backlash],
-  [NexemajSpec.Newline]: [NexemajSpec.Backlash, NexemajSpec.LetterN],
-  [NexemajSpec.Carriage]: [NexemajSpec.Backlash, NexemajSpec.LetterR],
-  [NexemajSpec.Tab]: [NexemajSpec.Backlash, NexemajSpec.LetterT],
-} as any;

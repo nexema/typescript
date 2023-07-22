@@ -25,7 +25,7 @@ it('should generate base type classes', () => {
                     type: {
                         kind: 'primitiveValueType',
                         nullable: false,
-                        primitive: 'boolean',
+                        primitive: 'bool',
                     } as NexemaPrimitiveValueType,
                     annotations: {},
                     documentation: [],
@@ -56,10 +56,9 @@ it('should generate base type classes', () => {
             documentation: [],
         },
         {
-            fileName: 'base.nex',
+            path: 'base.nex',
             id: 'abc',
             packageName: 'root',
-            path: 'base.nex',
             types: [],
         },
         DefaultGenerateContext

@@ -113,7 +113,7 @@ function writeJsonEncode(variableName: string, valueType: NexemaValueType): stri
             case 'uint32':
             case 'float32':
             case 'float64':
-            case 'boolean':
+            case 'bool':
             case 'duration':
                 out = betweenBracesEscaped(variableName)
                 break

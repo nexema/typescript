@@ -36,7 +36,7 @@ describe('UnionGenerator', () => {
                         type: {
                             kind: 'primitiveValueType',
                             nullable: false,
-                            primitive: 'boolean',
+                            primitive: 'bool',
                         } as NexemaPrimitiveValueType,
                         annotations: {},
                         documentation: [],
@@ -67,7 +67,6 @@ describe('UnionGenerator', () => {
                 documentation: [],
             },
             {
-                fileName: 'union.nex',
                 id: 'abc',
                 packageName: 'root',
                 path: 'union.nex',
@@ -99,7 +98,7 @@ describe('UnionGenerator', () => {
                         jsName: "boolField",
                         name: "bool_field",
                         value: {
-                            kind: "boolean",
+                            kind: "bool",
                             nullable: false
                         }
                     },

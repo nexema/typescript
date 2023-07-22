@@ -22,7 +22,6 @@ export interface NexemaSnapshot {
 }
 
 export interface NexemaFile {
-    fileName: string
     packageName: string
     path: string
     id: string
@@ -65,7 +64,7 @@ export interface NexemaPrimitiveValueType extends NexemaValueType {
 
 export type NexemaPrimitive =
     | 'string'
-    | 'boolean'
+    | 'bool'
     | 'uint'
     | 'int'
     | 'int8'
@@ -94,28 +93,7 @@ export interface NexemaTypeValueType extends NexemaValueType {
 const reviver = (key: string, value: any) => {
     switch (key) {
         case 'type':
-            if (value && value.kind === 'primitiveValueType') {
-                const { kind, primitive, nullable, arguments: arg } = value
-                return {
-                    kind,
-                    primitive,
-                    nullable,
-                    arguments: arg
-                        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          arg.map((argValue: any) => ({
-                              nullable: argValue.nullable,
-                          }))
-                        : [],
-                }
-            } else if (value && value.kind === 'customType') {
-                const { kind, objectId, nullable } = value
-                return {
-                    kind,
-                    nullable,
-                    objectId,
-                }
-            }
-            return value
+            return parseValueType(value)
         case 'types':
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return value.map((typeDef: any) => ({
@@ -131,6 +109,31 @@ const reviver = (key: string, value: any) => {
         default:
             return value
     }
+}
+
+function parseValueType(value: Record<string, unknown>): unknown {
+    if (value && value.kind === 'primitiveValueType') {
+        const { kind, primitive, nullable, arguments: arg } = value
+        return {
+            kind,
+            primitive,
+            nullable,
+            arguments:
+                arg && Array.isArray(arg)
+                    ? arg.map((argValue: Record<string, unknown>) => parseValueType(argValue))
+                    : [],
+        }
+    } else if (value && value.kind === 'customType') {
+        const { kind, objectId, nullable } = value
+        return {
+            kind,
+            nullable,
+            objectId,
+        }
+    }
+
+    // this should never happen tho
+    return value
 }
 
 export function parseSnapshot(input: string): NexemaSnapshot {

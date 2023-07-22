@@ -44,8 +44,8 @@ describe('JsonEncoderWriter tests', () => {
 
     test('boolean', () => {
         const out = json_writer.forStruct([
-            getField(1, 'b', getPrimitiveValueType('boolean')),
-            getField(2, 'bn', getPrimitiveValueType('boolean', true)),
+            getField(1, 'b', getPrimitiveValueType('bool')),
+            getField(2, 'bn', getPrimitiveValueType('bool', true)),
         ])
         expect(out).toBe(
             `public override toJson(): string {return \`{"b":\${this.b},"bn":\${this.bn}}\`}`

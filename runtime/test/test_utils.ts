@@ -172,7 +172,7 @@ export class StructA
               nullable: false,
             },
             {
-              kind: "boolean",
+              kind: "bool",
               nullable: false,
             },
           ],
@@ -332,7 +332,7 @@ export class UnionA
             },
             {
               nullable: false,
-              kind: "boolean",
+              kind: "bool",
             },
           ],
         },

@@ -74,10 +74,11 @@ ${sourceCode}`
 
                 files.set(file.id, {
                     id: file.id,
-                    name: `${file.fileName}.ts`,
+                    name: `${path.basename(file.path)}.ts`,
                     contents: prettier.format(sourceCode, PrettierSettings),
                 })
             } catch (err) {
+                console.error('an error happened', err)
                 return {
                     exitCode: -1,
                     error: `File [${file.path}] Error: [${err}]`,
@@ -121,12 +122,7 @@ ${sourceCode}`
     }
 
     private resolveImportFor(file: NexemaFile, p: string): string {
-        const rel = path.relative(
-            path.dirname(
-                path.join(this._settings.outputPath, path.dirname(file.path), file.fileName)
-            ),
-            p
-        )
+        const rel = path.relative(path.dirname(path.join(this._settings.outputPath, file.path)), p)
         return rel
     }
 
@@ -134,12 +130,8 @@ ${sourceCode}`
         for (const file of this._snapshot.files) {
             for (const type of file.types) {
                 this._types.set(type.id, {
-                    importAlias: `$${toSnakeCase(path.parse(file.fileName).name)}`,
-                    path: path.join(
-                        this._settings.outputPath,
-                        path.dirname(file.path),
-                        file.fileName
-                    ),
+                    importAlias: `$${toSnakeCase(path.parse(file.path).name)}`,
+                    path: path.join(this._settings.outputPath, file.path),
                     type: type,
                 })
             }

@@ -1,4 +1,4 @@
-import { Base64 } from "../src/base64";
+import { Base64 } from "../src/index";
 
 describe("Base64", () => {
   describe("bytesToBase64", () => {

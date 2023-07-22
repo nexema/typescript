@@ -1,4 +1,5 @@
 import prettier from 'prettier'
+import { NexemaPrimitive } from './models'
 
 export const ImportAlias = {
     Nexema: '$nex',
@@ -28,9 +29,9 @@ export const PrettierSettings: prettier.Options = {
     singleQuote: true,
 } as const
 
-export const EncoderMethods: { [key: string]: string } = {
+export const EncoderMethods: Record<NexemaPrimitive, string> = {
     string: 'encodeString',
-    boolean: 'encodeBool',
+    bool: 'encodeBool',
     uint: 'encodeUvarint',
     int: 'encodeVarint',
     uint8: 'encodeUint8',
@@ -48,11 +49,12 @@ export const EncoderMethods: { [key: string]: string } = {
     map: 'beginMap',
     timestamp: 'encodeTimestamp',
     duration: 'encodeDuration',
+    type: 'unknown',
 } as const
 
-export const DecoderMethods: { [key: string]: string } = {
+export const DecoderMethods: Record<NexemaPrimitive, string> = {
     string: 'decodeString',
-    boolean: 'decodeBool',
+    bool: 'decodeBool',
     uint: 'decodeUvarint',
     int: 'decodeVarint',
     uint8: 'decodeUint8',
@@ -70,4 +72,5 @@ export const DecoderMethods: { [key: string]: string } = {
     map: 'beginDecodeMap',
     timestamp: 'decodeTimestamp',
     duration: 'decodeDuration',
+    type: 'unknown',
 } as const

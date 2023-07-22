@@ -8,7 +8,7 @@ export const NexemaReflection = {
    * @param value The value to check.
    * @returns A boolean indicating whatever value is a BaseNexemaType.
    */
-  isNexemaType(value: any | unknown): boolean {
+  isNexemaType(value: unknown): boolean {
     return value instanceof BaseNexemaType;
   },
 
@@ -17,7 +17,7 @@ export const NexemaReflection = {
    *
    * @param value The value to get its type info.
    */
-  getTypeInfo(value: any | unknown): NexemaTypeInfo | undefined {
+  getTypeInfo(value: unknown): NexemaTypeInfo | undefined {
     if (value instanceof BaseNexemaType) {
       return value.getTypeInfo();
     }

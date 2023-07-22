@@ -49,6 +49,7 @@ function main() {
     if (result.exitCode) {
         out({
             exitCode: result.exitCode,
+            error: result.error,
         })
         return
     }

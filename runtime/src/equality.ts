@@ -1,9 +1,15 @@
+// the following eslint rules are disabled for this file because when calling .equals
+// objects will be of the type they indicate, so there is no need for extra checking.
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { FieldKind, FieldUtils } from "./definition";
 import {
-  PrimitiveMapObj,
   Primitive,
   PrimitiveList,
   PrimitiveMap,
+  PrimitiveMapObj,
 } from "./primitives";
 
 export function primitiveEquals(a: Primitive, b: Primitive): boolean {
@@ -20,13 +26,13 @@ export function primitiveEquals(a: Primitive, b: Primitive): boolean {
 }
 
 export function binaryEquals(a: Uint8Array, b: Uint8Array): boolean {
-  if ((a as Uint8Array).length !== (b as Uint8Array).length) {
+  if (a.length !== b.length) {
     return false;
   }
 
-  for (let i = 0; i < (a as Uint8Array).length; i++) {
-    const ua = (a as Uint8Array)[i];
-    const ub = (b as Uint8Array)[i];
+  for (let i = 0; i < a.length; i++) {
+    const ua = a[i];
+    const ub = b[i];
     if (ua !== ub) {
       return false;
     }
@@ -67,7 +73,7 @@ export function listEquals(
       const left = a[i];
       const right = b[i];
 
-      if (!(left as any).equals(right as any)) {
+      if (!(left as any).equals(right)) {
         return false;
       }
     }
@@ -110,7 +116,7 @@ export function mapEquals(
         const av = a.get(key);
         const bv = b.get(key);
 
-        if (!(av as any).equals(bv as any)) {
+        if (!(av as any).equals(bv)) {
           return false;
         }
       }
