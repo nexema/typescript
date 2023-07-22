@@ -140,6 +140,7 @@ export abstract class NexemaStruct<T extends NexemaStruct<T>>
           return false;
         }
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
         if (!(a as any).equals(b as any)) {
           return false;
         }
@@ -195,7 +196,7 @@ export abstract class NexemaUnion<
 
     switch (field.value!.kind) {
       case "string":
-      case "boolean":
+      case "bool":
       case "uint":
       case "uint8":
       case "uint16":
@@ -208,20 +209,22 @@ export abstract class NexemaUnion<
       case "int64":
       case "float32":
       case "float64":
-      case "duration":
+      case "duration": {
         if (!primitiveEquals(a as Primitive, b as Primitive)) {
           return false;
         }
         break;
+      }
 
-      case "binary":
+      case "binary": {
         if (!binaryEquals(a as Uint8Array, b as Uint8Array)) {
           return false;
         }
 
         break;
+      }
 
-      case "list":
+      case "list": {
         const argumentType = field.value!.arguments![0];
         if (
           !listEquals(argumentType.kind, a as PrimitiveList, b as PrimitiveList)
@@ -229,21 +232,25 @@ export abstract class NexemaUnion<
           return false;
         }
         break;
+      }
 
-      case "map":
+      case "map": {
         const valueType = field.value!.arguments![1];
         if (!mapEquals(valueType.kind, a as PrimitiveMap, b as PrimitiveMap)) {
           return false;
         }
         break;
+      }
 
       case "enum":
       case "struct":
-      case "union":
+      case "union": {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
         if (!(a as any).equals(b as any)) {
           return false;
         }
         break;
+      }
     }
 
     return true;

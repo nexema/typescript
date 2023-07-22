@@ -21,5 +21,4 @@ export type JsObj =
   | Uint8Array
   | Date
   | JsObj[]
-  | { [key: string | number]: JsObj }
-  | null;
+  | { [key: string | number]: JsObj };

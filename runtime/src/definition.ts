@@ -44,7 +44,7 @@ export interface NexemaFieldType {
 
 export type FieldKind =
   | "string"
-  | "boolean"
+  | "bool"
   | "uint"
   | "int"
   | "int8"
