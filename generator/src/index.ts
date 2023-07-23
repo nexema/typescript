@@ -54,6 +54,10 @@ function main() {
         outputPath: outputPath,
         projectName: projectName,
         useOnlyMaps: true,
+        toJson: true,
+        toObject: true,
+        toString: true,
+        typeInfo: true,
     })
     const result = generator.run()
     if (result.exitCode) {
