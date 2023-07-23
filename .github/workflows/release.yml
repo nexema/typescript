@@ -1,0 +1,64 @@
+name: Create GitHub Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'runtime/**' 
+      - 'generator/**'
+
+jobs:
+  create_release_runtime:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        working-directory: ./runtime
+        run: npm install
+
+      - name: Get version from runtime package.json
+        id: get_version_runtime
+        working-directory: ./runtime
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
+      - name: Create GitHub Release for runtime package
+        uses: softprops/action-gh-release@v1
+        with:
+          files: './runtime/dist/**'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: Nexema Runtime ${{ steps.get_version_runtime.outputs.version }}
+          TAG_NAME: v${{ steps.get_version_runtime.outputs.version }}
+          TARGET_COMMITISH: ${{ github.sha }}
+
+  create_release_generator:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        working-directory: ./generator
+        run: npm install
+
+      - name: Get version from generator package.json
+        id: get_version_generator
+        working-directory: ./generator
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
+      - name: Create GitHub Release for generator package
+        uses: softprops/action-gh-release@v1
+        with:
+          files: './generator/dist/**'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: Nexema Generator ${{ steps.get_version_generator.outputs.version }}
+          TAG_NAME: v${{ steps.get_version_generator.outputs.version }}
+          TARGET_COMMITISH: ${{ github.sha }}
