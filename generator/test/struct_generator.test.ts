@@ -85,6 +85,7 @@ describe('StructGenerator', () => {
             private static readonly _typeInfo: $nex.NexemaTypeInfo = {
                 typeId: '1',
                 name: 'MyStruct',
+                fullName: 'MyStruct',
                 new: () => MyStruct.createEmpty(),
                 inherits: null,
                 kind: 'struct',
@@ -129,6 +130,9 @@ describe('StructGenerator', () => {
                     listField: 2
                 }
             };
+            public static override get qualifiedName(): string {
+              return this._typeInfo.fullName
+            }
     
             public constructor(data: {
                 stringField: string,
@@ -303,6 +307,7 @@ describe('StructGenerator', () => {
       private static readonly _typeInfo: $nex.NexemaTypeInfo = {
         typeId: '1',
         name: 'A',
+        fullName: 'root/A',
         new: () => A.createEmpty(),
         inherits: null,
         kind: "struct",
@@ -481,6 +486,9 @@ describe('StructGenerator', () => {
           durationField: 16,
         },
       };
+      public static override get qualifiedName(): string {
+        return this._typeInfo.fullName
+      }
     
       public constructor(data: {
         stringField: string;
@@ -936,6 +944,7 @@ describe('StructGenerator', () => {
         private static readonly _typeInfo: $nex.NexemaTypeInfo = {
           typeId: '1',
           name: 'A',
+          fullName: 'root/A',
           new: () => A.createEmpty(),
           inherits: null,
           kind: 'struct',
@@ -1098,6 +1107,9 @@ describe('StructGenerator', () => {
             maptBothNullField: 8,
           },
         };
+        public static override get qualifiedName(): string {
+          return this._typeInfo.fullName
+        }
       
         public constructor(data: {
           stringField?: string | null;
@@ -1502,7 +1514,15 @@ describe('StructGenerator', () => {
                 hashcode: '',
                 files: [file],
             },
-            { outputPath: '', useOnlyMaps: true }
+            {
+                outputPath: '',
+                useOnlyMaps: true,
+                projectName: '',
+                toJson: true,
+                toObject: true,
+                toString: true,
+                typeInfo: true,
+            }
         )
 
         const generator = new StructGenerator(
@@ -1515,6 +1535,15 @@ describe('StructGenerator', () => {
             {
                 getObject: g.getObject.bind(g),
                 resolveFor: g.resolveFor.bind(g),
+                generatorOptions: {
+                    outputPath: '',
+                    useOnlyMaps: true,
+                    projectName: '',
+                    toJson: true,
+                    toObject: true,
+                    toString: true,
+                    typeInfo: true,
+                },
             }
         )
 
@@ -1523,6 +1552,7 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
       private static readonly _typeInfo: $nex.NexemaTypeInfo = {
         typeId: '1',
         name: 'A',
+        fullName: 'root/A',
         new: () => A.createEmpty(),
         inherits: {
           name: "Base",
@@ -1543,6 +1573,9 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
           stringField: 0,
         },
       };
+      public static override get qualifiedName(): string {
+        return this._typeInfo.fullName
+      }
     
       public constructor(data: {
         varintField: bigint;
@@ -1676,7 +1709,15 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
                 hashcode: '',
                 files: [file],
             },
-            { outputPath: '', useOnlyMaps: true }
+            {
+                outputPath: '',
+                useOnlyMaps: true,
+                projectName: '',
+                toJson: true,
+                toObject: true,
+                toString: true,
+                typeInfo: true,
+            }
         )
 
         const generator = new StructGenerator(
@@ -1731,6 +1772,15 @@ export class A extends Base<A> implements $nex.NexemaMergeable<A>, $nex.NexemaCl
             {
                 getObject: g.getObject.bind(g),
                 resolveFor: g.resolveFor.bind(g),
+                generatorOptions: {
+                    outputPath: '',
+                    useOnlyMaps: true,
+                    projectName: '',
+                    toJson: true,
+                    toObject: true,
+                    toString: true,
+                    typeInfo: true,
+                },
             }
         )
 
@@ -1739,6 +1789,7 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
     private static readonly _typeInfo: $nex.NexemaTypeInfo = {
       typeId: '1',
       name: 'A',
+      fullName: 'root/A',
       new: () => A.createEmpty(),
       inherits: null,
       kind: 'struct',
@@ -1943,6 +1994,9 @@ export class A extends $nex.NexemaStruct<A> implements $nex.NexemaMergeable<A>, 
         mapEnumNullField: 11,
       },
     };
+    public static override get qualifiedName(): string {
+      return this._typeInfo.fullName
+    }
   
     public constructor(data: {
       structField: B;

@@ -80,7 +80,15 @@ describe('Generator tests', () => {
                 },
             ],
         }
-        const generator = new Generator(snapshot, { outputPath: '', useOnlyMaps: true })
+        const generator = new Generator(snapshot, {
+            outputPath: '',
+            useOnlyMaps: true,
+            projectName: '',
+            toJson: true,
+            toObject: true,
+            toString: true,
+            typeInfo: true,
+        })
 
         const result = generator.run()
         expect(result.error).toBeUndefined()
@@ -88,10 +96,16 @@ describe('Generator tests', () => {
 
         if (result.files) {
             for (const file of result.files) {
+                if (file.id === '__type-registry') {
+                    continue
+                }
+
                 const p = `example/src/${snapshot.files.find((x) => x.id == file.id)!.path}.ts`
                 fs.mkdirSync(path.dirname(p), { recursive: true })
                 fs.writeFileSync(p, file.contents)
             }
         }
+
+        fs.rmSync('example/src/root', { force: true, recursive: true })
     })
 })

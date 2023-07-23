@@ -80,6 +80,7 @@ describe('UnionGenerator', () => {
             private static readonly _typeInfo: $nex.NexemaTypeInfo = {
                 typeId: '1',
                 name: 'MyUnion',
+                fullName: 'MyUnion',
                 new: () => MyUnion.createEmpty(),
                 inherits: null,
                 kind: "union",
@@ -124,6 +125,9 @@ describe('UnionGenerator', () => {
                     listField: 2
                 }
             };
+            public static override get qualifiedName(): string {
+              return this._typeInfo.fullName
+            }
     
             public constructor(data?: MyUnionBuilder) {
                 let currentValue: any;
@@ -374,7 +378,15 @@ describe('UnionGenerator', () => {
                 version: 0,
                 files: [file],
             },
-            { outputPath: '', useOnlyMaps: true }
+            {
+                outputPath: '',
+                useOnlyMaps: true,
+                projectName: '',
+                toJson: true,
+                toObject: true,
+                toString: true,
+                typeInfo: true,
+            }
         )
         const generator = new UnionGenerator(
             {
@@ -394,6 +406,15 @@ describe('UnionGenerator', () => {
             {
                 getObject: g.getObject.bind(g),
                 resolveFor: g.resolveFor.bind(g),
+                generatorOptions: {
+                    outputPath: '',
+                    useOnlyMaps: true,
+                    projectName: '',
+                    toJson: true,
+                    toObject: true,
+                    toString: true,
+                    typeInfo: true,
+                },
             }
         )
 
@@ -402,6 +423,7 @@ describe('UnionGenerator', () => {
 private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '1',
     name: 'MyUnion',
+    fullName: 'MyUnion',
     new: () => MyUnion.createEmpty(),
     inherits: null,
     kind: "union",
@@ -432,6 +454,9 @@ private static readonly _typeInfo: $nex.NexemaTypeInfo = {
         aStruct: 1,
     }
 };
+public static override get qualifiedName(): string {
+  return this._typeInfo.fullName
+}
 
 public constructor(data?: MyUnionBuilder) {
     let currentValue: any;

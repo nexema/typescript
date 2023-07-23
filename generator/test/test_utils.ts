@@ -168,4 +168,13 @@ export const DefaultGenerateContext: GenerateContext = {
     resolveFor(file, typeId): TypeReference {
         throw 'not-implemented'
     },
+    generatorOptions: {
+        outputPath: '',
+        projectName: '',
+        toJson: true,
+        toObject: true,
+        toString: true,
+        typeInfo: true,
+        useOnlyMaps: true,
+    },
 }

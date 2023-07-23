@@ -47,10 +47,11 @@ it('should generate enum classes', () => {
     * MyEnum
     */
     export class MyEnum extends $nex.NexemaEnum<MyEnum> {
-        private static readonly _enumTypeInfo: $nex.NexemaTypeInfo = {
+        private static readonly _typeInfo: $nex.NexemaTypeInfo = {
           typeId: '1',
           inherits: null,
           name: 'MyEnum',
+          fullName: "root/MyEnum",
           new: () => MyEnum.unknown,
           kind: 'enum',
           fieldsByIndex: {
@@ -81,7 +82,10 @@ it('should generate enum classes', () => {
         }
         
         protected get _typeInfo(): $nex.NexemaTypeInfo {
-          return MyEnum._enumTypeInfo
+          return MyEnum._typeInfo
+        }
+        public static override get qualifiedName(): string {
+          return this._typeInfo.fullName
         }
 
         private constructor(index: number, name: string) {
