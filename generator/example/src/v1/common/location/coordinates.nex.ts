@@ -10,6 +10,7 @@ export class Coordinates
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '13479800383264607709',
     name: 'Coordinates',
+    fullName: 'example.com/v1/common/location/Coordinates',
     new: () => Coordinates.createEmpty(),
     inherits: null,
     kind: 'struct',
@@ -39,6 +40,9 @@ export class Coordinates
       latitude: 0,
       longitude: 1,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: { latitude: number; longitude: number }) {

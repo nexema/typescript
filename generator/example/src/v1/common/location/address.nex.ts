@@ -9,6 +9,7 @@ export class Address
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '13009575510080279639',
     name: 'Address',
+    fullName: 'example.com/v1/common/location/Address',
     new: () => Address.createEmpty(),
     inherits: null,
     kind: 'struct',
@@ -71,6 +72,9 @@ export class Address
       country: 3,
       coordinates: 4,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: {

@@ -11,6 +11,7 @@ export class User
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '1018294955515524191',
     name: 'User',
+    fullName: 'example.com/v1/identity/User',
     new: () => User.createEmpty(),
     inherits: {
       name: 'Entity',
@@ -125,6 +126,9 @@ export class User
       accountDetails: 6,
       address: 7,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: {
@@ -496,10 +500,11 @@ export class User
 }
 
 export class AccountType extends $nex.NexemaEnum<AccountType> {
-  private static readonly _enumTypeInfo: $nex.NexemaTypeInfo = {
+  private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '17814066070050856057',
     inherits: null,
     name: 'AccountType',
+    fullName: 'example.com/v1/identity/AccountType',
     new: () => AccountType.unknown,
     kind: 'enum',
     fieldsByIndex: {
@@ -537,7 +542,10 @@ export class AccountType extends $nex.NexemaEnum<AccountType> {
   }
 
   protected get _typeInfo(): $nex.NexemaTypeInfo {
-    return AccountType._enumTypeInfo
+    return AccountType._typeInfo
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   private constructor(index: number, name: string) {
@@ -599,6 +607,7 @@ export class AccountDetails
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '10295209963266977739',
     name: 'AccountDetails',
+    fullName: 'example.com/v1/identity/AccountDetails',
     new: () => AccountDetails.createEmpty(),
     inherits: null,
     kind: 'union',
@@ -639,6 +648,9 @@ export class AccountDetails
       employee: 1,
       admin: 2,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data?: AccountDetailsBuilder) {
@@ -893,6 +905,7 @@ export class CustomerAccount
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '15573699729907174246',
     name: 'CustomerAccount',
+    fullName: 'example.com/v1/identity/CustomerAccount',
     new: () => CustomerAccount.createEmpty(),
     inherits: null,
     kind: 'struct',
@@ -911,6 +924,9 @@ export class CustomerAccount
     fieldsByJsName: {
       dni: 0,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: { dni: string }) {
@@ -993,6 +1009,7 @@ export class EmployeeAccount
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '2635019918070179479',
     name: 'EmployeeAccount',
+    fullName: 'example.com/v1/identity/EmployeeAccount',
     new: () => EmployeeAccount.createEmpty(),
     inherits: null,
     kind: 'struct',
@@ -1017,6 +1034,9 @@ export class EmployeeAccount
     fieldsByJsName: {
       permissions: 0,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: { permissions: Array<string> }) {
@@ -1107,6 +1127,7 @@ export class AdminAccount
   private static readonly _typeInfo: $nex.NexemaTypeInfo = {
     typeId: '13933365081113129845',
     name: 'AdminAccount',
+    fullName: 'example.com/v1/identity/AdminAccount',
     new: () => AdminAccount.createEmpty(),
     inherits: null,
     kind: 'struct',
@@ -1125,6 +1146,9 @@ export class AdminAccount
     fieldsByJsName: {
       fullAccess: 0,
     },
+  }
+  public static override get qualifiedName(): string {
+    return this._typeInfo.fullName
   }
 
   public constructor(data: { fullAccess: boolean }) {

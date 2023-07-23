@@ -1,6 +1,7 @@
 export interface GeneratorSettings {
     useOnlyMaps: boolean
     outputPath: string
+    projectName: string
 }
 
 export interface PluginResult {

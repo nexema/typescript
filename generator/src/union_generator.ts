@@ -48,6 +48,7 @@ export class UnionGenerator extends GeneratorBase {
         }<${this._type.name}> {
 
             ${this._writeTypeInfo()}
+            ${this._writeQualifiedNameGetter()}
 
             ${this._writeConstructor()}
 

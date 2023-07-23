@@ -16,6 +16,7 @@ import { UnionGenerator } from './union_generator'
 import { EnumGenerator } from './enum_generator'
 import { DefaultImports, PrettierSettings } from './constants'
 import { GenerateContext } from './generate_context'
+import { generateTypeRegistry } from './type_registry_generator'
 
 export class Generator {
     private _snapshot: NexemaSnapshot
@@ -38,6 +39,7 @@ export class Generator {
         const context: GenerateContext = {
             getObject: this.getObject.bind(this),
             resolveFor: this.resolveFor.bind(this),
+            generatorOptions: this._settings,
         }
         for (const file of this._snapshot.files) {
             try {
@@ -88,6 +90,14 @@ ${sourceCode}`
             }
         }
 
+        // type registry
+        const typeRegistryCode = generateTypeRegistry(this._snapshot.files, this._settings)
+        files.set('__type-registry', {
+            contents: prettier.format(typeRegistryCode, PrettierSettings),
+            filePath: `nexema-type-registry`,
+            name: `nexema-type-registry`,
+            id: '__type-registry',
+        })
         return {
             exitCode: 0,
             files: Array.from(files.values()),

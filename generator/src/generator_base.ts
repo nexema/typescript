@@ -16,15 +16,22 @@ import {
     isJsPrimitive,
     toCamelCase,
 } from './utils'
+import * as p from 'path'
 
 export abstract class GeneratorBase {
     protected _type: NexemaTypeDefinition
+    protected _typeQualifiedName: string
     protected _file: NexemaFile
     protected _context: GenerateContext
     protected _fieldNames: { [key: string]: string }
 
     public constructor(type: NexemaTypeDefinition, file: NexemaFile, context: GenerateContext) {
         this._type = type
+        this._typeQualifiedName = p.join(
+            context.generatorOptions.projectName,
+            p.dirname(file.path),
+            type.name
+        )
         this._file = file
         this._context = context
         this._fieldNames = Object.fromEntries(
@@ -180,6 +187,7 @@ export abstract class GeneratorBase {
         return `private static readonly _typeInfo: ${CommonTypes.NexemaTypeInfo} = {
             typeId: "${this._type.id}",
             name: "${this._type.name}",
+            fullName: "${this._typeQualifiedName}",
             new: () => ${this._type.name}.createEmpty(),
             inherits: ${
                 this._type.baseType
@@ -191,6 +199,12 @@ export abstract class GeneratorBase {
             kind: "${this._type.modifier}",
             fieldsByIndex: ${this._writeNexemaFields()},
             fieldsByJsName: ${this._writeNexemaFieldsByJsName()}
+        }`
+    }
+
+    protected _writeQualifiedNameGetter(): string {
+        return `public static override get qualifiedName(): string {
+            return this._typeInfo.fullName;
         }`
     }
 

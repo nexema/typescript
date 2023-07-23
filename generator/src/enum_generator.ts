@@ -16,6 +16,7 @@ export class EnumGenerator extends GeneratorBase {
             this._type.name
         }> {
             ${this._writeTypeInfo()}
+            ${this._writeQualifiedNameGetter()}
 
             ${this._writeConstructor()}
 
@@ -76,10 +77,11 @@ export class EnumGenerator extends GeneratorBase {
     }
 
     protected override _writeTypeInfo(): string {
-        return `private static readonly _enumTypeInfo: ${CommonTypes.NexemaTypeInfo} = {
+        return `private static readonly _typeInfo: ${CommonTypes.NexemaTypeInfo} = {
             typeId: "${this._type.id}",
             inherits: null,
             name: "${this._type.name}",
+            fullName: "${this._typeQualifiedName}",
             new: () => ${this._type.name}.${this._type.fields![0].name},
             kind: "enum",
             fieldsByIndex: ${this._writeNexemaFields(true)},
@@ -87,7 +89,7 @@ export class EnumGenerator extends GeneratorBase {
         }
         
         protected get _typeInfo(): ${CommonTypes.NexemaTypeInfo} {
-            return ${this._type.name}._enumTypeInfo;
+            return ${this._type.name}._typeInfo;
         }`
     }
 }
