@@ -1,6 +1,6 @@
 {
   "name": "nexema-generator",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Nexema TypeScript/JavaScript code generator",
   "main": "./dist/index.js",
   "bin": {
