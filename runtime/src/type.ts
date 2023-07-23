@@ -64,6 +64,13 @@ export abstract class BaseNexemaType {
   }
 
   /**
+   * Returns the full name of the type.
+   */
+  public static get qualifiedName(): string {
+    return "unknown";
+  }
+
+  /**
    * Encodes the current instance to a Uint8Array
    */
   public abstract encode(): Uint8Array;

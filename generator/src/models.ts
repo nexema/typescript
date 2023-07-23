@@ -1,6 +1,38 @@
 export interface GeneratorSettings {
-    useOnlyMaps: boolean
+    /**
+     * The path where the files will be placed.
+     */
     outputPath: string
+
+    /**
+     * The name of the Nexema project.
+     */
+    projectName: string
+
+    /**
+     * A flag that indicates if it will generate type's TypeInfo for reflection.
+     */
+    typeInfo: boolean
+
+    /**
+     * A flag that indicates if Nexema type's map will be generated as Map or as an object.
+     */
+    useOnlyMaps: boolean
+
+    /**
+     * A flag that indicates if it will generate .toString() methods on types.
+     */
+    toString: boolean
+
+    /**
+     * A flag that indicates if it will generate .toJson() methods on types.
+     */
+    toJson: boolean
+
+    /**
+     * A flag that indicates if it will generate .toObject() methods on types.
+     */
+    toObject: boolean
 }
 
 export interface PluginResult {
@@ -13,6 +45,7 @@ export interface GeneratedFile {
     id: string
     name: string
     contents: string
+    filePath: string
 }
 
 export interface NexemaSnapshot {

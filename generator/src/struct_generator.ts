@@ -45,6 +45,7 @@ export class StructGenerator extends GeneratorBase {
         }<${this._type.name}>, ${CommonTypes.NexemaClonable}<${this._type.name}> {
 
             ${this._writeTypeInfo()}
+            ${this._writeQualifiedNameGetter()}
 
             ${this._writeConstructor()}
             

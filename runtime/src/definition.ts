@@ -18,6 +18,11 @@ export interface NexemaField {
    * The field's value type
    */
   value?: NexemaFieldType;
+
+  /**
+   * Metadata associated with the field.
+   */
+  metadata?: NexemaMetadata;
 }
 
 export interface NexemaFieldType {
@@ -82,3 +87,5 @@ export const FieldUtils = {
     }
   },
 };
+
+export type NexemaMetadata = { [key: string]: string | boolean | number };

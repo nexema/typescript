@@ -48,6 +48,7 @@ export class UnionGenerator extends GeneratorBase {
         }<${this._type.name}> {
 
             ${this._writeTypeInfo()}
+            ${this._writeQualifiedNameGetter()}
 
             ${this._writeConstructor()}
 
@@ -77,7 +78,7 @@ export class UnionGenerator extends GeneratorBase {
 
     private _writeConstructor(): string {
         return `public constructor(data?: ${this._type.name}Builder) {
-            let currentValue = undefined;
+            let currentValue: any;
             let fieldIndex = -1;
             if(data) {
                 ${this._writeConstructorDataSet()}

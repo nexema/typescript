@@ -41,9 +41,23 @@ function main() {
         return
     }
 
+    const projectName = args.get('--project-name')
+    if (!projectName) {
+        out({
+            exitCode: 400,
+            error: 'missing-project-name',
+        })
+        return
+    }
+
     const generator = new Generator(snapshot, {
         outputPath: outputPath,
+        projectName: projectName,
         useOnlyMaps: true,
+        toJson: true,
+        toObject: true,
+        toString: true,
+        typeInfo: true,
     })
     const result = generator.run()
     if (result.exitCode) {
